@@ -61,6 +61,22 @@ const darkTheme = createTheme({
         },
       },
     },
+    MuiDrawer: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: '#1a1a1a',
+          borderRight: '1px solid #333333',
+        },
+      },
+    },
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#1a1a1a',
+          borderBottom: '1px solid #333333',
+        },
+      },
+    },
   },
 });
 

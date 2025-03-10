@@ -34,6 +34,14 @@ import {
   formaterTempsJeu,
   TEMPS_REEL_PAR_ANNEE_JEU
 } from '../models/types';
+import Layout, { MenuType } from './Layout';
+import { 
+  ProfileMenu, 
+  CultivationMenu, 
+  InventoryMenu, 
+  QuestsMenu, 
+  StatsMenu 
+} from './menus';
 
 const GameScreen: React.FC = () => {
   const [personnage, setPersonnage] = useState<Personnage | null>(null);
@@ -50,6 +58,7 @@ const GameScreen: React.FC = () => {
   const [openResetDialog, setOpenResetDialog] = useState<boolean>(false);
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>("");
+  const [activeMenu, setActiveMenu] = useState<MenuType>(MenuType.PROFILE);
   
   // Référence pour le timer d'âge
   const ageTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -232,6 +241,8 @@ const GameScreen: React.FC = () => {
           if (perceeAtteinte) {
             setOpenPerceeDialog(true);
             setMeditationActive(false);
+            // Réinitialiser le compteur de temps de méditation
+            setTempsTotalMeditation(0);
             // Jouer un son ou ajouter une animation ici si nécessaire
           }
           
@@ -298,6 +309,11 @@ const GameScreen: React.FC = () => {
     setMeditationActive(nouvelEtat);
     console.log(`Méditation ${nouvelEtat ? 'activée' : 'désactivée'}`);
     
+    // Réinitialiser le compteur de temps si on désactive la méditation
+    if (!nouvelEtat) {
+      setTempsTotalMeditation(0);
+    }
+    
     // Afficher un message à l'utilisateur
     setSnackbarMessage(`Méditation ${nouvelEtat ? 'activée' : 'désactivée'}`);
     setSnackbarOpen(true);
@@ -319,6 +335,64 @@ const GameScreen: React.FC = () => {
     window.location.href = '/';
   };
 
+  // Changer de menu
+  const handleMenuChange = (menu: MenuType) => {
+    setActiveMenu(menu);
+  };
+
+  // Obtenir le titre du menu actif
+  const getMenuTitle = () => {
+    switch (activeMenu) {
+      case MenuType.PROFILE:
+        return personnage ? personnage.nom : 'Profil';
+      case MenuType.CULTIVATION:
+        return 'Cultivation';
+      case MenuType.INVENTORY:
+        return 'Inventaire';
+      case MenuType.QUESTS:
+        return 'Quêtes';
+      case MenuType.STATS:
+        return 'Statistiques';
+      default:
+        return 'Wuxia Idle';
+    }
+  };
+
+  // Rendu du contenu en fonction du menu actif
+  const renderContent = () => {
+    if (!personnage) return null;
+
+    switch (activeMenu) {
+      case MenuType.PROFILE:
+        return (
+          <ProfileMenu 
+            personnage={personnage} 
+            ageActuel={ageActuel} 
+            esperanceVie={esperanceVie} 
+            tempsJeuFormate={tempsJeuFormate} 
+          />
+        );
+      case MenuType.CULTIVATION:
+        return (
+          <CultivationMenu 
+            personnage={personnage} 
+            meditationActive={meditationActive} 
+            gainQiParSeconde={gainQiParSeconde} 
+            tempsTotalMeditation={tempsTotalMeditation} 
+            toggleMeditation={toggleMeditation} 
+          />
+        );
+      case MenuType.INVENTORY:
+        return <InventoryMenu personnage={personnage} />;
+      case MenuType.QUESTS:
+        return <QuestsMenu personnage={personnage} />;
+      case MenuType.STATS:
+        return <StatsMenu personnage={personnage} />;
+      default:
+        return null;
+    }
+  };
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -338,305 +412,17 @@ const GameScreen: React.FC = () => {
     );
   }
 
-  const raceInfo = getRaceInfo(personnage.race);
-  const origineInfo = getOrigineInfo(personnage.origine);
-  const nomCultivation = getNomCompletCultivation(personnage.royaumeCultivation, personnage.niveauPercee);
-  const descriptionRoyaume = getDescriptionRoyaume(personnage.royaumeCultivation);
-  const pourcentageProgression = (personnage.pointsQi / personnage.qiRequis) * 100;
-  const pourcentageAge = (ageActuel / esperanceVie) * 100;
-
   return (
-    <Box sx={{ maxWidth: 1200, margin: '0 auto', p: 2 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h4" component="h1" sx={{ fontFamily: "'Cinzel', serif" }}>
-          <span className="text-primary">Wuxia</span> <span className="text-accent">Idle</span>
-        </Typography>
-        <Box>
-          <Button 
-            variant="contained" 
-            color="primary" 
-            onClick={sauvegarderManuellement}
-            sx={{ mr: 1 }}
-          >
-            💾 Sauvegarder
-          </Button>
-          <Button 
-            variant="contained" 
-            color="error" 
-            onClick={confirmerReinitialisation}
-          >
-            🔄 Réinitialiser
-          </Button>
-        </Box>
-      </Box>
-      
-      {ageActuel >= esperanceVie * 0.9 && (
-        <Alert severity="warning" sx={{ mb: 2 }}>
-          Votre personnage approche de la fin de sa vie ! Atteignez un royaume de cultivation supérieur pour prolonger votre espérance de vie.
-        </Alert>
-      )}
-      
-      <Grid container spacing={3}>
-        {/* Informations du personnage */}
-        <Grid item xs={12} md={4}>
-          <Paper elevation={3} sx={{ p: 2, backgroundColor: 'background.paper' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6">{personnage.nom}</Typography>
-              <Chip 
-                label={nomCultivation}
-                size="small"
-                sx={{ 
-                  backgroundColor: getRoyaumeColor(personnage.royaumeCultivation),
-                  color: 'white',
-                  fontWeight: 'bold'
-                }}
-              />
-            </Box>
-            
-            <Divider sx={{ mb: 2 }} />
-            
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">Race</Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography variant="body1">{personnage.race}</Typography>
-                <Chip 
-                  label={raceInfo.rarete} 
-                  size="small" 
-                  sx={{ 
-                    backgroundColor: getRareteColor(raceInfo.rarete),
-                    color: 'white',
-                    fontSize: '0.6rem'
-                  }} 
-                />
-              </Box>
-            </Box>
-            
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">Origine</Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography variant="body1">{personnage.origine}</Typography>
-                <Chip 
-                  label={origineInfo.rarete} 
-                  size="small" 
-                  sx={{ 
-                    backgroundColor: getRareteColor(origineInfo.rarete),
-                    color: 'white',
-                    fontSize: '0.6rem'
-                  }} 
-                />
-              </Box>
-            </Box>
-            
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">Genre</Typography>
-              <Typography variant="body1">{personnage.genre}</Typography>
-            </Box>
-            
-            <Box sx={{ mb: 2 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="body2" color="text.secondary">Âge</Typography>
-                <Typography variant="body2">
-                  {ageActuel} / {esperanceVie} ans
-                </Typography>
-              </Box>
-              <LinearProgress 
-                variant="determinate" 
-                value={pourcentageAge} 
-                sx={{ 
-                  height: 8, 
-                  borderRadius: 4,
-                  '& .MuiLinearProgress-bar': {
-                    backgroundColor: pourcentageAge > 90 ? '#e74c3c' : pourcentageAge > 75 ? '#f39c12' : '#2ecc71',
-                  }
-                }} 
-              />
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                Temps de jeu: <strong>{tempsJeuFormate}</strong>
-              </Typography>
-            </Box>
-            
-            <Box sx={{ mb: 1 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="body2" color="text.secondary">Progression</Typography>
-                <Typography variant="body2">
-                  {personnage.pointsQi} / {personnage.qiRequis}
-                </Typography>
-              </Box>
-              <LinearProgress 
-                variant="determinate" 
-                value={pourcentageProgression} 
-                sx={{ 
-                  height: 8, 
-                  borderRadius: 4,
-                  '& .MuiLinearProgress-bar': {
-                    backgroundColor: getRoyaumeColor(personnage.royaumeCultivation),
-                  }
-                }} 
-              />
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                Points de Qi Total: <strong>{personnage.pointsQiTotal}</strong>
-              </Typography>
-            </Box>
-          </Paper>
-          
-          <Paper elevation={3} sx={{ p: 2, mt: 2, backgroundColor: 'background.paper' }}>
-            <Typography variant="h6" gutterBottom>Statistiques</Typography>
-            
-            <Grid container spacing={1}>
-              <Grid item xs={6}>
-                <Typography variant="body2" color="text.secondary">Force</Typography>
-                <Typography variant="body1">{personnage.stats.force}</Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="body2" color="text.secondary">Agilité</Typography>
-                <Typography variant="body1">{personnage.stats.agilite}</Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="body2" color="text.secondary">Constitution</Typography>
-                <Typography variant="body1">{personnage.stats.constitution}</Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="body2" color="text.secondary">Intelligence</Typography>
-                <Typography variant="body1">{personnage.stats.intelligence}</Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="body2" color="text.secondary">Perception</Typography>
-                <Typography variant="body1">{personnage.stats.perception}</Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="body2" color="text.secondary">Charisme</Typography>
-                <Typography variant="body1">{personnage.stats.charisme}</Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="body2" color="text.secondary">Chance</Typography>
-                <Typography variant="body1">{personnage.stats.chance}</Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="body2" color="text.secondary">Qi</Typography>
-                <Typography variant="body1">{personnage.stats.qi}</Typography>
-              </Grid>
-            </Grid>
-          </Paper>
-        </Grid>
-        
-        {/* Zone de jeu principale */}
-        <Grid item xs={12} md={8}>
-          <Paper 
-            elevation={3} 
-            sx={{ 
-              p: 2, 
-              backgroundColor: 'background.paper', 
-              minHeight: '300px',
-              border: meditationActive ? `1px solid ${getRoyaumeColor(personnage.royaumeCultivation)}` : 'none',
-              boxShadow: meditationActive ? `0 0 15px ${getRoyaumeColor(personnage.royaumeCultivation)}` : 'none',
-              transition: 'all 0.5s ease'
-            }}
-          >
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6">Cultivation - {personnage.royaumeCultivation}</Typography>
-              <Chip 
-                label={`+${gainQiParSeconde} Qi/s`} 
-                color="primary" 
-                size="small"
-                sx={{ 
-                  animation: meditationActive ? 'pulse 2s infinite' : 'none'
-                }}
-              />
-            </Box>
-            
-            <Typography variant="body2" color="text.secondary" paragraph>
-              {descriptionRoyaume}
-            </Typography>
-            
-            <Box sx={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
-              alignItems: 'center', 
-              mt: 4,
-              position: 'relative'
-            }}>
-              {meditationActive && (
-                <Box 
-                  sx={{ 
-                    position: 'absolute', 
-                    top: -30, 
-                    left: '50%', 
-                    transform: 'translateX(-50%)',
-                    color: getRoyaumeColor(personnage.royaumeCultivation),
-                    fontWeight: 'bold',
-                    animation: 'float 3s ease-in-out infinite'
-                  }}
-                >
-                  +{gainQiParSeconde} Qi
-                </Box>
-              )}
-              
-              <Button 
-                variant="contained" 
-                color={meditationActive ? "secondary" : "primary"}
-                size="large"
-                className={meditationActive ? "animate-pulse" : ""}
-                onClick={toggleMeditation}
-                sx={{ 
-                  minWidth: 200,
-                  py: 1.5,
-                  boxShadow: meditationActive 
-                    ? `0 4px 20px ${getRoyaumeColor(personnage.royaumeCultivation)}` 
-                    : '0 4px 20px rgba(230, 57, 70, 0.4)',
-                  '&:hover': {
-                    boxShadow: meditationActive 
-                      ? `0 6px 25px ${getRoyaumeColor(personnage.royaumeCultivation)}` 
-                      : '0 6px 25px rgba(230, 57, 70, 0.6)',
-                  },
-                  animation: meditationActive ? 'pulse 2s infinite' : 'none',
-                  '@keyframes pulse': {
-                    '0%': { opacity: 1 },
-                    '50%': { opacity: 0.7 },
-                    '100%': { opacity: 1 }
-                  }
-                }}
-              >
-                {meditationActive ? "Arrêter la Méditation" : "Commencer à Méditer"}
-                {meditationActive && (
-                  <Box component="span" sx={{ ml: 1, display: 'flex', alignItems: 'center', fontSize: '0.85em' }}>
-                    <span style={{ color: '#4caf50' }}>+{gainQiParSeconde}</span>
-                    <span style={{ marginLeft: '2px' }}>Qi/s</span>
-                  </Box>
-                )}
-              </Button>
-              
-              {meditationActive && (
-                <Typography variant="body2" sx={{ mt: 2, color: 'text.secondary' }}>
-                  Méditation en cours... {Math.floor(tempsTotalMeditation / 60)}:{(tempsTotalMeditation % 60).toString().padStart(2, '0')}
-                </Typography>
-              )}
-            </Box>
-          </Paper>
-          
-          <Grid container spacing={2} sx={{ mt: 1 }}>
-            <Grid item xs={12} md={6}>
-              <Card sx={{ backgroundColor: 'background.paper' }}>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>Quêtes</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Aucune quête disponible pour le moment.
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Card sx={{ backgroundColor: 'background.paper' }}>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>Inventaire</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Votre inventaire est vide.
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
+    <>
+      <Layout 
+        activeMenu={activeMenu} 
+        onMenuChange={handleMenuChange} 
+        onSave={sauvegarderManuellement} 
+        onReset={confirmerReinitialisation}
+        title={getMenuTitle()}
+      >
+        {renderContent()}
+      </Layout>
       
       {/* Dialogue de percée */}
       <Dialog
@@ -671,7 +457,7 @@ const GameScreen: React.FC = () => {
             backgroundColor: 'rgba(0,0,0,0.2)'
           }}>
             <Typography variant="body1" gutterBottom>
-              Niveau actuel: <strong>{personnage.royaumeCultivation} - {nomCultivation}</strong>
+              Niveau actuel: <strong>{personnage.royaumeCultivation} - {getNomCompletCultivation(personnage.royaumeCultivation, personnage.niveauPercee)}</strong>
             </Typography>
             
             <Typography variant="body1" gutterBottom>
@@ -760,10 +546,10 @@ const GameScreen: React.FC = () => {
             backgroundColor: 'rgba(0,0,0,0.2)'
           }}>
             <Typography variant="body1" gutterBottom>
-              Niveau final: <strong>{personnage.royaumeCultivation} - {nomCultivation}</strong>
+              Niveau final: <strong>{personnage.royaumeCultivation} - {getNomCompletCultivation(personnage.royaumeCultivation, personnage.niveauPercee)}</strong>
             </Typography>
             <Typography variant="body1" gutterBottom>
-              Points de Qi accumulés: <strong>{personnage.pointsQiTotal}</strong>
+              Points de Qi accumulés: <strong>{personnage.pointsQiTotal.toLocaleString()}</strong>
             </Typography>
             <Typography variant="body1">
               Temps de jeu total: <strong>{tempsJeuFormate}</strong>
@@ -817,7 +603,7 @@ const GameScreen: React.FC = () => {
         onClose={() => setSnackbarOpen(false)}
         message={snackbarMessage}
       />
-    </Box>
+    </>
   );
 };
 
