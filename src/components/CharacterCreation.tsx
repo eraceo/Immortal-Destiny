@@ -203,6 +203,15 @@ const CharacterCreation: React.FC = () => {
     }
 
     try {
+      // S'assurer que le rang est toujours DISCIPLE_EXTERNE, quelle que soit la secte choisie
+      let appartenanceSecteFinale = personnage.appartenanceSecte;
+      if (appartenanceSecteFinale) {
+        appartenanceSecteFinale = {
+          ...appartenanceSecteFinale,
+          rang: RangSecte.DISCIPLE_EXTERNE
+        };
+      }
+
       // Créer le personnage avec les valeurs actuelles
       const nouveauPersonnage: Personnage = {
         id: genererID(),
@@ -222,7 +231,7 @@ const CharacterCreation: React.FC = () => {
         tempsJeuTotal: 0,
         pierresSpirituelles: 0,
         // Nouvelles propriétés pour le système de sectes
-        appartenanceSecte: personnage.appartenanceSecte,
+        appartenanceSecte: appartenanceSecteFinale,
         techniquesApprises: personnage.techniquesApprises,
         affiniteElements: personnage.affiniteElements,
         talentCultivation: personnage.talentCultivation
@@ -592,6 +601,9 @@ const CharacterCreation: React.FC = () => {
           </Typography>
           <Typography variant="body2" color="text.secondary" gutterBottom>
             En fonction de votre talent et de vos affinités, certaines sectes pourraient vous accepter comme disciple.
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', mb: 2 }}>
+            Vous commencerez toujours comme Disciple Externe, quel que soit votre talent. Vous pourrez progresser dans les rangs de la secte au fil de votre aventure.
           </Typography>
           
           <Grid container spacing={2} sx={{ mt: 1 }}>
