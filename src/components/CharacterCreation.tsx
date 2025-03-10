@@ -222,14 +222,22 @@ const CharacterCreation: React.FC = () => {
     }
 
     try {
-      // Convertir l'objet personnage en JSON
-      const personnageJSON = JSON.stringify(personnage);
+      // Créer un objet de sauvegarde contenant toutes les données
+      const sauvegarde = {
+        personnage: personnage,
+        tempsMeditationCumule: 0,
+        derniereAnneeEvenement: 0,
+        historiqueEvenements: []
+      };
+      
+      // Convertir l'objet de sauvegarde en JSON
+      const sauvegardeJSON = JSON.stringify(sauvegarde);
       
       // Encoder le JSON en base64
-      const personnageBase64 = btoa(personnageJSON);
+      const sauvegardeBase64 = btoa(sauvegardeJSON);
       
       // Stocker dans le localStorage
-      localStorage.setItem('personnage', personnageBase64);
+      localStorage.setItem('wuxiaWorldSauvegarde', sauvegardeBase64);
       
       // Rediriger vers la page du jeu
       navigate('/game');

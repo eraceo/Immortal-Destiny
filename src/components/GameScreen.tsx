@@ -79,44 +79,33 @@ const GameScreen: React.FC = () => {
   // Charger le personnage depuis le localStorage
   useEffect(() => {
     try {
-      const personnageBase64 = localStorage.getItem('personnage');
-      if (!personnageBase64) {
+      const sauvegardeBase64 = localStorage.getItem('wuxiaWorldSauvegarde');
+      if (!sauvegardeBase64) {
         setError("Aucun personnage trouvé. Veuillez en créer un nouveau.");
         setLoading(false);
         return;
       }
 
       // Décoder le base64 en JSON
-      const personnageJSON = atob(personnageBase64);
-      const personnageData = JSON.parse(personnageJSON);
+      const sauvegardeJSON = atob(sauvegardeBase64);
+      const sauvegarde = JSON.parse(sauvegardeJSON);
+      
+      // Extraire les données de la sauvegarde
+      const personnageData = sauvegarde.personnage;
+      const tempsMeditationCumuleSauvegarde = sauvegarde.tempsMeditationCumule || 0;
+      const derniereAnneeEvenementSauvegarde = sauvegarde.derniereAnneeEvenement || 0;
+      const historiqueEvenementsSauvegarde = sauvegarde.historiqueEvenements || [];
       
       // Mettre à jour le dernier temps de jeu
       personnageData.dernierTempsJeu = Date.now();
       
       setPersonnage(personnageData);
-      
-      // Récupérer le temps de méditation cumulé depuis le localStorage
-      const tempsMeditationCumuleSauvegarde = localStorage.getItem('tempsMeditationCumule');
-      if (tempsMeditationCumuleSauvegarde) {
-        setTempsMeditationCumule(parseInt(tempsMeditationCumuleSauvegarde, 10));
-      }
-      
-      // Récupérer la dernière année d'événement depuis le localStorage
-      const derniereAnneeEvenementSauvegarde = localStorage.getItem('derniereAnneeEvenement');
-      if (derniereAnneeEvenementSauvegarde) {
-        setDerniereAnneeEvenement(parseInt(derniereAnneeEvenementSauvegarde, 10));
-      }
-      
-      // Récupérer l'historique des événements depuis le localStorage
-      const historiqueEvenementsSauvegarde = localStorage.getItem('historiqueEvenements');
-      if (historiqueEvenementsSauvegarde) {
-        setHistoriqueEvenements(JSON.parse(historiqueEvenementsSauvegarde));
-      }
+      setTempsMeditationCumule(tempsMeditationCumuleSauvegarde);
+      setDerniereAnneeEvenement(derniereAnneeEvenementSauvegarde);
+      setHistoriqueEvenements(historiqueEvenementsSauvegarde);
       
       // Calculer l'âge actuel en fonction du temps de méditation cumulé
-      const anneesMeditation = tempsMeditationCumuleSauvegarde 
-        ? Math.floor(parseInt(tempsMeditationCumuleSauvegarde, 10) / 60) 
-        : 0;
+      const anneesMeditation = Math.floor(tempsMeditationCumuleSauvegarde / 60);
       const ageCalcule = personnageData.age + anneesMeditation;
       setAgeActuel(ageCalcule);
       
@@ -157,21 +146,20 @@ const GameScreen: React.FC = () => {
         tempsJeuTotal: personnageActuel.tempsJeuTotal + 10 // Ajouter 10 secondes (intervalle de sauvegarde)
       };
       
-      // Sauvegarder également le temps de méditation cumulé dans le localStorage
-      localStorage.setItem('tempsMeditationCumule', tempsMeditationCumule.toString());
-      
-      // Sauvegarder la dernière année d'événement
-      localStorage.setItem('derniereAnneeEvenement', derniereAnneeEvenement.toString());
-      
-      // Sauvegarder l'historique des événements
-      localStorage.setItem('historiqueEvenements', JSON.stringify(historiqueEvenements));
+      // Créer un objet de sauvegarde contenant toutes les données
+      const sauvegarde = {
+        personnage: personnageAJour,
+        tempsMeditationCumule: tempsMeditationCumule,
+        derniereAnneeEvenement: derniereAnneeEvenement,
+        historiqueEvenements: historiqueEvenements
+      };
       
       // Convertir en JSON puis en base64
-      const personnageJSON = JSON.stringify(personnageAJour);
-      const personnageBase64 = btoa(personnageJSON);
+      const sauvegardeJSON = JSON.stringify(sauvegarde);
+      const sauvegardeBase64 = btoa(sauvegardeJSON);
       
       // Sauvegarder dans le localStorage
-      localStorage.setItem('personnage', personnageBase64);
+      localStorage.setItem('wuxiaWorldSauvegarde', sauvegardeBase64);
       
       return true;
     } catch (err) {
@@ -423,20 +411,29 @@ const GameScreen: React.FC = () => {
     setSnackbarOpen(true);
   };
 
-  // Réinitialiser le personnage (après la mort)
+  // Fonction pour réinitialiser le personnage
   const reinitialiserPersonnage = () => {
-    localStorage.removeItem('personnage');
-    window.location.href = '/';
-  };
-
-  // Ouvrir la boîte de dialogue de confirmation pour la réinitialisation
-  const confirmerReinitialisation = () => {
     setOpenResetDialog(true);
   };
+  
+  // Fonction pour confirmer la réinitialisation
+  const confirmerReinitialisation = () => {
+    localStorage.removeItem('wuxiaWorldSauvegarde');
+    setOpenResetDialog(false);
+    window.location.href = "/";
+  };
 
+  // Fonction pour retourner à la création de personnage
   const retourCreation = () => {
-    // Rediriger vers la page de création de personnage
-    window.location.href = '/';
+    localStorage.removeItem('wuxiaWorldSauvegarde');
+    window.location.href = "/";
+  };
+
+  // Fonction pour gérer la mort du personnage
+  const handleMortPersonnage = () => {
+    setOpenMortDialog(false);
+    localStorage.removeItem('wuxiaWorldSauvegarde');
+    window.location.href = "/";
   };
 
   // Changer de menu
@@ -752,7 +749,7 @@ const GameScreen: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button 
-            onClick={reinitialiserPersonnage} 
+            onClick={handleMortPersonnage} 
             variant="contained" 
             color="error"
           >
@@ -780,7 +777,7 @@ const GameScreen: React.FC = () => {
           <Button onClick={() => setOpenResetDialog(false)} color="primary">
             Annuler
           </Button>
-          <Button onClick={reinitialiserPersonnage} color="error" variant="contained">
+          <Button onClick={confirmerReinitialisation} color="error" variant="contained">
             Réinitialiser
           </Button>
         </DialogActions>
