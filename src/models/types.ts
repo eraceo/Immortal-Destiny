@@ -58,7 +58,7 @@ export enum Genre {
 }
 
 // Constantes pour le système de temps et d'âge
-export const TEMPS_REEL_PAR_ANNEE_JEU = 60 * 5; // 5 minutes réelles = 1 année dans le jeu (remis à la valeur d'origine)
+export const TEMPS_REEL_PAR_ANNEE_JEU = 60; // 1 minute réelle = 1 année dans le jeu
 export const AGE_INITIAL_MIN = 16;
 export const AGE_INITIAL_MAX = 25;
 
@@ -267,10 +267,9 @@ export const genererAgeInitial = (): number => {
 
 // Fonction pour calculer l'âge actuel du personnage
 export const calculerAgeActuel = (personnage: Personnage): number => {
-  const maintenant = Date.now();
-  const tempsEcoule = maintenant - personnage.dateNaissance;
-  const anneesEcoulees = Math.floor(tempsEcoule / (TEMPS_REEL_PAR_ANNEE_JEU * 1000));
-  return personnage.age + anneesEcoulees;
+  // L'âge est maintenant simplement l'âge initial plus les années gagnées pendant la méditation
+  // Ces années sont stockées directement dans personnage.age
+  return personnage.age;
 };
 
 // Fonction pour calculer le temps de jeu total formaté

@@ -51,6 +51,7 @@ const GameScreen: React.FC = () => {
   const [gainQiParSeconde, setGainQiParSeconde] = useState<number>(0);
   const [openPerceeDialog, setOpenPerceeDialog] = useState<boolean>(false);
   const [tempsTotalMeditation, setTempsTotalMeditation] = useState<number>(0);
+  const [tempsMeditationCumule, setTempsMeditationCumule] = useState<number>(0);
   const [ageActuel, setAgeActuel] = useState<number>(0);
   const [esperanceVie, setEsperanceVie] = useState<number>(0);
   const [tempsJeuFormate, setTempsJeuFormate] = useState<string>("00:00:00");
@@ -84,8 +85,17 @@ const GameScreen: React.FC = () => {
       
       setPersonnage(personnageData);
       
-      // Calculer l'âge actuel et l'espérance de vie
-      const ageCalcule = calculerAgeActuel(personnageData);
+      // Récupérer le temps de méditation cumulé depuis le localStorage
+      const tempsMeditationCumuleSauvegarde = localStorage.getItem('tempsMeditationCumule');
+      if (tempsMeditationCumuleSauvegarde) {
+        setTempsMeditationCumule(parseInt(tempsMeditationCumuleSauvegarde, 10));
+      }
+      
+      // Calculer l'âge actuel en fonction du temps de méditation cumulé
+      const anneesMeditation = tempsMeditationCumuleSauvegarde 
+        ? Math.floor(parseInt(tempsMeditationCumuleSauvegarde, 10) / 60) 
+        : 0;
+      const ageCalcule = personnageData.age + anneesMeditation;
       setAgeActuel(ageCalcule);
       
       const esperanceVieCalculee = calculerEsperanceVie(personnageData.race, personnageData.royaumeCultivation);
@@ -117,13 +127,16 @@ const GameScreen: React.FC = () => {
       
       if (!personnageActuel) return false;
       
-      // Mettre à jour le dernier temps de jeu
+      // Mettre à jour le dernier temps de jeu et l'âge actuel
       const personnageAJour = {
         ...personnageActuel,
         dernierTempsJeu: Date.now(),
-        age: ageActuel,
+        age: personnage ? personnage.age : ageActuel, // Conserver l'âge initial du personnage
         tempsJeuTotal: personnageActuel.tempsJeuTotal + 10 // Ajouter 10 secondes (intervalle de sauvegarde)
       };
+      
+      // Sauvegarder également le temps de méditation cumulé dans le localStorage
+      localStorage.setItem('tempsMeditationCumule', tempsMeditationCumule.toString());
       
       // Convertir en JSON puis en base64
       const personnageJSON = JSON.stringify(personnageAJour);
@@ -137,7 +150,7 @@ const GameScreen: React.FC = () => {
       console.error("Erreur lors de la sauvegarde:", err);
       return false;
     }
-  }, [personnage, ageActuel]);
+  }, [personnage, ageActuel, tempsMeditationCumule]);
 
   // Fonction pour sauvegarder manuellement
   const sauvegarderManuellement = () => {
@@ -174,10 +187,15 @@ const GameScreen: React.FC = () => {
 
   // Gérer le vieillissement du personnage
   useEffect(() => {
-    if (personnage) {
-      // Démarrer le timer pour mettre à jour l'âge
+    // Le timer d'âge ne doit être actif que pendant la méditation
+    if (personnage && meditationActive) {
+      // Démarrer le timer pour mettre à jour l'âge uniquement pendant la méditation
       ageTimerRef.current = setInterval(() => {
-        const nouvelAge = calculerAgeActuel(personnage);
+        // Calculer l'âge en fonction du temps de méditation cumulé
+        // Un an par minute (60 secondes)
+        const anneesMeditation = Math.floor(tempsMeditationCumule / 60);
+        const nouvelAge = personnage.age + anneesMeditation;
+        
         setAgeActuel(nouvelAge);
         
         // Vérifier si le personnage a dépassé son espérance de vie
@@ -191,9 +209,17 @@ const GameScreen: React.FC = () => {
             ageTimerRef.current = null;
           }
         }
-      }, TEMPS_REEL_PAR_ANNEE_JEU * 1000); // Mettre à jour l'âge selon le temps réel par année de jeu
-      
-      // Démarrer le timer pour mettre à jour le temps de jeu
+      }, 1000); // Mettre à jour l'âge chaque seconde pendant la méditation
+    } else {
+      // Si la méditation est désactivée, arrêter le timer d'âge
+      if (ageTimerRef.current) {
+        clearInterval(ageTimerRef.current);
+        ageTimerRef.current = null;
+      }
+    }
+    
+    // Démarrer le timer pour mettre à jour le temps de jeu (indépendant de la méditation)
+    if (personnage && !tempsJeuTimerRef.current) {
       tempsJeuTimerRef.current = setInterval(() => {
         if (personnage) {
           setPersonnage(prev => {
@@ -221,7 +247,7 @@ const GameScreen: React.FC = () => {
         tempsJeuTimerRef.current = null;
       }
     };
-  }, [personnage, esperanceVie]);
+  }, [personnage, esperanceVie, meditationActive, tempsMeditationCumule]); // Ajouter tempsMeditationCumule comme dépendance
 
   // Effet pour la méditation
   useEffect(() => {
@@ -241,8 +267,8 @@ const GameScreen: React.FC = () => {
           if (perceeAtteinte) {
             setOpenPerceeDialog(true);
             setMeditationActive(false);
-            // Réinitialiser le compteur de temps de méditation
-            setTempsTotalMeditation(0);
+            // Ne pas réinitialiser le compteur de temps de méditation
+            // setTempsTotalMeditation(0);
             // Jouer un son ou ajouter une animation ici si nécessaire
           }
           
@@ -255,9 +281,12 @@ const GameScreen: React.FC = () => {
           };
         });
         
-        // Incrémenter le temps total de méditation
+        // Incrémenter le temps total de méditation (pour l'affichage de la session en cours)
         setTempsTotalMeditation(prev => prev + 1);
-      }, 1000); // Remis à 1 seconde pour une mise à jour plus fluide
+        
+        // Incrémenter le temps de méditation cumulé (pour le calcul de l'âge)
+        setTempsMeditationCumule(prev => prev + 1);
+      }, 1000); // Mise à jour chaque seconde
     }
     
     return () => {
@@ -309,10 +338,8 @@ const GameScreen: React.FC = () => {
     setMeditationActive(nouvelEtat);
     console.log(`Méditation ${nouvelEtat ? 'activée' : 'désactivée'}`);
     
-    // Réinitialiser le compteur de temps si on désactive la méditation
-    if (!nouvelEtat) {
-      setTempsTotalMeditation(0);
-    }
+    // Ne pas réinitialiser le compteur de temps si on désactive la méditation
+    // Cela empêche l'exploitation qui consiste à arrêter/reprendre la méditation
     
     // Afficher un message à l'utilisateur
     setSnackbarMessage(`Méditation ${nouvelEtat ? 'activée' : 'désactivée'}`);
@@ -378,7 +405,8 @@ const GameScreen: React.FC = () => {
             personnage={personnage} 
             meditationActive={meditationActive} 
             gainQiParSeconde={gainQiParSeconde} 
-            tempsTotalMeditation={tempsTotalMeditation} 
+            tempsTotalMeditation={tempsTotalMeditation}
+            tempsMeditationCumule={tempsMeditationCumule}
             toggleMeditation={toggleMeditation} 
           />
         );

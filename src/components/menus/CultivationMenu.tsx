@@ -19,6 +19,7 @@ interface CultivationMenuProps {
   meditationActive: boolean;
   gainQiParSeconde: number;
   tempsTotalMeditation: number;
+  tempsMeditationCumule: number;
   toggleMeditation: () => void;
 }
 
@@ -27,6 +28,7 @@ const CultivationMenu: React.FC<CultivationMenuProps> = ({
   meditationActive, 
   gainQiParSeconde, 
   tempsTotalMeditation, 
+  tempsMeditationCumule,
   toggleMeditation 
 }) => {
   const descriptionRoyaume = getDescriptionRoyaume(personnage.royaumeCultivation);
@@ -165,6 +167,22 @@ const CultivationMenu: React.FC<CultivationMenuProps> = ({
               </Box>
             </Typography>
           )}
+          
+          <Typography variant="body2" sx={{ mt: meditationActive ? 1 : 2, color: 'text.secondary', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span>Temps total de cultivation: </span>
+            <Box component="span" sx={{ 
+              ml: 1, 
+              fontFamily: 'monospace', 
+              fontWeight: 'bold',
+              color: getRoyaumeColor(personnage.royaumeCultivation),
+              backgroundColor: 'rgba(0,0,0,0.1)',
+              px: 1,
+              py: 0.5,
+              borderRadius: 1
+            }}>
+              {Math.floor(tempsMeditationCumule / 3600)}h {Math.floor((tempsMeditationCumule % 3600) / 60)}m {tempsMeditationCumule % 60}s
+            </Box>
+          </Typography>
         </Box>
       </Paper>
       
@@ -198,6 +216,10 @@ const CultivationMenu: React.FC<CultivationMenuProps> = ({
         }}>
           <Typography variant="body2" gutterBottom>
             <strong>Conseil:</strong> Méditez régulièrement pour accumuler du Qi et atteindre des percées qui prolongeront votre espérance de vie.
+          </Typography>
+          
+          <Typography variant="body2" sx={{ mt: 1, color: '#ff9800' }}>
+            <strong>Attention:</strong> Votre personnage vieillit d'un an par minute de cultivation cumulée. Le temps de cultivation est comptabilisé en permanence, même si vous arrêtez et reprenez la méditation. Cultivez avec sagesse pour ne pas atteindre prématurément votre espérance de vie.
           </Typography>
         </Box>
       </Paper>
