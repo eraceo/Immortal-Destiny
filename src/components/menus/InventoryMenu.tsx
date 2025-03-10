@@ -6,7 +6,8 @@ import {
   Grid, 
   Card, 
   CardContent,
-  Divider
+  Divider,
+  Chip
 } from '@mui/material';
 import { Personnage } from '../../models/types';
 
@@ -20,6 +21,29 @@ const InventoryMenu: React.FC<InventoryMenuProps> = ({ personnage }) => {
       <Typography variant="h5" component="h1" gutterBottom>
         Inventaire
       </Typography>
+      
+      {/* Section des Pierres Spirituelles */}
+      <Paper elevation={3} sx={{ p: 3, backgroundColor: 'background.paper', mb: 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="h6" gutterBottom>
+            Monnaie
+          </Typography>
+          <Chip 
+            label={`${personnage.pierresSpirituelles} Pierres Spirituelles`} 
+            color="primary" 
+            sx={{ 
+              fontWeight: 'bold',
+              fontSize: '1rem',
+              p: 1,
+              height: 'auto'
+            }} 
+          />
+        </Box>
+        
+        <Typography variant="body2" color="text.secondary" paragraph>
+          Les pierres spirituelles sont la monnaie principale du monde de cultivation. Elles peuvent être utilisées pour acheter des ressources, des techniques et des équipements.
+        </Typography>
+      </Paper>
       
       <Paper elevation={3} sx={{ p: 3, backgroundColor: 'background.paper', mb: 3 }}>
         <Typography variant="h6" gutterBottom>

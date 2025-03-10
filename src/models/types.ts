@@ -65,6 +65,45 @@ export enum TypeEvenement {
   SPECIAL = "Spécial"
 }
 
+// Énumérations pour les types de sectes
+export enum TypeSecte {
+  MARTIALE = "Secte Martiale",
+  SPIRITUELLE = "Secte Spirituelle",
+  ALCHIMIQUE = "Secte Alchimique",
+  DEMONIAQUE = "Secte Démoniaque",
+  CELESTE = "Secte Céleste",
+  NEUTRE = "Secte Neutre"
+}
+
+// Énumérations pour les rangs dans une secte
+export enum RangSecte {
+  DISCIPLE_EXTERNE = "Disciple Externe",
+  DISCIPLE_INTERNE = "Disciple Interne",
+  DISCIPLE_PRINCIPAL = "Disciple Principal",
+  DOYEN = "Doyen",
+  ANCIEN = "Ancien",
+  GRAND_ANCIEN = "Grand Ancien",
+  PATRIARCHE = "Patriarche"
+}
+
+// Énumérations pour les éléments de cultivation
+export enum ElementCultivation {
+  FEU = "Feu",
+  EAU = "Eau",
+  BOIS = "Bois",
+  METAL = "Métal",
+  TERRE = "Terre",
+  FOUDRE = "Foudre",
+  VENT = "Vent",
+  GLACE = "Glace",
+  LUMIERE = "Lumière",
+  OBSCURITE = "Obscurité",
+  CHAOS = "Chaos",
+  ESPACE = "Espace",
+  TEMPS = "Temps",
+  SANG = "Sang"
+}
+
 // Constantes pour le système de temps et d'âge
 export const TEMPS_REEL_PAR_ANNEE_JEU = 60; // 1 minute réelle = 1 année dans le jeu
 export const AGE_INITIAL_MIN = 16;
@@ -229,6 +268,98 @@ export interface OrigineInfo {
   description: string;
 }
 
+// Interface pour les techniques de cultivation
+export interface TechniqueCultivation {
+  id: string;
+  nom: string;
+  description: string;
+  rarete: Rarete;
+  element: ElementCultivation;
+  niveauRequis: RoyaumeCultivation;
+  effets: {
+    multiplicateurQi?: number;       // Multiplicateur pour le gain de Qi
+    bonusStats?: Partial<Stats>;     // Bonus aux statistiques
+    reductionTemps?: number;         // Réduction du temps de cultivation (en %)
+    bonusLongevite?: number;         // Bonus à l'espérance de vie (en %)
+    resistanceElement?: ElementCultivation[]; // Résistance à certains éléments
+  };
+  coutApprentissage: number;         // Coût en pierres spirituelles pour apprendre
+}
+
+// Interface pour les ressources de secte
+export interface RessourceSecte {
+  id: string;
+  nom: string;
+  description: string;
+  rarete: Rarete;
+  quantite: number;
+  effets: {
+    gainQi?: number;                 // Gain immédiat de Qi
+    bonusTemporaire?: Partial<Stats>; // Bonus temporaire aux statistiques
+    dureeBonus?: number;             // Durée du bonus en années de jeu
+  };
+}
+
+// Interface pour les missions de secte
+export interface MissionSecte {
+  id: string;
+  titre: string;
+  description: string;
+  difficulte: Rarete;
+  duree: number;                     // Durée en années de jeu
+  recompenses: {
+    pierresSpirituelles?: number;
+    ressources?: RessourceSecte[];
+    techniques?: TechniqueCultivation[];
+    pointsContribution?: number;
+    experience?: number;
+  };
+  conditionsRequises: {
+    royaumeMinimum?: RoyaumeCultivation;
+    statsMinimales?: Partial<Stats>;
+    rangMinimum?: RangSecte;
+  };
+  complete: boolean;
+}
+
+// Interface pour les sectes
+export interface Secte {
+  id: string;
+  nom: string;
+  description: string;
+  type: TypeSecte;
+  rarete: Rarete;
+  elementPrincipal: ElementCultivation;
+  elementsSecondaires: ElementCultivation[];
+  techniques: TechniqueCultivation[];
+  ressources: RessourceSecte[];
+  missions: MissionSecte[];
+  avantages: {
+    multiplicateurQi: number;        // Multiplicateur pour le gain de Qi
+    bonusStats: Partial<Stats>;      // Bonus aux statistiques
+    reductionTempsPercee: number;    // Réduction du temps pour les percées (en %)
+    bonusLongevite: number;          // Bonus à l'espérance de vie (en %)
+  };
+  conditionsAdmission: {
+    royaumeMinimum: RoyaumeCultivation;
+    statsMinimales: Partial<Stats>;
+    raceCompatible?: Race[];
+  };
+  relationSectes: Record<string, number>; // ID de secte -> valeur de relation (-100 à 100)
+}
+
+// Interface pour l'appartenance à une secte
+export interface AppartenanceSecte {
+  secteId: string;
+  dateAdhesion: number;              // Timestamp de l'adhésion
+  rang: RangSecte;
+  pointsContribution: number;        // Points de contribution à la secte
+  techniquesApprises: string[];      // IDs des techniques apprises
+  missionsCompletees: string[];      // IDs des missions complétées
+  ressourcesObtenues: Record<string, number>; // ID de ressource -> quantité
+  relationAnciens: number;           // Relation avec les anciens (-100 à 100)
+}
+
 // Interface pour les statistiques du personnage
 export interface Stats {
   force: number;       // Force physique
@@ -259,6 +390,13 @@ export interface Personnage {
   dateNaissance: number; // Timestamp de création du personnage
   dernierTempsJeu: number; // Timestamp de la dernière fois que le joueur a joué
   tempsJeuTotal: number; // Temps total de jeu en secondes
+  // Système monétaire
+  pierresSpirituelles: number; // Monnaie du jeu
+  // Système de sectes
+  appartenanceSecte: AppartenanceSecte | null;
+  techniquesApprises: TechniqueCultivation[];
+  affiniteElements: Record<ElementCultivation, number>; // Affinité avec chaque élément (0-100)
+  talentCultivation: number; // Talent de cultivation (0-100)
 }
 
 // Fonction pour calculer l'espérance de vie d'un personnage
@@ -528,6 +666,7 @@ export interface Evenement {
     stats?: Partial<Stats>; // Modification des stats (positif ou négatif)
     age?: number;           // Modification de l'âge (généralement négatif pour vieillissement accéléré)
     esperanceVie?: number;  // Modification de l'espérance de vie (positif ou négatif)
+    pierresSpirituelles?: number; // Modification des pierres spirituelles (positif ou négatif)
   };
   rarete: Rarete;           // Rareté de l'événement
   conditionRoyaume?: RoyaumeCultivation[]; // Royaumes de cultivation requis pour que l'événement puisse se produire
@@ -709,6 +848,60 @@ export const EVENEMENTS: Evenement[] = [
     },
     rarete: Rarete.MYTHIQUE,
     conditionRoyaume: [RoyaumeCultivation.NASCENT_SOUL, RoyaumeCultivation.TRANSCENDANCE, RoyaumeCultivation.SAINT_MARTIAL]
+  },
+  
+  // Nouveaux événements liés aux pierres spirituelles
+  {
+    id: "20",
+    titre: "Découverte d'une veine de pierres spirituelles",
+    description: "Lors de votre exploration, vous avez découvert une petite veine de pierres spirituelles dans une grotte isolée.",
+    type: TypeEvenement.POSITIF,
+    effets: {
+      pierresSpirituelles: 200
+    },
+    rarete: Rarete.RARE
+  },
+  {
+    id: "21",
+    titre: "Récompense de secte",
+    description: "Votre secte vous a récompensé pour vos efforts de cultivation avec quelques pierres spirituelles.",
+    type: TypeEvenement.POSITIF,
+    effets: {
+      pierresSpirituelles: 50
+    },
+    rarete: Rarete.COMMUN
+  },
+  {
+    id: "22",
+    titre: "Victoire dans un duel",
+    description: "Vous avez vaincu un cultivateur rival dans un duel et gagné un pari de pierres spirituelles.",
+    type: TypeEvenement.POSITIF,
+    effets: {
+      pierresSpirituelles: 100,
+      stats: { force: 1 }
+    },
+    rarete: Rarete.COMMUN
+  },
+  {
+    id: "23",
+    titre: "Embuscade de bandits",
+    description: "Des bandits vous ont tendu une embuscade et volé une partie de vos pierres spirituelles.",
+    type: TypeEvenement.NEGATIF,
+    effets: {
+      pierresSpirituelles: -75
+    },
+    rarete: Rarete.COMMUN
+  },
+  {
+    id: "24",
+    titre: "Achat d'un manuel de cultivation",
+    description: "Vous avez dépensé des pierres spirituelles pour acquérir un manuel de cultivation qui améliore votre compréhension du Qi.",
+    type: TypeEvenement.NEUTRE,
+    effets: {
+      pierresSpirituelles: -150,
+      stats: { qi: 2, intelligence: 1 }
+    },
+    rarete: Rarete.RARE
   }
 ];
 
@@ -776,5 +969,377 @@ export const appliquerEffetsEvenement = (personnage: Personnage, evenement: Even
     personnageModifie.age += evenement.effets.age;
   }
   
+  // Appliquer les modifications de pierres spirituelles
+  if (evenement.effets.pierresSpirituelles) {
+    personnageModifie.pierresSpirituelles = Math.max(0, personnageModifie.pierresSpirituelles + evenement.effets.pierresSpirituelles);
+  }
+  
   return personnageModifie;
+};
+
+// Liste des sectes disponibles dans le jeu
+export const SECTES: Secte[] = [
+  {
+    id: "secte-epee-azur",
+    nom: "Secte de l'Épée d'Azur",
+    description: "Une secte ancienne spécialisée dans les arts de l'épée et la cultivation du Qi de métal. Leurs disciples sont connus pour leur discipline stricte et leur maîtrise inégalée des techniques d'épée.",
+    type: TypeSecte.MARTIALE,
+    rarete: Rarete.RARE,
+    elementPrincipal: ElementCultivation.METAL,
+    elementsSecondaires: [ElementCultivation.VENT, ElementCultivation.EAU],
+    techniques: [],
+    ressources: [],
+    missions: [],
+    avantages: {
+      multiplicateurQi: 1.2,
+      bonusStats: { force: 1, agilite: 1 },
+      reductionTempsPercee: 10,
+      bonusLongevite: 5
+    },
+    conditionsAdmission: {
+      royaumeMinimum: RoyaumeCultivation.INITIATION,
+      statsMinimales: { force: 4, agilite: 4 }
+    },
+    relationSectes: {}
+  },
+  {
+    id: "secte-lotus-pourpre",
+    nom: "Secte du Lotus Pourpre",
+    description: "Une secte mystique qui cultive l'essence spirituelle à travers la méditation et l'alchimie. Leurs disciples excellent dans la création d'élixirs et la compréhension des mystères du monde.",
+    type: TypeSecte.SPIRITUELLE,
+    rarete: Rarete.RARE,
+    elementPrincipal: ElementCultivation.EAU,
+    elementsSecondaires: [ElementCultivation.BOIS, ElementCultivation.LUMIERE],
+    techniques: [],
+    ressources: [],
+    missions: [],
+    avantages: {
+      multiplicateurQi: 1.3,
+      bonusStats: { intelligence: 1, perception: 1 },
+      reductionTempsPercee: 5,
+      bonusLongevite: 15
+    },
+    conditionsAdmission: {
+      royaumeMinimum: RoyaumeCultivation.INITIATION,
+      statsMinimales: { intelligence: 5, perception: 3 }
+    },
+    relationSectes: {}
+  },
+  {
+    id: "secte-flamme-eternelle",
+    nom: "Secte de la Flamme Éternelle",
+    description: "Une secte puissante qui maîtrise les arts du feu et de la forge. Leurs disciples sont réputés pour leur tempérament ardent et leur capacité à forger des artefacts légendaires.",
+    type: TypeSecte.ALCHIMIQUE,
+    rarete: Rarete.RARE,
+    elementPrincipal: ElementCultivation.FEU,
+    elementsSecondaires: [ElementCultivation.METAL, ElementCultivation.TERRE],
+    techniques: [],
+    ressources: [],
+    missions: [],
+    avantages: {
+      multiplicateurQi: 1.15,
+      bonusStats: { force: 1, constitution: 1 },
+      reductionTempsPercee: 8,
+      bonusLongevite: 10
+    },
+    conditionsAdmission: {
+      royaumeMinimum: RoyaumeCultivation.INITIATION,
+      statsMinimales: { force: 3, constitution: 5 }
+    },
+    relationSectes: {}
+  },
+  {
+    id: "secte-nuage-celeste",
+    nom: "Secte du Nuage Céleste",
+    description: "Une secte vénérable située au sommet des montagnes sacrées. Leurs disciples pratiquent des techniques de vol et de contrôle des vents, aspirant à l'immortalité céleste.",
+    type: TypeSecte.CELESTE,
+    rarete: Rarete.EPIQUE,
+    elementPrincipal: ElementCultivation.VENT,
+    elementsSecondaires: [ElementCultivation.LUMIERE, ElementCultivation.ESPACE],
+    techniques: [],
+    ressources: [],
+    missions: [],
+    avantages: {
+      multiplicateurQi: 1.4,
+      bonusStats: { agilite: 2, perception: 1 },
+      reductionTempsPercee: 15,
+      bonusLongevite: 20
+    },
+    conditionsAdmission: {
+      royaumeMinimum: RoyaumeCultivation.QI_CONDENSE,
+      statsMinimales: { agilite: 6, intelligence: 5, perception: 4 }
+    },
+    relationSectes: {}
+  },
+  {
+    id: "secte-sang-demon",
+    nom: "Secte du Sang Démoniaque",
+    description: "Une secte redoutée qui pratique des arts interdits et des rituels de sang. Leurs disciples sacrifient leur humanité pour obtenir un pouvoir immense et rapide.",
+    type: TypeSecte.DEMONIAQUE,
+    rarete: Rarete.EPIQUE,
+    elementPrincipal: ElementCultivation.OBSCURITE,
+    elementsSecondaires: [ElementCultivation.SANG, ElementCultivation.FEU],
+    techniques: [],
+    ressources: [],
+    missions: [],
+    avantages: {
+      multiplicateurQi: 1.5,
+      bonusStats: { force: 2, constitution: 1 },
+      reductionTempsPercee: 20,
+      bonusLongevite: -10 // Réduit la longévité
+    },
+    conditionsAdmission: {
+      royaumeMinimum: RoyaumeCultivation.INITIATION,
+      statsMinimales: { force: 5, constitution: 4 }
+    },
+    relationSectes: {}
+  },
+  {
+    id: "secte-montagne-verte",
+    nom: "Secte de la Montagne Verte",
+    description: "Une secte paisible qui vit en harmonie avec la nature. Leurs disciples cultivent l'essence naturelle et excellent dans les arts de guérison et d'herboristerie.",
+    type: TypeSecte.NEUTRE,
+    rarete: Rarete.COMMUN,
+    elementPrincipal: ElementCultivation.BOIS,
+    elementsSecondaires: [ElementCultivation.EAU, ElementCultivation.TERRE],
+    techniques: [],
+    ressources: [],
+    missions: [],
+    avantages: {
+      multiplicateurQi: 1.1,
+      bonusStats: { constitution: 1, intelligence: 1 },
+      reductionTempsPercee: 5,
+      bonusLongevite: 15
+    },
+    conditionsAdmission: {
+      royaumeMinimum: RoyaumeCultivation.MORTEL,
+      statsMinimales: { constitution: 3, intelligence: 3 }
+    },
+    relationSectes: {}
+  },
+  {
+    id: "secte-paume-tonnerre",
+    nom: "Secte de la Paume du Tonnerre",
+    description: "Une secte dynamique qui maîtrise la foudre et les techniques de combat à mains nues. Leurs disciples sont connus pour leur vitesse fulgurante et leur puissance explosive.",
+    type: TypeSecte.MARTIALE,
+    rarete: Rarete.RARE,
+    elementPrincipal: ElementCultivation.FOUDRE,
+    elementsSecondaires: [ElementCultivation.VENT, ElementCultivation.FEU],
+    techniques: [],
+    ressources: [],
+    missions: [],
+    avantages: {
+      multiplicateurQi: 1.25,
+      bonusStats: { agilite: 2, force: 1 },
+      reductionTempsPercee: 12,
+      bonusLongevite: 8
+    },
+    conditionsAdmission: {
+      royaumeMinimum: RoyaumeCultivation.INITIATION,
+      statsMinimales: { agilite: 5, force: 4 }
+    },
+    relationSectes: {}
+  },
+  {
+    id: "secte-givre-eternel",
+    nom: "Secte du Givre Éternel",
+    description: "Une secte mystérieuse qui réside dans les terres gelées du nord. Leurs disciples maîtrisent les arts de la glace et possèdent une résistance extraordinaire aux conditions extrêmes.",
+    type: TypeSecte.SPIRITUELLE,
+    rarete: Rarete.RARE,
+    elementPrincipal: ElementCultivation.GLACE,
+    elementsSecondaires: [ElementCultivation.EAU, ElementCultivation.VENT],
+    techniques: [],
+    ressources: [],
+    missions: [],
+    avantages: {
+      multiplicateurQi: 1.2,
+      bonusStats: { constitution: 2, perception: 1 },
+      reductionTempsPercee: 10,
+      bonusLongevite: 12
+    },
+    conditionsAdmission: {
+      royaumeMinimum: RoyaumeCultivation.INITIATION,
+      statsMinimales: { constitution: 5, perception: 4 }
+    },
+    relationSectes: {}
+  },
+  {
+    id: "secte-voile-temps",
+    nom: "Secte du Voile du Temps",
+    description: "Une secte légendaire qui étudie les mystères du temps et de l'espace. Leurs disciples sont rares mais extrêmement puissants, capables de manipuler le flux temporel.",
+    type: TypeSecte.CELESTE,
+    rarete: Rarete.LEGENDAIRE,
+    elementPrincipal: ElementCultivation.TEMPS,
+    elementsSecondaires: [ElementCultivation.ESPACE, ElementCultivation.CHAOS],
+    techniques: [],
+    ressources: [],
+    missions: [],
+    avantages: {
+      multiplicateurQi: 1.6,
+      bonusStats: { intelligence: 2, perception: 2 },
+      reductionTempsPercee: 25,
+      bonusLongevite: 30
+    },
+    conditionsAdmission: {
+      royaumeMinimum: RoyaumeCultivation.CORE_OR,
+      statsMinimales: { intelligence: 7, perception: 7, chance: 6 }
+    },
+    relationSectes: {}
+  }
+];
+
+// Fonction pour obtenir les sectes disponibles en fonction du talent et des stats
+export const getSecteDisponibles = (personnage: Personnage): Secte[] => {
+  // Calculer un score de talent basé sur les stats et le talent de cultivation
+  const scoreTalent = personnage.talentCultivation + 
+                     (personnage.stats.intelligence * 0.8) + 
+                     (personnage.stats.perception * 0.6) + 
+                     (personnage.stats.chance * 0.4);
+  
+  // Filtrer les sectes en fonction du royaume de cultivation et des stats minimales
+  return SECTES.filter(secte => {
+    // Vérifier si le personnage répond aux conditions d'admission de base
+    const royaumeOk = personnage.royaumeCultivation >= secte.conditionsAdmission.royaumeMinimum;
+    
+    // Vérifier si les stats du personnage sont suffisantes
+    let statsOk = true;
+    Object.entries(secte.conditionsAdmission.statsMinimales).forEach(([stat, valeurMin]) => {
+      if (personnage.stats[stat as keyof Stats] < valeurMin) {
+        statsOk = false;
+      }
+    });
+    
+    // Vérifier la compatibilité de race si spécifiée
+    let raceOk = true;
+    if (secte.conditionsAdmission.raceCompatible && 
+        !secte.conditionsAdmission.raceCompatible.includes(personnage.race)) {
+      raceOk = false;
+    }
+    
+    // Vérifier le score de talent pour les sectes rares
+    let talentOk = true;
+    if (secte.rarete === Rarete.RARE && scoreTalent < 50) talentOk = false;
+    if (secte.rarete === Rarete.EPIQUE && scoreTalent < 70) talentOk = false;
+    if (secte.rarete === Rarete.LEGENDAIRE && scoreTalent < 90) talentOk = false;
+    if (secte.rarete === Rarete.MYTHIQUE && scoreTalent < 95) talentOk = false;
+    
+    return royaumeOk && statsOk && raceOk && talentOk;
+  });
+};
+
+// Fonction pour rejoindre une secte
+export const rejoindreSecte = (personnage: Personnage, secteId: string): Personnage => {
+  // Copie profonde du personnage pour éviter les mutations directes
+  const personnageMisAJour = JSON.parse(JSON.stringify(personnage));
+  
+  // Trouver la secte correspondante
+  const secte = SECTES.find(s => s.id === secteId);
+  if (!secte) return personnageMisAJour;
+  
+  // Créer l'appartenance à la secte
+  personnageMisAJour.appartenanceSecte = {
+    secteId: secte.id,
+    dateAdhesion: Date.now(),
+    rang: RangSecte.DISCIPLE_EXTERNE,
+    pointsContribution: 0,
+    techniquesApprises: [],
+    missionsCompletees: [],
+    ressourcesObtenues: {},
+    relationAnciens: 50 // Relation neutre au départ
+  };
+  
+  return personnageMisAJour;
+};
+
+// Fonction pour obtenir les informations d'une secte par son ID
+export const getSecteById = (secteId: string): Secte | undefined => {
+  return SECTES.find(secte => secte.id === secteId);
+};
+
+// Fonction pour calculer les bonus de secte appliqués au personnage
+export const calculerBonusSecte = (personnage: Personnage): { 
+  multiplicateurQi: number, 
+  bonusStats: Partial<Stats>,
+  reductionTempsPercee: number,
+  bonusLongevite: number
+} => {
+  // Valeurs par défaut si le personnage n'appartient à aucune secte
+  const bonusDefaut = {
+    multiplicateurQi: 1,
+    bonusStats: {},
+    reductionTempsPercee: 0,
+    bonusLongevite: 0
+  };
+  
+  // Si le personnage n'appartient à aucune secte, retourner les valeurs par défaut
+  if (!personnage.appartenanceSecte) return bonusDefaut;
+  
+  // Trouver la secte du personnage
+  const secte = getSecteById(personnage.appartenanceSecte.secteId);
+  if (!secte) return bonusDefaut;
+  
+  // Calculer les bonus en fonction du rang dans la secte
+  let multiplicateurRang = 1;
+  switch (personnage.appartenanceSecte.rang) {
+    case RangSecte.DISCIPLE_EXTERNE:
+      multiplicateurRang = 1;
+      break;
+    case RangSecte.DISCIPLE_INTERNE:
+      multiplicateurRang = 1.2;
+      break;
+    case RangSecte.DISCIPLE_PRINCIPAL:
+      multiplicateurRang = 1.5;
+      break;
+    case RangSecte.DOYEN:
+      multiplicateurRang = 1.8;
+      break;
+    case RangSecte.ANCIEN:
+      multiplicateurRang = 2;
+      break;
+    case RangSecte.GRAND_ANCIEN:
+      multiplicateurRang = 2.5;
+      break;
+    case RangSecte.PATRIARCHE:
+      multiplicateurRang = 3;
+      break;
+  }
+  
+  // Appliquer les bonus de la secte multipliés par le rang
+  return {
+    multiplicateurQi: secte.avantages.multiplicateurQi * multiplicateurRang,
+    bonusStats: Object.entries(secte.avantages.bonusStats).reduce((acc, [stat, valeur]) => {
+      acc[stat as keyof Stats] = valeur * multiplicateurRang;
+      return acc;
+    }, {} as Partial<Stats>),
+    reductionTempsPercee: secte.avantages.reductionTempsPercee * multiplicateurRang,
+    bonusLongevite: secte.avantages.bonusLongevite * multiplicateurRang
+  };
+};
+
+// Fonction pour générer des affinités élémentaires aléatoires
+export const genererAffinitesElementaires = (): Record<ElementCultivation, number> => {
+  const affinites: Partial<Record<ElementCultivation, number>> = {};
+  
+  // Générer une affinité pour chaque élément
+  Object.values(ElementCultivation).forEach(element => {
+    affinites[element] = Math.floor(Math.random() * 100) + 1; // Valeur entre 1 et 100
+  });
+  
+  return affinites as Record<ElementCultivation, number>;
+};
+
+// Fonction pour générer un talent de cultivation aléatoire
+export const genererTalentCultivation = (): number => {
+  // Distribution normale centrée autour de 50 avec un écart-type de 15
+  let talent = Math.floor(Math.random() * 100) + 1;
+  
+  // Appliquer une distribution plus réaliste (plus rare d'avoir un talent très élevé)
+  if (talent > 90) {
+    // 10% de chance de garder un talent > 90
+    if (Math.random() > 0.1) {
+      talent = 90 - Math.floor(Math.random() * 20);
+    }
+  }
+  
+  return talent;
 }; 

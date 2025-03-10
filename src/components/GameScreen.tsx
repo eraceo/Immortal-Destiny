@@ -36,7 +36,14 @@ import {
   Evenement,
   obtenirEvenementAleatoire,
   appliquerEffetsEvenement,
-  TypeEvenement
+  TypeEvenement,
+  getSecteById,
+  calculerBonusSecte,
+  ElementCultivation,
+  RangSecte,
+  TypeSecte,
+  RoyaumeCultivation,
+  NiveauPercee
 } from '../models/types';
 import Layout, { MenuType } from './Layout';
 import { 
@@ -314,101 +321,190 @@ const GameScreen: React.FC = () => {
     };
   }, [personnage, esperanceVie, meditationActive, tempsMeditationCumule, derniereAnneeEvenement, declencherEvenementAleatoire]); // Ajouter tempsMeditationCumule comme dépendance
 
-  // Effet pour la méditation
-  useEffect(() => {
-    let intervalId: NodeJS.Timeout | null = null;
-    
-    if (meditationActive && personnage) {
-      intervalId = setInterval(() => {
-        setPersonnage(prev => {
-          if (!prev) return prev;
+  // Fonction pour activer/désactiver la méditation
+  const toggleMeditation = () => {
+    if (meditationActive) {
+      // Arrêter la méditation
+      setMeditationActive(false);
+      if (ageTimerRef.current) {
+        clearInterval(ageTimerRef.current);
+        ageTimerRef.current = null;
+      }
+    } else {
+      // Démarrer la méditation
+      setMeditationActive(true);
+      
+      // Calculer le gain de Qi par seconde en fonction des stats et du royaume
+      let baseGainParSeconde = 0.1 + (personnage?.stats.qi || 0) * 0.05;
+      
+      // Appliquer les multiplicateurs en fonction du royaume de cultivation
+      switch (personnage?.royaumeCultivation) {
+        case RoyaumeCultivation.MORTEL:
+          baseGainParSeconde *= 1;
+          break;
+        case RoyaumeCultivation.INITIATION:
+          baseGainParSeconde *= 1.5;
+          break;
+        case RoyaumeCultivation.QI_CONDENSE:
+          baseGainParSeconde *= 2;
+          break;
+        case RoyaumeCultivation.FONDATION:
+          baseGainParSeconde *= 3;
+          break;
+        case RoyaumeCultivation.CORE_OR:
+          baseGainParSeconde *= 5;
+          break;
+        case RoyaumeCultivation.NASCENT_SOUL:
+          baseGainParSeconde *= 8;
+          break;
+        case RoyaumeCultivation.TRANSCENDANCE:
+          baseGainParSeconde *= 12;
+          break;
+        case RoyaumeCultivation.SAINT_MARTIAL:
+          baseGainParSeconde *= 20;
+          break;
+        case RoyaumeCultivation.DEMI_DIEU:
+          baseGainParSeconde *= 35;
+          break;
+        case RoyaumeCultivation.DIVIN_SUPREME:
+          baseGainParSeconde *= 50;
+          break;
+      }
+      
+      // Appliquer les bonus de secte
+      if (personnage) {
+        const bonusSecte = calculerBonusSecte(personnage);
+        baseGainParSeconde *= bonusSecte.multiplicateurQi;
+      }
+      
+      setGainQiParSeconde(baseGainParSeconde);
+      
+      // Démarrer le timer pour l'âge
+      ageTimerRef.current = setInterval(() => {
+        setPersonnage(prevPersonnage => {
+          if (!prevPersonnage) return null;
           
-          const nouveauxPointsQi = prev.pointsQi + gainQiParSeconde;
-          const nouveauxPointsQiTotal = prev.pointsQiTotal + gainQiParSeconde;
+          // Incrémenter l'âge (1 an par minute réelle)
+          const nouvelAge = prevPersonnage.age + (1 / 60);
           
-          // Vérifier si une percée est possible
-          const perceeAtteinte = nouveauxPointsQi >= prev.qiRequis;
+          // Vérifier si le personnage a dépassé son espérance de vie
+          const esperanceVieActuelle = calculerEsperanceVie(prevPersonnage.race, prevPersonnage.royaumeCultivation);
           
-          if (perceeAtteinte) {
-            setOpenPerceeDialog(true);
-            setMeditationActive(false);
-            // Ne pas réinitialiser le compteur de temps de méditation
-            // setTempsTotalMeditation(0);
-            // Jouer un son ou ajouter une animation ici si nécessaire
+          // Appliquer les bonus de secte à l'espérance de vie
+          let esperanceVieFinale = esperanceVieActuelle;
+          if (prevPersonnage.appartenanceSecte) {
+            const bonusSecte = calculerBonusSecte(prevPersonnage);
+            esperanceVieFinale += (esperanceVieActuelle * bonusSecte.bonusLongevite / 100);
           }
           
-          // Mettre à jour les points de Qi, même si une percée est atteinte
-          // La fonction effectuerPercee s'occupera de gérer les points excédentaires
+          if (nouvelAge >= esperanceVieFinale) {
+            // Le personnage est mort de vieillesse
+            setMeditationActive(false);
+            if (ageTimerRef.current) {
+              clearInterval(ageTimerRef.current);
+              ageTimerRef.current = null;
+            }
+            setOpenMortDialog(true);
+            return prevPersonnage;
+          }
+          
+          // Incrémenter les points de Qi
+          const nouveauxPointsQi = prevPersonnage.pointsQi + gainQiParSeconde;
+          const nouveauxPointsQiTotal = prevPersonnage.pointsQiTotal + gainQiParSeconde;
+          
+          // Vérifier si le personnage a atteint le Qi requis pour une percée
+          if (nouveauxPointsQi >= prevPersonnage.qiRequis) {
+            // Arrêter la méditation pour effectuer la percée
+            setMeditationActive(false);
+            if (ageTimerRef.current) {
+              clearInterval(ageTimerRef.current);
+              ageTimerRef.current = null;
+            }
+            setOpenPerceeDialog(true);
+          }
+          
+          // Mettre à jour le temps de méditation cumulé
+          setTempsMeditationCumule(prev => prev + 1);
+          
+          // Vérifier si un événement aléatoire doit se produire (tous les 10 ans de jeu)
+          const anneeActuelle = Math.floor(nouvelAge);
+          if (anneeActuelle > derniereAnneeEvenement && anneeActuelle % 10 === 0) {
+            setDerniereAnneeEvenement(anneeActuelle);
+            
+            // Tenter de générer un événement aléatoire
+            const evenement = obtenirEvenementAleatoire(prevPersonnage.royaumeCultivation);
+            if (evenement) {
+              setEvenementActuel(evenement);
+              setOpenEvenementDialog(true);
+              
+              // Ajouter l'événement à l'historique
+              setHistoriqueEvenements(prev => [...prev, evenement]);
+            }
+          }
+          
           return {
-            ...prev,
+            ...prevPersonnage,
+            age: nouvelAge,
             pointsQi: nouveauxPointsQi,
             pointsQiTotal: nouveauxPointsQiTotal
           };
         });
         
-        // Incrémenter le temps total de méditation (pour l'affichage de la session en cours)
-        setTempsTotalMeditation(prev => prev + 1);
+        // Mettre à jour l'âge actuel
+        setAgeActuel(prevAge => prevAge + (1 / 60));
         
-        // Incrémenter le temps de méditation cumulé (pour le calcul de l'âge)
-        setTempsMeditationCumule(prev => prev + 1);
+        // Incrémenter le temps total de méditation
+        setTempsTotalMeditation(prev => prev + 1);
       }, 1000); // Mise à jour chaque seconde
     }
-    
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [meditationActive, personnage, gainQiParSeconde]);
+  };
 
   // Effectuer une percée
   const effectuerPercee = () => {
     if (!personnage) return;
     
+    // Obtenir les informations sur le prochain niveau
     const prochainNiveau = getProchainNiveau(personnage.royaumeCultivation, personnage.niveauPercee);
     
-    // Calculer les points de Qi excédentaires après la percée
-    const pointsQiExcedentaires = Math.max(0, personnage.pointsQi - personnage.qiRequis);
+    // Calculer les points de Qi excédentaires
+    const pointsQiExcedentaires = personnage.pointsQi - personnage.qiRequis;
     
-    const nouveauPersonnage = {
+    // Créer une copie du personnage avec les nouvelles valeurs
+    const nouveauPersonnage: Personnage = {
       ...personnage,
-      pointsQi: pointsQiExcedentaires, // Conserver uniquement les points excédentaires
       royaumeCultivation: prochainNiveau.royaume,
       niveauPercee: prochainNiveau.niveau,
-      qiRequis: prochainNiveau.qiRequis
+      qiRequis: prochainNiveau.qiRequis,
+      pointsQi: pointsQiExcedentaires > 0 ? pointsQiExcedentaires : 0
     };
+    
+    // Appliquer les bonus de secte pour la réduction du temps de percée
+    if (personnage.appartenanceSecte) {
+      const bonusSecte = calculerBonusSecte(personnage);
+      
+      // Ajouter un message pour informer le joueur des bonus appliqués
+      const messageBonus = `Grâce à votre appartenance à la secte, vous bénéficiez d'une réduction de ${bonusSecte.reductionTempsPercee.toFixed(1)}% du temps de percée.`;
+      setSnackbarMessage(messageBonus);
+      setSnackbarOpen(true);
+      
+      // On pourrait ajouter ici une logique pour réduire le temps nécessaire pour la prochaine percée
+      // Par exemple, réduire qiRequis en fonction du bonus de secte
+      nouveauPersonnage.qiRequis = Math.floor(nouveauPersonnage.qiRequis * (1 - bonusSecte.reductionTempsPercee / 100));
+    }
     
     // Mettre à jour l'état du personnage
     setPersonnage(nouveauPersonnage);
     
-    // Recalculer l'espérance de vie après la percée
-    const nouvelleEsperanceVie = calculerEsperanceVie(nouveauPersonnage.race, nouveauPersonnage.royaumeCultivation);
-    setEsperanceVie(nouvelleEsperanceVie);
-    
-    // Afficher un message de succès avec les points excédentaires si applicable
-    const messageExcedent = pointsQiExcedentaires > 0 
-      ? ` ${pointsQiExcedentaires.toLocaleString()} points de Qi excédentaires conservés.` 
-      : '';
-    
-    setSnackbarMessage(`Percée réussie ! Vous avez atteint ${getNomCompletCultivation(prochainNiveau.royaume, prochainNiveau.niveau)}.${messageExcedent}`);
-    setSnackbarOpen(true);
-    
+    // Fermer la boîte de dialogue
     setOpenPerceeDialog(false);
-    sauvegarderPersonnage(nouveauPersonnage);
-  };
-
-  // Activer/désactiver la méditation
-  const toggleMeditation = () => {
-    const nouvelEtat = !meditationActive;
-    setMeditationActive(nouvelEtat);
-    console.log(`Méditation ${nouvelEtat ? 'activée' : 'désactivée'}`);
     
-    // Ne pas réinitialiser le compteur de temps si on désactive la méditation
-    // Cela empêche l'exploitation qui consiste à arrêter/reprendre la méditation
-    
-    // Afficher un message à l'utilisateur
-    setSnackbarMessage(`Méditation ${nouvelEtat ? 'activée' : 'désactivée'}`);
+    // Afficher un message de félicitations
+    const message = `Félicitations ! Vous avez atteint ${getNomCompletCultivation(prochainNiveau.royaume, prochainNiveau.niveau)} !`;
+    setSnackbarMessage(message);
     setSnackbarOpen(true);
+    
+    // Sauvegarder le personnage
+    sauvegarderPersonnage(nouveauPersonnage);
   };
 
   // Fonction pour réinitialiser le personnage

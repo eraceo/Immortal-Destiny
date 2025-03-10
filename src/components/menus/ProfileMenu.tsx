@@ -28,7 +28,12 @@ import {
   formaterTempsJeu,
   ESPERANCE_VIE_BASE,
   Evenement,
-  TypeEvenement
+  TypeEvenement,
+  getSecteById,
+  calculerBonusSecte,
+  ElementCultivation,
+  RangSecte,
+  TypeSecte
 } from '../../models/types';
 
 interface ProfileMenuProps {
@@ -98,59 +103,62 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6">{personnage.nom}</Typography>
               <Chip 
-                label={nomCultivation}
-                size="small"
+                label={getNomCompletCultivation(personnage.royaumeCultivation, personnage.niveauPercee)} 
                 sx={{ 
                   backgroundColor: getRoyaumeColor(personnage.royaumeCultivation),
-                  color: 'white',
+                  color: '#fff',
                   fontWeight: 'bold'
-                }}
+                }} 
               />
             </Box>
             
             <Divider sx={{ mb: 2 }} />
             
             <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">Race</Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography variant="body1">{personnage.race}</Typography>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                Race: <strong>{personnage.race}</strong>
                 <Chip 
+                  size="small" 
                   label={raceInfo.rarete} 
-                  size="small" 
                   sx={{ 
+                    ml: 1, 
                     backgroundColor: getRareteColor(raceInfo.rarete),
-                    color: 'white',
-                    fontSize: '0.6rem'
+                    color: '#fff',
+                    fontSize: '0.7rem'
                   }} 
                 />
-              </Box>
-            </Box>
-            
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">Origine</Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography variant="body1">{personnage.origine}</Typography>
+              </Typography>
+              
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                Origine: <strong>{personnage.origine}</strong>
                 <Chip 
-                  label={origineInfo.rarete} 
                   size="small" 
+                  label={origineInfo.rarete} 
                   sx={{ 
+                    ml: 1, 
                     backgroundColor: getRareteColor(origineInfo.rarete),
-                    color: 'white',
-                    fontSize: '0.6rem'
+                    color: '#fff',
+                    fontSize: '0.7rem'
                   }} 
                 />
-              </Box>
-            </Box>
-            
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">Genre</Typography>
-              <Typography variant="body1">{personnage.genre}</Typography>
-            </Box>
-            
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">Âge</Typography>
-              <Typography variant="body1">{ageActuel} ans</Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+              </Typography>
+              
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                Genre: <strong>{personnage.genre}</strong>
+              </Typography>
+              
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                Âge: <strong>{ageActuel} ans</strong> (Espérance de vie: {esperanceVie} ans)
+              </Typography>
+              
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                Pierres Spirituelles: <strong>{personnage.pierresSpirituelles}</strong>
+              </Typography>
+              
+              <Box sx={{ mt: 1 }}>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  Progression de l'âge:
+                </Typography>
                 <LinearProgress 
                   variant="determinate" 
                   value={Math.min(pourcentageAge, 100)} 
@@ -165,9 +173,6 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
                     }
                   }} 
                 />
-                <Typography variant="body2" color="text.secondary">
-                  {esperanceVie} ans
-                </Typography>
               </Box>
             </Box>
             
@@ -247,35 +252,213 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
             <Typography variant="body2" paragraph>
               {raceInfo.description}
             </Typography>
-            <Box sx={{ 
-              p: 1, 
-              backgroundColor: 'rgba(0,0,0,0.1)', 
-              borderRadius: 1,
-              border: `1px solid ${getRareteColor(raceInfo.rarete)}`,
-              mb: 2
-            }}>
-              <Typography variant="body2">
-                <strong>Rareté:</strong> {raceInfo.rarete}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Espérance de vie de base:</strong> {ESPERANCE_VIE_BASE[personnage.race]} ans
-              </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <Typography variant="body2" color="text.secondary">Rareté:</Typography>
+              <Chip 
+                size="small" 
+                label={raceInfo.rarete} 
+                sx={{ 
+                  ml: 1, 
+                  backgroundColor: getRareteColor(raceInfo.rarete),
+                  color: '#fff',
+                  fontSize: '0.7rem'
+                }} 
+              />
             </Box>
             
             <Typography variant="h6" gutterBottom>Origine: {personnage.origine}</Typography>
             <Typography variant="body2" paragraph>
               {origineInfo.description}
             </Typography>
-            <Box sx={{ 
-              p: 1, 
-              backgroundColor: 'rgba(0,0,0,0.1)', 
-              borderRadius: 1,
-              border: `1px solid ${getRareteColor(origineInfo.rarete)}`
-            }}>
-              <Typography variant="body2">
-                <strong>Rareté:</strong> {origineInfo.rarete}
-              </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Typography variant="body2" color="text.secondary">Rareté:</Typography>
+              <Chip 
+                size="small" 
+                label={origineInfo.rarete} 
+                sx={{ 
+                  ml: 1, 
+                  backgroundColor: getRareteColor(origineInfo.rarete),
+                  color: '#fff',
+                  fontSize: '0.7rem'
+                }} 
+              />
             </Box>
+          </Paper>
+          
+          {/* Informations sur la secte */}
+          <Paper elevation={3} sx={{ p: 2, backgroundColor: 'background.paper' }}>
+            <Typography variant="h6" gutterBottom>Affiliation</Typography>
+            
+            {personnage.appartenanceSecte ? (
+              <>
+                {(() => {
+                  const secte = getSecteById(personnage.appartenanceSecte.secteId);
+                  if (!secte) return <Typography>Aucune information disponible</Typography>;
+                  
+                  // Calculer les bonus de la secte
+                  const bonusSecte = calculerBonusSecte(personnage);
+                  
+                  // Fonction pour obtenir la couleur associée à un élément
+                  const getElementColor = (element: ElementCultivation): string => {
+                    switch (element) {
+                      case ElementCultivation.FEU: return '#e74c3c'; // Rouge
+                      case ElementCultivation.EAU: return '#3498db'; // Bleu
+                      case ElementCultivation.BOIS: return '#2ecc71'; // Vert
+                      case ElementCultivation.METAL: return '#95a5a6'; // Gris
+                      case ElementCultivation.TERRE: return '#d35400'; // Marron
+                      case ElementCultivation.FOUDRE: return '#9b59b6'; // Violet
+                      case ElementCultivation.VENT: return '#1abc9c'; // Turquoise
+                      case ElementCultivation.GLACE: return '#00cec9'; // Cyan
+                      case ElementCultivation.LUMIERE: return '#f1c40f'; // Jaune
+                      case ElementCultivation.OBSCURITE: return '#34495e'; // Bleu foncé
+                      case ElementCultivation.CHAOS: return '#6c5ce7'; // Indigo
+                      case ElementCultivation.ESPACE: return '#0984e3'; // Bleu ciel
+                      case ElementCultivation.TEMPS: return '#fdcb6e'; // Or
+                      case ElementCultivation.SANG: return '#d63031'; // Rouge sang
+                      default: return '#bdc3c7'; // Gris clair
+                    }
+                  };
+                  
+                  return (
+                    <>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                        <Typography variant="h6" sx={{ color: getElementColor(secte.elementPrincipal) }}>
+                          {secte.nom}
+                        </Typography>
+                        <Chip 
+                          label={secte.rarete} 
+                          size="small" 
+                          sx={{ 
+                            backgroundColor: getRareteColor(secte.rarete),
+                            color: 'white',
+                            fontWeight: 'bold'
+                          }} 
+                        />
+                      </Box>
+                      
+                      <Typography variant="body2" paragraph>
+                        {secte.description}
+                      </Typography>
+                      
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          Type: <strong>{secte.type}</strong>
+                        </Typography>
+                        
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          Rang: <strong>{personnage.appartenanceSecte.rang}</strong>
+                        </Typography>
+                        
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          Points de Contribution: <strong>{personnage.appartenanceSecte.pointsContribution}</strong>
+                        </Typography>
+                        
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          Relation avec les Anciens: <strong>{personnage.appartenanceSecte.relationAnciens}/100</strong>
+                        </Typography>
+                        
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          Date d'adhésion: <strong>{new Date(personnage.appartenanceSecte.dateAdhesion).toLocaleDateString()}</strong>
+                        </Typography>
+                      </Box>
+                      
+                      <Divider sx={{ my: 2 }} />
+                      
+                      <Typography variant="subtitle2" gutterBottom>
+                        Éléments:
+                      </Typography>
+                      <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                        <Chip 
+                          label={secte.elementPrincipal} 
+                          size="small" 
+                          sx={{ 
+                            backgroundColor: `${getElementColor(secte.elementPrincipal)}44`,
+                            color: getElementColor(secte.elementPrincipal),
+                            border: `1px solid ${getElementColor(secte.elementPrincipal)}`
+                          }} 
+                        />
+                        {secte.elementsSecondaires.map(element => (
+                          <Chip 
+                            key={element}
+                            label={element} 
+                            size="small" 
+                            sx={{ 
+                              backgroundColor: `${getElementColor(element)}22`,
+                              color: getElementColor(element),
+                              border: `1px solid ${getElementColor(element)}`
+                            }} 
+                          />
+                        ))}
+                      </Box>
+                      
+                      <Typography variant="subtitle2" gutterBottom>
+                        Bonus actuels (basés sur votre rang):
+                      </Typography>
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                        <Chip 
+                          label={`Qi ×${bonusSecte.multiplicateurQi.toFixed(2)}`} 
+                          size="small" 
+                          sx={{ backgroundColor: '#1e1e1e' }} 
+                        />
+                        {Object.entries(bonusSecte.bonusStats).map(([stat, valeur]) => (
+                          <Chip 
+                            key={stat}
+                            label={`${stat} +${valeur.toFixed(1)}`} 
+                            size="small" 
+                            sx={{ backgroundColor: '#1e1e1e' }} 
+                          />
+                        ))}
+                        <Chip 
+                          label={`Percée -${bonusSecte.reductionTempsPercee.toFixed(1)}%`} 
+                          size="small" 
+                          sx={{ backgroundColor: '#1e1e1e' }} 
+                        />
+                        <Chip 
+                          label={`Longévité ${bonusSecte.bonusLongevite > 0 ? '+' : ''}${bonusSecte.bonusLongevite.toFixed(1)}%`} 
+                          size="small" 
+                          sx={{ 
+                            backgroundColor: '#1e1e1e',
+                            color: bonusSecte.bonusLongevite > 0 ? '#2ecc71' : '#e74c3c'
+                          }} 
+                        />
+                      </Box>
+                      
+                      <Typography variant="subtitle2" gutterBottom sx={{ mt: 2 }}>
+                        Techniques apprises: {personnage.appartenanceSecte.techniquesApprises.length}
+                      </Typography>
+                      
+                      <Typography variant="subtitle2" gutterBottom>
+                        Missions complétées: {personnage.appartenanceSecte.missionsCompletees.length}
+                      </Typography>
+                    </>
+                  );
+                })()}
+              </>
+            ) : (
+              <Box>
+                <Typography variant="subtitle1" gutterBottom>
+                  Cultivateur Indépendant
+                </Typography>
+                <Typography variant="body2" paragraph>
+                  Vous avez choisi de suivre votre propre voie sans les contraintes d'une secte. Vous êtes libre de vos choix, mais vous ne bénéficiez pas des avantages qu'offre l'appartenance à une secte.
+                </Typography>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+                  <Chip 
+                    label="Liberté totale" 
+                    size="small" 
+                    sx={{ backgroundColor: '#1e1e1e' }} 
+                  />
+                  <Chip 
+                    label="Pas de missions obligatoires" 
+                    size="small" 
+                    sx={{ backgroundColor: '#1e1e1e' }} 
+                  />
+                </Box>
+                <Typography variant="body2" color="text.secondary">
+                  Vous pouvez toujours tenter de rejoindre une secte plus tard dans votre parcours, si votre talent et vos compétences le permettent.
+                </Typography>
+              </Box>
+            )}
           </Paper>
         </Grid>
       </Grid>
