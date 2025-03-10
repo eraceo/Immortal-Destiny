@@ -32,7 +32,11 @@ import {
   calculerEsperanceVie,
   calculerAgeActuel,
   formaterTempsJeu,
-  TEMPS_REEL_PAR_ANNEE_JEU
+  TEMPS_REEL_PAR_ANNEE_JEU,
+  Evenement,
+  obtenirEvenementAleatoire,
+  appliquerEffetsEvenement,
+  TypeEvenement
 } from '../models/types';
 import Layout, { MenuType } from './Layout';
 import { 
@@ -60,6 +64,12 @@ const GameScreen: React.FC = () => {
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>("");
   const [activeMenu, setActiveMenu] = useState<MenuType>(MenuType.PROFILE);
+  
+  // Nouvel état pour les événements aléatoires
+  const [evenementActuel, setEvenementActuel] = useState<Evenement | null>(null);
+  const [openEvenementDialog, setOpenEvenementDialog] = useState<boolean>(false);
+  const [derniereAnneeEvenement, setDerniereAnneeEvenement] = useState<number>(0);
+  const [historiqueEvenements, setHistoriqueEvenements] = useState<Evenement[]>([]);
   
   // Référence pour le timer d'âge
   const ageTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -89,6 +99,18 @@ const GameScreen: React.FC = () => {
       const tempsMeditationCumuleSauvegarde = localStorage.getItem('tempsMeditationCumule');
       if (tempsMeditationCumuleSauvegarde) {
         setTempsMeditationCumule(parseInt(tempsMeditationCumuleSauvegarde, 10));
+      }
+      
+      // Récupérer la dernière année d'événement depuis le localStorage
+      const derniereAnneeEvenementSauvegarde = localStorage.getItem('derniereAnneeEvenement');
+      if (derniereAnneeEvenementSauvegarde) {
+        setDerniereAnneeEvenement(parseInt(derniereAnneeEvenementSauvegarde, 10));
+      }
+      
+      // Récupérer l'historique des événements depuis le localStorage
+      const historiqueEvenementsSauvegarde = localStorage.getItem('historiqueEvenements');
+      if (historiqueEvenementsSauvegarde) {
+        setHistoriqueEvenements(JSON.parse(historiqueEvenementsSauvegarde));
       }
       
       // Calculer l'âge actuel en fonction du temps de méditation cumulé
@@ -138,6 +160,12 @@ const GameScreen: React.FC = () => {
       // Sauvegarder également le temps de méditation cumulé dans le localStorage
       localStorage.setItem('tempsMeditationCumule', tempsMeditationCumule.toString());
       
+      // Sauvegarder la dernière année d'événement
+      localStorage.setItem('derniereAnneeEvenement', derniereAnneeEvenement.toString());
+      
+      // Sauvegarder l'historique des événements
+      localStorage.setItem('historiqueEvenements', JSON.stringify(historiqueEvenements));
+      
       // Convertir en JSON puis en base64
       const personnageJSON = JSON.stringify(personnageAJour);
       const personnageBase64 = btoa(personnageJSON);
@@ -150,7 +178,7 @@ const GameScreen: React.FC = () => {
       console.error("Erreur lors de la sauvegarde:", err);
       return false;
     }
-  }, [personnage, ageActuel, tempsMeditationCumule]);
+  }, [personnage, ageActuel, tempsMeditationCumule, derniereAnneeEvenement, historiqueEvenements]);
 
   // Fonction pour sauvegarder manuellement
   const sauvegarderManuellement = () => {
@@ -185,6 +213,45 @@ const GameScreen: React.FC = () => {
     };
   }, [personnage, sauvegarderPersonnage]);
 
+  // Fonction pour déclencher un événement aléatoire
+  const declencherEvenementAleatoire = useCallback(() => {
+    if (!personnage) return;
+    
+    const evenement = obtenirEvenementAleatoire(personnage.royaumeCultivation);
+    if (evenement) {
+      setEvenementActuel(evenement);
+      setOpenEvenementDialog(true);
+      
+      // Ajouter l'événement à l'historique
+      setHistoriqueEvenements(prev => [...prev, evenement]);
+    }
+  }, [personnage]);
+
+  // Fonction pour appliquer les effets de l'événement actuel
+  const appliquerEvenement = useCallback(() => {
+    if (!personnage || !evenementActuel) return;
+    
+    // Appliquer les effets de l'événement au personnage
+    const personnageModifie = appliquerEffetsEvenement(personnage, evenementActuel);
+    
+    // Mettre à jour l'espérance de vie si nécessaire
+    if (evenementActuel.effets.esperanceVie) {
+      const nouvelleEsperanceVie = Math.max(ageActuel + 1, esperanceVie + evenementActuel.effets.esperanceVie);
+      setEsperanceVie(nouvelleEsperanceVie);
+    }
+    
+    // Mettre à jour le personnage
+    setPersonnage(personnageModifie);
+    
+    // Fermer la boîte de dialogue
+    setOpenEvenementDialog(false);
+    setEvenementActuel(null);
+    
+    // Afficher un message de confirmation
+    setSnackbarMessage(`Les effets de l'événement "${evenementActuel.titre}" ont été appliqués !`);
+    setSnackbarOpen(true);
+  }, [personnage, evenementActuel, ageActuel, esperanceVie]);
+
   // Gérer le vieillissement du personnage
   useEffect(() => {
     // Le timer d'âge ne doit être actif que pendant la méditation
@@ -197,6 +264,16 @@ const GameScreen: React.FC = () => {
         const nouvelAge = personnage.age + anneesMeditation;
         
         setAgeActuel(nouvelAge);
+        
+        // Vérifier si une année s'est écoulée depuis le dernier événement
+        const anneeActuelle = Math.floor(tempsMeditationCumule / 60);
+        if (anneeActuelle > derniereAnneeEvenement) {
+          // Mettre à jour la dernière année d'événement
+          setDerniereAnneeEvenement(anneeActuelle);
+          
+          // Déclencher un événement aléatoire
+          declencherEvenementAleatoire();
+        }
         
         // Vérifier si le personnage a dépassé son espérance de vie
         if (nouvelAge >= esperanceVie) {
@@ -247,7 +324,7 @@ const GameScreen: React.FC = () => {
         tempsJeuTimerRef.current = null;
       }
     };
-  }, [personnage, esperanceVie, meditationActive, tempsMeditationCumule]); // Ajouter tempsMeditationCumule comme dépendance
+  }, [personnage, esperanceVie, meditationActive, tempsMeditationCumule, derniereAnneeEvenement, declencherEvenementAleatoire]); // Ajouter tempsMeditationCumule comme dépendance
 
   // Effet pour la méditation
   useEffect(() => {
@@ -385,10 +462,10 @@ const GameScreen: React.FC = () => {
     }
   };
 
-  // Rendu du contenu en fonction du menu actif
+  // Fonction pour rendre le contenu en fonction du menu actif
   const renderContent = () => {
     if (!personnage) return null;
-
+    
     switch (activeMenu) {
       case MenuType.PROFILE:
         return (
@@ -396,18 +473,19 @@ const GameScreen: React.FC = () => {
             personnage={personnage} 
             ageActuel={ageActuel} 
             esperanceVie={esperanceVie} 
-            tempsJeuFormate={tempsJeuFormate} 
+            tempsJeuFormate={tempsJeuFormate}
+            historiqueEvenements={historiqueEvenements}
           />
         );
       case MenuType.CULTIVATION:
         return (
           <CultivationMenu 
             personnage={personnage} 
-            meditationActive={meditationActive} 
-            gainQiParSeconde={gainQiParSeconde} 
+            gainQiParSeconde={gainQiParSeconde}
+            meditationActive={meditationActive}
+            toggleMeditation={toggleMeditation}
             tempsTotalMeditation={tempsTotalMeditation}
             tempsMeditationCumule={tempsMeditationCumule}
-            toggleMeditation={toggleMeditation} 
           />
         );
       case MenuType.INVENTORY:
@@ -419,6 +497,90 @@ const GameScreen: React.FC = () => {
       default:
         return null;
     }
+  };
+
+  // Ajouter la boîte de dialogue d'événement dans le rendu
+  const renderEvenementDialog = () => {
+    if (!evenementActuel) return null;
+    
+    // Déterminer la couleur en fonction du type d'événement
+    const getEvenementColor = (type: TypeEvenement): string => {
+      switch (type) {
+        case TypeEvenement.POSITIF:
+          return '#4caf50'; // Vert
+        case TypeEvenement.NEUTRE:
+          return '#2196f3'; // Bleu
+        case TypeEvenement.NEGATIF:
+          return '#f44336'; // Rouge
+        case TypeEvenement.SPECIAL:
+          return '#9c27b0'; // Violet
+        default:
+          return '#ffffff';
+      }
+    };
+    
+    return (
+      <Dialog
+        open={openEvenementDialog}
+        onClose={() => appliquerEvenement()}
+        aria-labelledby="evenement-dialog-title"
+        aria-describedby="evenement-dialog-description"
+        PaperProps={{
+          style: {
+            border: `2px solid ${getEvenementColor(evenementActuel.type)}`,
+            background: '#1a1a1a'
+          }
+        }}
+      >
+        <DialogTitle id="evenement-dialog-title" style={{ color: getEvenementColor(evenementActuel.type) }}>
+          {evenementActuel.titre}
+          <Chip 
+            label={evenementActuel.type} 
+            size="small" 
+            style={{ 
+              marginLeft: '10px', 
+              backgroundColor: getEvenementColor(evenementActuel.type),
+              color: '#000000'
+            }} 
+          />
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="evenement-dialog-description" style={{ color: '#ffffff' }}>
+            {evenementActuel.description}
+          </DialogContentText>
+          <Box mt={2}>
+            <Typography variant="h6" style={{ color: '#ffffff' }}>Effets:</Typography>
+            <Box mt={1}>
+              {evenementActuel.effets.qi && (
+                <Typography style={{ color: evenementActuel.effets.qi > 0 ? '#4caf50' : '#f44336' }}>
+                  Qi: {evenementActuel.effets.qi > 0 ? '+' : ''}{evenementActuel.effets.qi}
+                </Typography>
+              )}
+              {evenementActuel.effets.stats && Object.entries(evenementActuel.effets.stats).map(([stat, valeur]) => (
+                <Typography key={stat} style={{ color: (valeur as number) > 0 ? '#4caf50' : '#f44336' }}>
+                  {stat.charAt(0).toUpperCase() + stat.slice(1)}: {(valeur as number) > 0 ? '+' : ''}{valeur}
+                </Typography>
+              ))}
+              {evenementActuel.effets.age && (
+                <Typography style={{ color: '#f44336' }}>
+                  Âge: +{evenementActuel.effets.age} an(s)
+                </Typography>
+              )}
+              {evenementActuel.effets.esperanceVie && (
+                <Typography style={{ color: evenementActuel.effets.esperanceVie > 0 ? '#4caf50' : '#f44336' }}>
+                  Espérance de vie: {evenementActuel.effets.esperanceVie > 0 ? '+' : ''}{evenementActuel.effets.esperanceVie} an(s)
+                </Typography>
+              )}
+            </Box>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={appliquerEvenement} color="primary" variant="contained">
+            Accepter
+          </Button>
+        </DialogActions>
+      </Dialog>
+    );
   };
 
   if (loading) {
@@ -631,6 +793,8 @@ const GameScreen: React.FC = () => {
         onClose={() => setSnackbarOpen(false)}
         message={snackbarMessage}
       />
+
+      {renderEvenementDialog()}
     </>
   );
 };

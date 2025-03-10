@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Box, 
   Typography, 
@@ -6,8 +6,17 @@ import {
   Divider, 
   LinearProgress, 
   Chip,
-  Grid
+  Grid,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon
 } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import EventIcon from '@mui/icons-material/Event';
 import { 
   Personnage, 
   getRaceInfo, 
@@ -17,7 +26,9 @@ import {
   getRoyaumeColor,
   calculerEsperanceVie,
   formaterTempsJeu,
-  ESPERANCE_VIE_BASE
+  ESPERANCE_VIE_BASE,
+  Evenement,
+  TypeEvenement
 } from '../../models/types';
 
 interface ProfileMenuProps {
@@ -25,19 +36,38 @@ interface ProfileMenuProps {
   ageActuel: number;
   esperanceVie: number;
   tempsJeuFormate: string;
+  historiqueEvenements?: Evenement[];
 }
 
 const ProfileMenu: React.FC<ProfileMenuProps> = ({ 
   personnage, 
   ageActuel, 
   esperanceVie, 
-  tempsJeuFormate 
+  tempsJeuFormate,
+  historiqueEvenements = []
 }) => {
+  const [expanded, setExpanded] = useState<boolean>(false);
   const raceInfo = getRaceInfo(personnage.race);
   const origineInfo = getOrigineInfo(personnage.origine);
   const nomCultivation = getNomCompletCultivation(personnage.royaumeCultivation, personnage.niveauPercee);
   const pourcentageProgression = (personnage.pointsQi / personnage.qiRequis) * 100;
   const pourcentageAge = (ageActuel / esperanceVie) * 100;
+
+  // Fonction pour obtenir la couleur en fonction du type d'événement
+  const getEvenementColor = (type: TypeEvenement): string => {
+    switch (type) {
+      case TypeEvenement.POSITIF:
+        return '#4caf50'; // Vert
+      case TypeEvenement.NEUTRE:
+        return '#2196f3'; // Bleu
+      case TypeEvenement.NEGATIF:
+        return '#f44336'; // Rouge
+      case TypeEvenement.SPECIAL:
+        return '#9c27b0'; // Violet
+      default:
+        return '#ffffff';
+    }
+  };
 
   return (
     <Box>
@@ -118,51 +148,96 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
             </Box>
             
             <Box sx={{ mb: 2 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="body2" color="text.secondary">Âge</Typography>
-                <Typography variant="body2">
-                  {ageActuel} / {esperanceVie} ans
+              <Typography variant="body2" color="text.secondary">Âge</Typography>
+              <Typography variant="body1">{ageActuel} ans</Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                <LinearProgress 
+                  variant="determinate" 
+                  value={Math.min(pourcentageAge, 100)} 
+                  sx={{ 
+                    flexGrow: 1, 
+                    mr: 1,
+                    height: 8,
+                    borderRadius: 4,
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    '& .MuiLinearProgress-bar': {
+                      backgroundColor: pourcentageAge > 90 ? 'error.main' : 'primary.main',
+                    }
+                  }} 
+                />
+                <Typography variant="body2" color="text.secondary">
+                  {esperanceVie} ans
                 </Typography>
               </Box>
-              <LinearProgress 
-                variant="determinate" 
-                value={pourcentageAge} 
-                sx={{ 
-                  height: 8, 
-                  borderRadius: 4,
-                  '& .MuiLinearProgress-bar': {
-                    backgroundColor: pourcentageAge > 90 ? '#e74c3c' : pourcentageAge > 75 ? '#f39c12' : '#2ecc71',
-                  }
-                }} 
-              />
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                Temps de jeu: <strong>{tempsJeuFormate}</strong>
-              </Typography>
             </Box>
             
-            <Box sx={{ mb: 1 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="body2" color="text.secondary">Progression</Typography>
-                <Typography variant="body2">
-                  {personnage.pointsQi.toLocaleString()} / {personnage.qiRequis.toLocaleString()}
-                </Typography>
-              </Box>
-              <LinearProgress 
-                variant="determinate" 
-                value={pourcentageProgression} 
-                sx={{ 
-                  height: 8, 
-                  borderRadius: 4,
-                  '& .MuiLinearProgress-bar': {
-                    backgroundColor: getRoyaumeColor(personnage.royaumeCultivation),
-                  }
-                }} 
-              />
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                Points de Qi Total: <strong>{personnage.pointsQiTotal.toLocaleString()}</strong>
-              </Typography>
+            <Box>
+              <Typography variant="body2" color="text.secondary">Temps de jeu</Typography>
+              <Typography variant="body1">{tempsJeuFormate}</Typography>
             </Box>
           </Paper>
+          
+          {/* Historique des événements */}
+          {historiqueEvenements.length > 0 && (
+            <Paper elevation={3} sx={{ p: 2, mt: 3, backgroundColor: 'background.paper' }}>
+              <Accordion 
+                expanded={expanded} 
+                onChange={() => setExpanded(!expanded)}
+                sx={{ 
+                  backgroundColor: 'transparent', 
+                  boxShadow: 'none',
+                  '&:before': {
+                    display: 'none',
+                  }
+                }}
+              >
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon />}
+                  aria-controls="evenements-content"
+                  id="evenements-header"
+                  sx={{ p: 0 }}
+                >
+                  <Typography variant="h6">Chronique des événements</Typography>
+                </AccordionSummary>
+                <AccordionDetails sx={{ p: 0 }}>
+                  <List sx={{ maxHeight: '300px', overflow: 'auto' }}>
+                    {historiqueEvenements.slice().reverse().map((evenement, index) => (
+                      <ListItem 
+                        key={`${evenement.id}-${index}`}
+                        sx={{ 
+                          borderLeft: `4px solid ${getEvenementColor(evenement.type)}`,
+                          mb: 1,
+                          backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                          borderRadius: '0 4px 4px 0'
+                        }}
+                      >
+                        <ListItemIcon>
+                          <EventIcon sx={{ color: getEvenementColor(evenement.type) }} />
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Typography variant="body1">{evenement.titre}</Typography>
+                              <Chip 
+                                label={evenement.type} 
+                                size="small" 
+                                sx={{ 
+                                  backgroundColor: getEvenementColor(evenement.type),
+                                  color: '#000000',
+                                  fontSize: '0.6rem'
+                                }} 
+                              />
+                            </Box>
+                          }
+                          secondary={evenement.description}
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                </AccordionDetails>
+              </Accordion>
+            </Paper>
+          )}
         </Grid>
         
         {/* Description de la race et de l'origine */}

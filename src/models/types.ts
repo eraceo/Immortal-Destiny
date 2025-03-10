@@ -57,6 +57,14 @@ export enum Genre {
   AUTRE = "Autre"
 }
 
+// Énumérations pour les types d'événements
+export enum TypeEvenement {
+  POSITIF = "Positif",
+  NEUTRE = "Neutre",
+  NEGATIF = "Négatif",
+  SPECIAL = "Spécial"
+}
+
 // Constantes pour le système de temps et d'âge
 export const TEMPS_REEL_PAR_ANNEE_JEU = 60; // 1 minute réelle = 1 année dans le jeu
 export const AGE_INITIAL_MIN = 16;
@@ -507,4 +515,266 @@ export const getRoyaumeColor = (royaume: RoyaumeCultivation): string => {
 // Fonction pour générer un ID unique
 export const genererID = (): string => {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+};
+
+// Interface pour les événements
+export interface Evenement {
+  id: string;
+  titre: string;
+  description: string;
+  type: TypeEvenement;
+  effets: {
+    qi?: number;            // Modification des points de Qi (positif ou négatif)
+    stats?: Partial<Stats>; // Modification des stats (positif ou négatif)
+    age?: number;           // Modification de l'âge (généralement négatif pour vieillissement accéléré)
+    esperanceVie?: number;  // Modification de l'espérance de vie (positif ou négatif)
+  };
+  rarete: Rarete;           // Rareté de l'événement
+  conditionRoyaume?: RoyaumeCultivation[]; // Royaumes de cultivation requis pour que l'événement puisse se produire
+}
+
+// Liste des événements possibles
+export const EVENEMENTS: Evenement[] = [
+  // Événements positifs
+  {
+    id: "1",
+    titre: "Découverte d'une source de Qi",
+    description: "Vous avez découvert une source naturelle de Qi qui renforce votre cultivation.",
+    type: TypeEvenement.POSITIF,
+    effets: {
+      qi: 500,
+      stats: { qi: 2 }
+    },
+    rarete: Rarete.RARE
+  },
+  {
+    id: "2",
+    titre: "Illumination soudaine",
+    description: "Une compréhension soudaine des principes du Dao vous a permis d'améliorer votre intelligence.",
+    type: TypeEvenement.POSITIF,
+    effets: {
+      stats: { intelligence: 3 }
+    },
+    rarete: Rarete.RARE
+  },
+  {
+    id: "3",
+    titre: "Rencontre avec un maître errant",
+    description: "Un maître errant vous a enseigné quelques techniques de base, améliorant votre compréhension du Qi.",
+    type: TypeEvenement.POSITIF,
+    effets: {
+      stats: { qi: 1, intelligence: 1, perception: 1 }
+    },
+    rarete: Rarete.COMMUN
+  },
+  {
+    id: "4",
+    titre: "Herbe médicinale rare",
+    description: "Vous avez trouvé une herbe médicinale rare qui a renforcé votre constitution.",
+    type: TypeEvenement.POSITIF,
+    effets: {
+      stats: { constitution: 2 },
+      esperanceVie: 5
+    },
+    rarete: Rarete.COMMUN
+  },
+  {
+    id: "5",
+    titre: "Méditation profonde",
+    description: "Une session de méditation particulièrement profonde vous a permis de mieux comprendre votre propre Qi.",
+    type: TypeEvenement.POSITIF,
+    effets: {
+      qi: 300,
+      stats: { perception: 1 }
+    },
+    rarete: Rarete.COMMUN
+  },
+  
+  // Événements neutres
+  {
+    id: "6",
+    titre: "Rêve étrange",
+    description: "Vous avez fait un rêve étrange qui vous a laissé perplexe, mais qui pourrait avoir une signification cachée.",
+    type: TypeEvenement.NEUTRE,
+    effets: {
+      stats: { perception: 1, intelligence: -1 }
+    },
+    rarete: Rarete.COMMUN
+  },
+  {
+    id: "7",
+    titre: "Changement climatique soudain",
+    description: "Un changement climatique soudain a perturbé votre méditation, mais vous a endurci.",
+    type: TypeEvenement.NEUTRE,
+    effets: {
+      qi: -100,
+      stats: { constitution: 1 }
+    },
+    rarete: Rarete.COMMUN
+  },
+  {
+    id: "8",
+    titre: "Rencontre avec un voyageur",
+    description: "Vous avez rencontré un voyageur qui vous a raconté des histoires de terres lointaines.",
+    type: TypeEvenement.NEUTRE,
+    effets: {
+      stats: { charisme: 1, qi: -1 }
+    },
+    rarete: Rarete.COMMUN
+  },
+  
+  // Événements négatifs
+  {
+    id: "9",
+    titre: "Déviation de Qi",
+    description: "Votre Qi a dévié pendant votre méditation, causant des dommages internes.",
+    type: TypeEvenement.NEGATIF,
+    effets: {
+      qi: -400,
+      stats: { constitution: -2 },
+      age: 1
+    },
+    rarete: Rarete.RARE
+  },
+  {
+    id: "10",
+    titre: "Attaque de bêtes sauvages",
+    description: "Des bêtes sauvages ont attaqué votre lieu de méditation, vous forçant à fuir.",
+    type: TypeEvenement.NEGATIF,
+    effets: {
+      qi: -200,
+      stats: { force: 1, constitution: -1 }
+    },
+    rarete: Rarete.COMMUN
+  },
+  {
+    id: "11",
+    titre: "Maladie mystérieuse",
+    description: "Vous avez contracté une maladie mystérieuse qui affaiblit votre corps.",
+    type: TypeEvenement.NEGATIF,
+    effets: {
+      stats: { constitution: -2, force: -1 },
+      esperanceVie: -3
+    },
+    rarete: Rarete.RARE
+  },
+  {
+    id: "12",
+    titre: "Tempête de Qi",
+    description: "Une tempête de Qi a perturbé l'environnement, rendant votre cultivation plus difficile.",
+    type: TypeEvenement.NEGATIF,
+    effets: {
+      qi: -300,
+      stats: { qi: -1 }
+    },
+    rarete: Rarete.COMMUN
+  },
+  
+  // Événements spéciaux (plus rares)
+  {
+    id: "13",
+    titre: "Héritage ancien",
+    description: "Vous avez découvert un héritage ancien qui contient des techniques de cultivation oubliées.",
+    type: TypeEvenement.SPECIAL,
+    effets: {
+      qi: 1000,
+      stats: { intelligence: 3, qi: 3, perception: 2 }
+    },
+    rarete: Rarete.LEGENDAIRE,
+    conditionRoyaume: [RoyaumeCultivation.FONDATION, RoyaumeCultivation.CORE_OR, RoyaumeCultivation.NASCENT_SOUL]
+  },
+  {
+    id: "14",
+    titre: "Tribulation céleste",
+    description: "Vous avez subi une tribulation céleste qui a testé vos limites, mais vous en êtes sorti plus fort.",
+    type: TypeEvenement.SPECIAL,
+    effets: {
+      qi: -500,
+      stats: { force: 3, constitution: 3, qi: 3 },
+      age: 2,
+      esperanceVie: 10
+    },
+    rarete: Rarete.EPIQUE,
+    conditionRoyaume: [RoyaumeCultivation.CORE_OR, RoyaumeCultivation.NASCENT_SOUL, RoyaumeCultivation.TRANSCENDANCE]
+  },
+  {
+    id: "15",
+    titre: "Rencontre avec un immortel",
+    description: "Un immortel vous a remarqué et vous a accordé sa bénédiction.",
+    type: TypeEvenement.SPECIAL,
+    effets: {
+      qi: 2000,
+      stats: { chance: 5 },
+      esperanceVie: 20
+    },
+    rarete: Rarete.MYTHIQUE,
+    conditionRoyaume: [RoyaumeCultivation.NASCENT_SOUL, RoyaumeCultivation.TRANSCENDANCE, RoyaumeCultivation.SAINT_MARTIAL]
+  }
+];
+
+// Fonction pour obtenir un événement aléatoire en fonction du royaume de cultivation
+export const obtenirEvenementAleatoire = (royaumeCultivation: RoyaumeCultivation): Evenement | null => {
+  // Filtrer les événements possibles en fonction du royaume de cultivation
+  const evenementsPossibles = EVENEMENTS.filter(evenement => 
+    !evenement.conditionRoyaume || evenement.conditionRoyaume.includes(royaumeCultivation)
+  );
+  
+  if (evenementsPossibles.length === 0) return null;
+  
+  // Système de poids basé sur la rareté
+  const poids: Record<Rarete, number> = {
+    [Rarete.COMMUN]: 60,
+    [Rarete.RARE]: 25,
+    [Rarete.EPIQUE]: 10,
+    [Rarete.LEGENDAIRE]: 4,
+    [Rarete.MYTHIQUE]: 1
+  };
+  
+  // Calculer le poids total
+  let poidsTotal = 0;
+  evenementsPossibles.forEach(evenement => {
+    poidsTotal += poids[evenement.rarete];
+  });
+  
+  // Générer un nombre aléatoire entre 0 et le poids total
+  const nombreAleatoire = Math.random() * poidsTotal;
+  
+  // Sélectionner un événement en fonction du poids
+  let poidsActuel = 0;
+  for (const evenement of evenementsPossibles) {
+    poidsActuel += poids[evenement.rarete];
+    if (nombreAleatoire <= poidsActuel) {
+      return evenement;
+    }
+  }
+  
+  // Fallback au cas où (ne devrait jamais arriver)
+  return evenementsPossibles[Math.floor(Math.random() * evenementsPossibles.length)];
+};
+
+// Fonction pour appliquer les effets d'un événement à un personnage
+export const appliquerEffetsEvenement = (personnage: Personnage, evenement: Evenement): Personnage => {
+  const personnageModifie = { ...personnage };
+  
+  // Appliquer les modifications de Qi
+  if (evenement.effets.qi) {
+    personnageModifie.pointsQi = Math.max(0, personnageModifie.pointsQi + evenement.effets.qi);
+    personnageModifie.pointsQiTotal = Math.max(0, personnageModifie.pointsQiTotal + evenement.effets.qi);
+  }
+  
+  // Appliquer les modifications de stats
+  if (evenement.effets.stats) {
+    Object.entries(evenement.effets.stats).forEach(([stat, valeur]) => {
+      if (stat in personnageModifie.stats) {
+        personnageModifie.stats[stat as keyof Stats] = Math.max(1, personnageModifie.stats[stat as keyof Stats] + (valeur as number));
+      }
+    });
+  }
+  
+  // Appliquer les modifications d'âge
+  if (evenement.effets.age) {
+    personnageModifie.age += evenement.effets.age;
+  }
+  
+  return personnageModifie;
 }; 
