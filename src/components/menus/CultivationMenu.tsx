@@ -18,18 +18,22 @@ interface CultivationMenuProps {
   personnage: Personnage;
   meditationActive: boolean;
   gainQiParSeconde: number;
-  tempsTotalMeditation: number;
-  tempsMeditationCumule: number;
+  tempsTotalMeditation?: number;
+  tempsMeditationCumule?: number;
   toggleMeditation: () => void;
+  onPercee?: () => void;
+  perceeDisponible?: boolean;
 }
 
 const CultivationMenu: React.FC<CultivationMenuProps> = ({ 
   personnage, 
   meditationActive, 
   gainQiParSeconde, 
-  tempsTotalMeditation, 
-  tempsMeditationCumule,
-  toggleMeditation 
+  tempsTotalMeditation = 0, 
+  tempsMeditationCumule = 0,
+  toggleMeditation,
+  onPercee,
+  perceeDisponible
 }) => {
   const descriptionRoyaume = getDescriptionRoyaume(personnage.royaumeCultivation);
   const nomCultivation = getNomCompletCultivation(personnage.royaumeCultivation, personnage.niveauPercee);

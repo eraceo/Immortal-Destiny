@@ -165,6 +165,9 @@ const CharacterCreation: React.FC = () => {
     talentCultivation: genererTalentCultivation()
   });
   
+  // État pour contrôler l'affichage des informations détaillées sur les sectes
+  const [afficherInfosSectes, setAfficherInfosSectes] = useState<boolean>(false);
+  
   // Fonction pour relancer tous les éléments du personnage
   const relancerTout = () => {
     const nouvelleRace = genererRaceAleatoire();
@@ -212,14 +215,32 @@ const CharacterCreation: React.FC = () => {
         };
       }
 
-      // Créer le personnage avec les valeurs actuelles
+      // Obtenir les informations de l'origine pour appliquer les bonus
+      const origineInfo = getOrigineInfo(personnage.origine);
+      
+      // Appliquer les bonus de statistiques de l'origine
+      const statsFinales = { ...personnage.stats };
+      if (origineInfo.bonusStats) {
+        Object.entries(origineInfo.bonusStats).forEach(([stat, bonus]) => {
+          statsFinales[stat as keyof Stats] += bonus;
+          // S'assurer que les statistiques ne dépassent pas 10
+          if (statsFinales[stat as keyof Stats] > 10) {
+            statsFinales[stat as keyof Stats] = 10;
+          }
+        });
+      }
+
+      // Calculer les pierres spirituelles initiales avec le bonus de l'origine
+      const pierresInitiales = 100 + (origineInfo.bonusPierresSpirituelles || 0);
+
+      // Créer le personnage avec les valeurs actuelles et les bonus appliqués
       const nouveauPersonnage: Personnage = {
         id: genererID(),
         nom: personnage.nom,
         genre: personnage.genre,
         race: personnage.race,
         origine: personnage.origine,
-        stats: personnage.stats,
+        stats: statsFinales,
         pointsQi: 0,
         pointsQiTotal: 0,
         royaumeCultivation: personnage.royaumeCultivation,
@@ -229,13 +250,28 @@ const CharacterCreation: React.FC = () => {
         dateNaissance: Date.now(),
         dernierTempsJeu: Date.now(),
         tempsJeuTotal: 0,
-        pierresSpirituelles: 0,
+        pierresSpirituelles: pierresInitiales,
         // Nouvelles propriétés pour le système de sectes
         appartenanceSecte: appartenanceSecteFinale,
         techniquesApprises: personnage.techniquesApprises,
         affiniteElements: personnage.affiniteElements,
-        talentCultivation: personnage.talentCultivation
+        talentCultivation: personnage.talentCultivation,
+        // Ajouter les bonus de l'origine comme propriétés du personnage
+        bonusQi: origineInfo.bonusQi || 0,
+        bonusApprentissage: origineInfo.bonusApprentissage || 0,
+        bonusSpecial: origineInfo.bonusSpecial || ""
       };
+      
+      // Si le personnage a rejoint une secte, appliquer le bonus de relation
+      if (nouveauPersonnage.appartenanceSecte && origineInfo.bonusRelationSecte) {
+        nouveauPersonnage.appartenanceSecte.relationAnciens += origineInfo.bonusRelationSecte;
+        // S'assurer que la relation ne dépasse pas 100 et n'est pas inférieure à 0
+        if (nouveauPersonnage.appartenanceSecte.relationAnciens > 100) {
+          nouveauPersonnage.appartenanceSecte.relationAnciens = 100;
+        } else if (nouveauPersonnage.appartenanceSecte.relationAnciens < 0) {
+          nouveauPersonnage.appartenanceSecte.relationAnciens = 0;
+        }
+      }
       
       // Créer un objet de sauvegarde contenant toutes les données
       const sauvegarde = {
@@ -508,6 +544,82 @@ const CharacterCreation: React.FC = () => {
                 <Typography variant="body2" color="text.secondary">
                   {origineInfo.description}
                 </Typography>
+                
+                {/* Affichage des bonus de l'origine */}
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Avantages de l'origine:
+                  </Typography>
+                  <Grid container spacing={1}>
+                    {/* Bonus de statistiques */}
+                    {origineInfo.bonusStats && Object.entries(origineInfo.bonusStats).map(([stat, bonus]) => (
+                      <Grid item xs={6} key={stat}>
+                        <Chip 
+                          label={`${stat.charAt(0).toUpperCase() + stat.slice(1)} +${bonus}`} 
+                          size="small" 
+                          sx={{ 
+                            backgroundColor: `${getStatColor(personnage.stats[stat as keyof Stats])}22`,
+                            color: getStatColor(personnage.stats[stat as keyof Stats]),
+                            border: `1px solid ${getStatColor(personnage.stats[stat as keyof Stats])}`,
+                          }} 
+                        />
+                      </Grid>
+                    ))}
+                    
+                    {/* Autres bonus */}
+                    {origineInfo.bonusPierresSpirituelles && origineInfo.bonusPierresSpirituelles > 0 && (
+                      <Grid item xs={6}>
+                        <Chip 
+                          label={`Pierres +${origineInfo.bonusPierresSpirituelles}`} 
+                          size="small" 
+                          sx={{ backgroundColor: '#1e1e1e' }} 
+                        />
+                      </Grid>
+                    )}
+                    
+                    {origineInfo.bonusQi && origineInfo.bonusQi > 0 && (
+                      <Grid item xs={6}>
+                        <Chip 
+                          label={`Gain de Qi +${origineInfo.bonusQi}%`} 
+                          size="small" 
+                          sx={{ backgroundColor: '#1e1e1e' }} 
+                        />
+                      </Grid>
+                    )}
+                    
+                    {origineInfo.bonusRelationSecte && origineInfo.bonusRelationSecte !== 0 && (
+                      <Grid item xs={6}>
+                        <Chip 
+                          label={`Relation Secte ${origineInfo.bonusRelationSecte > 0 ? '+' : ''}${origineInfo.bonusRelationSecte}`} 
+                          size="small" 
+                          sx={{ 
+                            backgroundColor: '#1e1e1e',
+                            color: origineInfo.bonusRelationSecte > 0 ? '#2ecc71' : '#e74c3c'
+                          }} 
+                        />
+                      </Grid>
+                    )}
+                    
+                    {origineInfo.bonusApprentissage && origineInfo.bonusApprentissage > 0 && (
+                      <Grid item xs={6}>
+                        <Chip 
+                          label={`Apprentissage +${origineInfo.bonusApprentissage}%`} 
+                          size="small" 
+                          sx={{ backgroundColor: '#1e1e1e' }} 
+                        />
+                      </Grid>
+                    )}
+                  </Grid>
+                  
+                  {/* Bonus spécial */}
+                  {origineInfo.bonusSpecial && (
+                    <Box sx={{ mt: 1, p: 1, borderRadius: 1, backgroundColor: 'rgba(0,0,0,0.2)' }}>
+                      <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                        <strong>Bonus spécial:</strong> {origineInfo.bonusSpecial}
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
               </Paper>
             </Box>
             
@@ -593,6 +705,108 @@ const CharacterCreation: React.FC = () => {
 
         {/* Affichage des affinités élémentaires */}
         {renderAffiniteElements()}
+
+        <Divider sx={{ my: 3 }} />
+        
+        {/* Nouvelle section pour les sectes */}
+        <Typography variant="h4" component="h2" gutterBottom align="center" sx={{ fontFamily: "'Cinzel', serif" }}>
+          Secte et Appartenance
+        </Typography>
+        <Typography variant="body1" color="text.secondary" align="center" gutterBottom>
+          Choisissez votre voie dans le monde des arts martiaux
+        </Typography>
+        
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+          <Button 
+            variant="outlined" 
+            color="secondary" 
+            onClick={() => setAfficherInfosSectes(!afficherInfosSectes)}
+            startIcon={afficherInfosSectes ? <span>▼</span> : <span>▶</span>}
+            sx={{ mb: 2 }}
+          >
+            {afficherInfosSectes ? "Masquer les informations sur les sectes" : "Afficher plus d'informations sur les sectes"}
+          </Button>
+        </Box>
+        
+        {afficherInfosSectes && (
+          <Box sx={{ 
+            p: 3, 
+            mb: 3, 
+            borderRadius: 2, 
+            backgroundColor: 'rgba(0,0,0,0.2)', 
+            border: '1px solid #333'
+          }}>
+            <Typography variant="body2" color="text.secondary" paragraph>
+              Dans le monde de la cultivation, les sectes sont des organisations puissantes qui regroupent des cultivateurs partageant des techniques, des ressources et des objectifs communs. Rejoindre une secte vous donnera accès à des techniques exclusives, des ressources rares et la protection de cultivateurs plus puissants.
+            </Typography>
+            <Typography variant="body2" color="text.secondary" paragraph>
+              Chaque secte a ses propres spécialités, éléments de prédilection et avantages. Votre choix de secte influencera grandement votre parcours de cultivation et les opportunités qui s'offriront à vous.
+            </Typography>
+            
+            <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
+              Types de Sectes
+            </Typography>
+            <Grid container spacing={1} sx={{ mb: 2 }}>
+              {Object.values(TypeSecte).map((type) => (
+                <Grid item xs={6} sm={4} key={type}>
+                  <Chip 
+                    label={type} 
+                    size="small" 
+                    sx={{ 
+                      backgroundColor: 'rgba(0,0,0,0.3)',
+                      border: '1px solid #333',
+                    }} 
+                  />
+                </Grid>
+              ))}
+            </Grid>
+            
+            <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
+              Éléments de Cultivation
+            </Typography>
+            <Typography variant="body2" color="text.secondary" paragraph>
+              Chaque secte se spécialise dans un ou plusieurs éléments de cultivation. Votre affinité avec ces éléments déterminera votre compatibilité avec les techniques de la secte.
+            </Typography>
+            <Grid container spacing={1} sx={{ mb: 2 }}>
+              {Object.values(ElementCultivation).map((element) => (
+                <Grid item xs={4} sm={3} md={2} key={element}>
+                  <Chip 
+                    label={element} 
+                    size="small" 
+                    sx={{ 
+                      backgroundColor: `${getElementColor(element)}22`,
+                      color: getElementColor(element),
+                      border: `1px solid ${getElementColor(element)}`,
+                    }} 
+                  />
+                </Grid>
+              ))}
+            </Grid>
+            
+            <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
+              Hiérarchie des Sectes
+            </Typography>
+            <Typography variant="body2" color="text.secondary" paragraph>
+              La hiérarchie des sectes est stricte, avec plusieurs rangs à gravir :
+            </Typography>
+            <Grid container spacing={1}>
+              {Object.values(RangSecte).map((rang, index) => (
+                <Grid item xs={6} sm={4} md={3} key={rang}>
+                  <Chip 
+                    label={rang} 
+                    size="small" 
+                    sx={{ 
+                      backgroundColor: index === 0 ? '#2ecc7144' : 'rgba(0,0,0,0.3)',
+                      border: index === 0 ? '1px solid #2ecc71' : '1px solid #333',
+                      color: index === 0 ? '#2ecc71' : 'inherit',
+                      fontWeight: index === 0 ? 'bold' : 'normal',
+                    }} 
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+        )}
 
         {/* Sélection de secte */}
         <Box sx={{ mt: 3, mb: 2 }}>
@@ -732,6 +946,27 @@ const CharacterCreation: React.FC = () => {
                         backgroundColor: '#1e1e1e',
                         color: secte.avantages.bonusLongevite > 0 ? '#2ecc71' : '#e74c3c'
                       }} 
+                    />
+                  </Box>
+                  
+                  <Typography variant="subtitle2" gutterBottom sx={{ mt: 1 }}>
+                    Inconvénients:
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    <Chip 
+                      label="Pas de bonus de Qi" 
+                      size="small" 
+                      sx={{ backgroundColor: '#1e1e1e', color: '#e74c3c' }} 
+                    />
+                    <Chip 
+                      label="Pas de techniques exclusives" 
+                      size="small" 
+                      sx={{ backgroundColor: '#1e1e1e', color: '#e74c3c' }} 
+                    />
+                    <Chip 
+                      label="Pas de protection" 
+                      size="small" 
+                      sx={{ backgroundColor: '#1e1e1e', color: '#e74c3c' }} 
                     />
                   </Box>
                   

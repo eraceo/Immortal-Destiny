@@ -266,6 +266,12 @@ export interface OrigineInfo {
   nom: Origine;
   rarete: Rarete;
   description: string;
+  bonusStats?: Partial<Stats>; // Bonus de statistiques
+  bonusPierresSpirituelles?: number; // Bonus de pierres spirituelles initiales
+  bonusQi?: number; // Bonus de gain de Qi (pourcentage)
+  bonusRelationSecte?: number; // Bonus de relation avec les anciens de la secte
+  bonusApprentissage?: number; // Bonus d'apprentissage des techniques (pourcentage)
+  bonusSpecial?: string; // Description d'un bonus spécial unique
 }
 
 // Interface pour les techniques de cultivation
@@ -397,6 +403,10 @@ export interface Personnage {
   techniquesApprises: TechniqueCultivation[];
   affiniteElements: Record<ElementCultivation, number>; // Affinité avec chaque élément (0-100)
   talentCultivation: number; // Talent de cultivation (0-100)
+  // Bonus liés à l'origine
+  bonusQi?: number; // Bonus de gain de Qi (pourcentage)
+  bonusApprentissage?: number; // Bonus d'apprentissage des techniques (pourcentage)
+  bonusSpecial?: string; // Description d'un bonus spécial unique
 }
 
 // Fonction pour calculer l'espérance de vie d'un personnage
@@ -502,47 +512,101 @@ export const ORIGINES_INFO: OrigineInfo[] = [
   {
     nom: Origine.FAMILLE_PAYSANNE,
     rarete: Rarete.COMMUN,
-    description: "Une famille modeste travaillant la terre. Vous avez développé une forte endurance et une connexion avec la nature."
+    description: "Une famille modeste travaillant la terre. Vous avez développé une forte endurance et une connexion avec la nature.",
+    bonusStats: { constitution: 2 },
+    bonusPierresSpirituelles: 50,
+    bonusQi: 5,
+    bonusRelationSecte: 0,
+    bonusApprentissage: 0,
+    bonusSpecial: "Endurance Naturelle: Vous récupérez plus rapidement de la fatigue lors de la méditation."
   },
   {
     nom: Origine.FAMILLE_MARCHANDE,
     rarete: Rarete.COMMUN,
-    description: "Une famille de commerçants. Vous avez un talent naturel pour la négociation et une bonne compréhension des relations sociales."
+    description: "Une famille de commerçants. Vous avez un talent naturel pour la négociation et une bonne compréhension des relations sociales.",
+    bonusStats: { charisme: 2 },
+    bonusPierresSpirituelles: 200,
+    bonusQi: 0,
+    bonusRelationSecte: 5,
+    bonusApprentissage: 0,
+    bonusSpecial: "Sens des Affaires: Vous obtenez 10% de réduction sur tous les achats."
   },
   {
     nom: Origine.FAMILLE_ARTISANS,
     rarete: Rarete.COMMUN,
-    description: "Une famille spécialisée dans l'artisanat. Vous avez une grande dextérité et un œil pour les détails."
+    description: "Une famille spécialisée dans l'artisanat. Vous avez une grande dextérité et un œil pour les détails.",
+    bonusStats: { agilite: 1, perception: 1 },
+    bonusPierresSpirituelles: 100,
+    bonusQi: 0,
+    bonusRelationSecte: 0,
+    bonusApprentissage: 10,
+    bonusSpecial: "Main Habile: Vous avez 15% de chances supplémentaires de réussir la création d'objets."
   },
   {
     nom: Origine.FAMILLE_BANDITS,
     rarete: Rarete.RARE,
-    description: "Une famille vivant en marge de la société. Vous avez appris à survivre par tous les moyens et connaissez les arts de l'infiltration."
+    description: "Une famille vivant en marge de la société. Vous avez appris à survivre par tous les moyens et connaissez les arts de l'infiltration.",
+    bonusStats: { agilite: 2, perception: 1 },
+    bonusPierresSpirituelles: 150,
+    bonusQi: 0,
+    bonusRelationSecte: -10,
+    bonusApprentissage: 5,
+    bonusSpecial: "Ombre Furtive: Vous avez 20% de chances supplémentaires d'éviter les dangers lors de l'exploration."
   },
   {
     nom: Origine.FAMILLE_ARTS_MARTIAUX,
     rarete: Rarete.RARE,
-    description: "Une famille pratiquant les arts martiaux depuis des générations. Vous avez été formé aux techniques de combat dès votre plus jeune âge."
+    description: "Une famille pratiquant les arts martiaux depuis des générations. Vous avez été formé aux techniques de combat dès votre plus jeune âge.",
+    bonusStats: { force: 2, agilite: 1 },
+    bonusPierresSpirituelles: 100,
+    bonusQi: 10,
+    bonusRelationSecte: 10,
+    bonusApprentissage: 15,
+    bonusSpecial: "Héritage Martial: Vous commencez avec une technique de combat de base déjà maîtrisée."
   },
   {
     nom: Origine.FAMILLE_LETTRÉS,
     rarete: Rarete.RARE,
-    description: "Une famille d'érudits et de sages. Vous avez une connaissance approfondie des textes anciens et des théories de cultivation."
+    description: "Une famille d'érudits et de sages. Vous avez une connaissance approfondie des textes anciens et des théories de cultivation.",
+    bonusStats: { intelligence: 2, perception: 1 },
+    bonusPierresSpirituelles: 100,
+    bonusQi: 5,
+    bonusRelationSecte: 5,
+    bonusApprentissage: 25,
+    bonusSpecial: "Sagesse Ancestrale: Vous avez 30% de chances supplémentaires de comprendre les textes anciens."
   },
   {
     nom: Origine.FAMILLE_NOBLE,
     rarete: Rarete.EPIQUE,
-    description: "Une famille de la haute noblesse. Vous avez accès à des ressources rares et avez reçu une éducation privilégiée."
+    description: "Une famille de la haute noblesse. Vous avez accès à des ressources rares et avez reçu une éducation privilégiée.",
+    bonusStats: { charisme: 2, intelligence: 1, chance: 1 },
+    bonusPierresSpirituelles: 500,
+    bonusQi: 10,
+    bonusRelationSecte: 20,
+    bonusApprentissage: 10,
+    bonusSpecial: "Connexions Influentes: Vous avez accès à des missions spéciales et des ressources exclusives."
   },
   {
     nom: Origine.FAMILLE_ROYALE,
     rarete: Rarete.LEGENDAIRE,
-    description: "Une famille de sang royal. Vous êtes né avec un statut élevé et avez accès aux meilleurs maîtres et ressources du royaume."
+    description: "Une famille de sang royal. Vous êtes né avec un statut élevé et avez accès aux meilleurs maîtres et ressources du royaume.",
+    bonusStats: { charisme: 2, intelligence: 2, chance: 2 },
+    bonusPierresSpirituelles: 1000,
+    bonusQi: 20,
+    bonusRelationSecte: 30,
+    bonusApprentissage: 20,
+    bonusSpecial: "Sang Royal: Vous avez une aura naturelle qui impressionne les autres et ouvre de nombreuses portes."
   },
   {
     nom: Origine.LIGNÉE_IMMORTELLE,
     rarete: Rarete.MYTHIQUE,
-    description: "Une lignée descendant directement des immortels. Votre sang contient des traces d'énergie divine et votre potentiel est illimité."
+    description: "Une lignée descendant directement des immortels. Votre sang contient des traces d'énergie divine et votre potentiel est illimité.",
+    bonusStats: { qi: 3, intelligence: 2, chance: 2 },
+    bonusPierresSpirituelles: 2000,
+    bonusQi: 50,
+    bonusRelationSecte: 50,
+    bonusApprentissage: 50,
+    bonusSpecial: "Héritage Divin: Votre corps possède une affinité naturelle avec l'énergie céleste, accélérant considérablement votre progression."
   }
 ];
 

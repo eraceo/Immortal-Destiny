@@ -18,7 +18,8 @@ import {
   Tooltip,
   IconButton,
   Alert,
-  Snackbar
+  Snackbar,
+  CircularProgress
 } from '@mui/material';
 import { 
   Personnage, 
@@ -51,7 +52,8 @@ import {
   CultivationMenu, 
   InventoryMenu, 
   QuestsMenu, 
-  StatsMenu 
+  StatsMenu,
+  SecteMenu 
 } from './menus';
 
 const GameScreen: React.FC = () => {
@@ -541,7 +543,7 @@ const GameScreen: React.FC = () => {
   const getMenuTitle = () => {
     switch (activeMenu) {
       case MenuType.PROFILE:
-        return personnage ? personnage.nom : 'Profil';
+        return 'Profil';
       case MenuType.CULTIVATION:
         return 'Cultivation';
       case MenuType.INVENTORY:
@@ -550,6 +552,8 @@ const GameScreen: React.FC = () => {
         return 'Quêtes';
       case MenuType.STATS:
         return 'Statistiques';
+      case MenuType.SECTE:
+        return 'Secte';
       default:
         return 'Wuxia Idle';
     }
@@ -557,38 +561,62 @@ const GameScreen: React.FC = () => {
 
   // Fonction pour rendre le contenu en fonction du menu actif
   const renderContent = () => {
-    if (!personnage) return null;
+    if (loading) {
+      return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+        <CircularProgress />
+      </Box>;
+    }
+    
+    if (error || !personnage) {
+      return <Box sx={{ p: 3 }}>
+        <Alert severity="error">{error || "Erreur lors du chargement du personnage"}</Alert>
+        <Button 
+          variant="contained" 
+          color="primary" 
+          onClick={retourCreation}
+          sx={{ mt: 2 }}
+        >
+          Retour à la création de personnage
+        </Button>
+      </Box>;
+    }
     
     switch (activeMenu) {
       case MenuType.PROFILE:
-        return (
-          <ProfileMenu 
-            personnage={personnage} 
-            ageActuel={ageActuel} 
-            esperanceVie={esperanceVie} 
-            tempsJeuFormate={tempsJeuFormate}
-            historiqueEvenements={historiqueEvenements}
-          />
-        );
+        return <ProfileMenu 
+          personnage={personnage} 
+          ageActuel={ageActuel} 
+          esperanceVie={esperanceVie} 
+          tempsJeuFormate={tempsJeuFormate}
+          historiqueEvenements={historiqueEvenements}
+        />;
       case MenuType.CULTIVATION:
-        return (
-          <CultivationMenu 
-            personnage={personnage} 
-            gainQiParSeconde={gainQiParSeconde}
-            meditationActive={meditationActive}
-            toggleMeditation={toggleMeditation}
-            tempsTotalMeditation={tempsTotalMeditation}
-            tempsMeditationCumule={tempsMeditationCumule}
-          />
-        );
+        return <CultivationMenu 
+          personnage={personnage} 
+          gainQiParSeconde={gainQiParSeconde} 
+          meditationActive={meditationActive} 
+          toggleMeditation={toggleMeditation} 
+          onPercee={effectuerPercee}
+          perceeDisponible={personnage.pointsQi >= personnage.qiRequis}
+          tempsTotalMeditation={tempsTotalMeditation}
+          tempsMeditationCumule={tempsMeditationCumule}
+        />;
       case MenuType.INVENTORY:
         return <InventoryMenu personnage={personnage} />;
       case MenuType.QUESTS:
         return <QuestsMenu personnage={personnage} />;
       case MenuType.STATS:
         return <StatsMenu personnage={personnage} />;
+      case MenuType.SECTE:
+        return <SecteMenu personnage={personnage} onUpdatePersonnage={setPersonnage} />;
       default:
-        return null;
+        return <ProfileMenu 
+          personnage={personnage} 
+          ageActuel={ageActuel} 
+          esperanceVie={esperanceVie} 
+          tempsJeuFormate={tempsJeuFormate}
+          historiqueEvenements={historiqueEvenements}
+        />;
     }
   };
 
