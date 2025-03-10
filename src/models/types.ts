@@ -28,6 +28,63 @@ export enum NiveauPercee {
   AVANCE = "Niveau Avancé"
 }
 
+// Énumérations pour les races
+export enum Race {
+  HUMAIN = "Humain",
+  DEMON = "Démon",
+  ESPRIT = "Esprit",
+  BETE_SPIRITUELLE = "Bête Spirituelle",
+  IMMORTEL_CELESTE = "Immortel Céleste"
+}
+
+// Énumérations pour les origines familiales
+export enum Origine {
+  FAMILLE_PAYSANNE = "Famille Paysanne",
+  FAMILLE_MARCHANDE = "Famille Marchande",
+  FAMILLE_ARTISANS = "Famille d'Artisans",
+  FAMILLE_BANDITS = "Famille de Bandits",
+  FAMILLE_ARTS_MARTIAUX = "Famille d'Arts Martiaux",
+  FAMILLE_LETTRÉS = "Famille de Lettrés",
+  FAMILLE_NOBLE = "Famille Noble",
+  FAMILLE_ROYALE = "Famille Royale",
+  LIGNÉE_IMMORTELLE = "Lignée Immortelle"
+}
+
+// Énumérations pour le genre
+export enum Genre {
+  MASCULIN = "Masculin",
+  FEMININ = "Féminin",
+  AUTRE = "Autre"
+}
+
+// Constantes pour le système de temps et d'âge
+export const TEMPS_REEL_PAR_ANNEE_JEU = 60 * 5; // 5 minutes réelles = 1 année dans le jeu (remis à la valeur d'origine)
+export const AGE_INITIAL_MIN = 16;
+export const AGE_INITIAL_MAX = 25;
+
+// Espérance de vie de base par race (en années)
+export const ESPERANCE_VIE_BASE: Record<Race, number> = {
+  [Race.HUMAIN]: 80,
+  [Race.DEMON]: 300,
+  [Race.ESPRIT]: 500,
+  [Race.BETE_SPIRITUELLE]: 800,
+  [Race.IMMORTEL_CELESTE]: 2000
+};
+
+// Multiplicateur d'espérance de vie par royaume de cultivation
+export const MULTIPLICATEUR_ESPERANCE_VIE: Record<RoyaumeCultivation, number> = {
+  [RoyaumeCultivation.MORTEL]: 1,
+  [RoyaumeCultivation.INITIATION]: 1.5,
+  [RoyaumeCultivation.QI_CONDENSE]: 2,
+  [RoyaumeCultivation.FONDATION]: 3,
+  [RoyaumeCultivation.CORE_OR]: 5,
+  [RoyaumeCultivation.NASCENT_SOUL]: 10,
+  [RoyaumeCultivation.TRANSCENDANCE]: 20,
+  [RoyaumeCultivation.SAINT_MARTIAL]: 50,
+  [RoyaumeCultivation.DEMI_DIEU]: 200,
+  [RoyaumeCultivation.DIVIN_SUPREME]: 1000
+};
+
 // Détails des noms spécifiques pour chaque niveau de percée dans chaque royaume
 export const NOMS_PERCEES: Record<RoyaumeCultivation, Record<NiveauPercee, string>> = {
   [RoyaumeCultivation.MORTEL]: {
@@ -100,48 +157,48 @@ export const DESCRIPTIONS_ROYAUMES: Record<RoyaumeCultivation, string> = {
 export const QI_REQUIS_PERCEE: Record<RoyaumeCultivation, Record<NiveauPercee, number>> = {
   [RoyaumeCultivation.MORTEL]: {
     [NiveauPercee.PREMIER]: 0,
-    [NiveauPercee.INTERMEDIAIRE]: 100,
-    [NiveauPercee.AVANCE]: 300
+    [NiveauPercee.INTERMEDIAIRE]: 200,
+    [NiveauPercee.AVANCE]: 600
   },
   [RoyaumeCultivation.INITIATION]: {
-    [NiveauPercee.PREMIER]: 600,
-    [NiveauPercee.INTERMEDIAIRE]: 1000,
-    [NiveauPercee.AVANCE]: 1500
+    [NiveauPercee.PREMIER]: 1200,
+    [NiveauPercee.INTERMEDIAIRE]: 2000,
+    [NiveauPercee.AVANCE]: 3000
   },
   [RoyaumeCultivation.QI_CONDENSE]: {
-    [NiveauPercee.PREMIER]: 2100,
-    [NiveauPercee.INTERMEDIAIRE]: 2800,
-    [NiveauPercee.AVANCE]: 3600
+    [NiveauPercee.PREMIER]: 4200,
+    [NiveauPercee.INTERMEDIAIRE]: 5600,
+    [NiveauPercee.AVANCE]: 7200
   },
   [RoyaumeCultivation.FONDATION]: {
-    [NiveauPercee.PREMIER]: 4500,
-    [NiveauPercee.INTERMEDIAIRE]: 5500,
-    [NiveauPercee.AVANCE]: 6600
+    [NiveauPercee.PREMIER]: 9000,
+    [NiveauPercee.INTERMEDIAIRE]: 11000,
+    [NiveauPercee.AVANCE]: 13200
   },
   [RoyaumeCultivation.CORE_OR]: {
-    [NiveauPercee.PREMIER]: 8000,
-    [NiveauPercee.INTERMEDIAIRE]: 10000,
-    [NiveauPercee.AVANCE]: 12500
+    [NiveauPercee.PREMIER]: 16000,
+    [NiveauPercee.INTERMEDIAIRE]: 20000,
+    [NiveauPercee.AVANCE]: 25000
   },
   [RoyaumeCultivation.NASCENT_SOUL]: {
-    [NiveauPercee.PREMIER]: 15000,
-    [NiveauPercee.INTERMEDIAIRE]: 18000,
-    [NiveauPercee.AVANCE]: 22000
+    [NiveauPercee.PREMIER]: 30000,
+    [NiveauPercee.INTERMEDIAIRE]: 36000,
+    [NiveauPercee.AVANCE]: 44000
   },
   [RoyaumeCultivation.TRANSCENDANCE]: {
-    [NiveauPercee.PREMIER]: 26000,
-    [NiveauPercee.INTERMEDIAIRE]: 31000,
-    [NiveauPercee.AVANCE]: 37000
+    [NiveauPercee.PREMIER]: 52000,
+    [NiveauPercee.INTERMEDIAIRE]: 62000,
+    [NiveauPercee.AVANCE]: 74000
   },
   [RoyaumeCultivation.SAINT_MARTIAL]: {
-    [NiveauPercee.PREMIER]: 44000,
-    [NiveauPercee.INTERMEDIAIRE]: 52000,
-    [NiveauPercee.AVANCE]: 61000
+    [NiveauPercee.PREMIER]: 88000,
+    [NiveauPercee.INTERMEDIAIRE]: 104000,
+    [NiveauPercee.AVANCE]: 122000
   },
   [RoyaumeCultivation.DEMI_DIEU]: {
-    [NiveauPercee.PREMIER]: 72000,
-    [NiveauPercee.INTERMEDIAIRE]: 85000,
-    [NiveauPercee.AVANCE]: 100000
+    [NiveauPercee.PREMIER]: 144000,
+    [NiveauPercee.INTERMEDIAIRE]: 170000,
+    [NiveauPercee.AVANCE]: 200000
   },
   [RoyaumeCultivation.DIVIN_SUPREME]: {
     [NiveauPercee.PREMIER]: 120000,
@@ -162,35 +219,6 @@ export interface OrigineInfo {
   nom: Origine;
   rarete: Rarete;
   description: string;
-}
-
-// Énumérations pour les races
-export enum Race {
-  HUMAIN = "Humain",
-  DEMON = "Démon",
-  ESPRIT = "Esprit",
-  BETE_SPIRITUELLE = "Bête Spirituelle",
-  IMMORTEL_CELESTE = "Immortel Céleste"
-}
-
-// Énumérations pour les origines familiales
-export enum Origine {
-  FAMILLE_PAYSANNE = "Famille Paysanne",
-  FAMILLE_MARCHANDE = "Famille Marchande",
-  FAMILLE_ARTISANS = "Famille d'Artisans",
-  FAMILLE_BANDITS = "Famille de Bandits",
-  FAMILLE_ARTS_MARTIAUX = "Famille d'Arts Martiaux",
-  FAMILLE_LETTRÉS = "Famille de Lettrés",
-  FAMILLE_NOBLE = "Famille Noble",
-  FAMILLE_ROYALE = "Famille Royale",
-  LIGNÉE_IMMORTELLE = "Lignée Immortelle"
-}
-
-// Énumérations pour le genre
-export enum Genre {
-  MASCULIN = "Masculin",
-  FEMININ = "Féminin",
-  AUTRE = "Autre"
 }
 
 // Interface pour les statistiques du personnage
@@ -218,7 +246,41 @@ export interface Personnage {
   royaumeCultivation: RoyaumeCultivation;
   niveauPercee: NiveauPercee;
   qiRequis: number;
+  // Système de temps et d'âge
+  age: number;
+  dateNaissance: number; // Timestamp de création du personnage
+  dernierTempsJeu: number; // Timestamp de la dernière fois que le joueur a joué
+  tempsJeuTotal: number; // Temps total de jeu en secondes
 }
+
+// Fonction pour calculer l'espérance de vie d'un personnage
+export const calculerEsperanceVie = (race: Race, royaumeCultivation: RoyaumeCultivation): number => {
+  const esperanceVieBase = ESPERANCE_VIE_BASE[race];
+  const multiplicateur = MULTIPLICATEUR_ESPERANCE_VIE[royaumeCultivation];
+  return Math.floor(esperanceVieBase * multiplicateur);
+};
+
+// Fonction pour générer un âge initial aléatoire
+export const genererAgeInitial = (): number => {
+  return Math.floor(Math.random() * (AGE_INITIAL_MAX - AGE_INITIAL_MIN + 1)) + AGE_INITIAL_MIN;
+};
+
+// Fonction pour calculer l'âge actuel du personnage
+export const calculerAgeActuel = (personnage: Personnage): number => {
+  const maintenant = Date.now();
+  const tempsEcoule = maintenant - personnage.dateNaissance;
+  const anneesEcoulees = Math.floor(tempsEcoule / (TEMPS_REEL_PAR_ANNEE_JEU * 1000));
+  return personnage.age + anneesEcoulees;
+};
+
+// Fonction pour calculer le temps de jeu total formaté
+export const formaterTempsJeu = (tempsEnSecondes: number): string => {
+  const heures = Math.floor(tempsEnSecondes / 3600);
+  const minutes = Math.floor((tempsEnSecondes % 3600) / 60);
+  const secondes = Math.floor(tempsEnSecondes % 60);
+  
+  return `${heures.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secondes.toString().padStart(2, '0')}`;
+};
 
 // Fonction pour obtenir le nom complet du niveau de cultivation
 export const getNomCompletCultivation = (royaume: RoyaumeCultivation, niveau: NiveauPercee): string => {

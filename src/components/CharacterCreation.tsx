@@ -39,7 +39,9 @@ import {
   RoyaumeCultivation,
   NiveauPercee,
   QI_REQUIS_PERCEE,
-  getNomCompletCultivation
+  getNomCompletCultivation,
+  genererAgeInitial,
+  calculerEsperanceVie
 } from '../models/types';
 
 // Composant pour afficher une statistique avec une barre de progression
@@ -143,7 +145,11 @@ const CharacterCreation: React.FC = () => {
     pointsQiTotal: 0,
     royaumeCultivation: RoyaumeCultivation.MORTEL,
     niveauPercee: NiveauPercee.PREMIER,
-    qiRequis: QI_REQUIS_PERCEE[RoyaumeCultivation.MORTEL][NiveauPercee.INTERMEDIAIRE]
+    qiRequis: QI_REQUIS_PERCEE[RoyaumeCultivation.MORTEL][NiveauPercee.INTERMEDIAIRE],
+    age: genererAgeInitial(),
+    dateNaissance: Date.now(),
+    dernierTempsJeu: Date.now(),
+    tempsJeuTotal: 0
   });
 
   // État pour le nombre de relances restantes
@@ -169,9 +175,11 @@ const CharacterCreation: React.FC = () => {
   // Fonction pour relancer la race
   const relancerRace = () => {
     if (relancesRestantes > 0) {
+      const nouvelleRace = genererRaceAleatoire();
       setPersonnage({
         ...personnage,
-        race: genererRaceAleatoire()
+        race: nouvelleRace,
+        age: genererAgeInitial() // Générer un nouvel âge initial car la race a changé
       });
       setRelancesRestantes(relancesRestantes - 1);
       setRaceRelancee(true);
@@ -241,6 +249,9 @@ const CharacterCreation: React.FC = () => {
 
   // Obtenir le nom complet du niveau de cultivation
   const nomCultivation = getNomCompletCultivation(personnage.royaumeCultivation, personnage.niveauPercee);
+
+  // Calcul de l'espérance de vie
+  const esperanceVie = calculerEsperanceVie(personnage.race, personnage.royaumeCultivation);
 
   return (
     <Card sx={{ maxWidth: 800, margin: '0 auto', backgroundColor: 'background.paper' }}>
@@ -326,6 +337,9 @@ const CharacterCreation: React.FC = () => {
                 <Typography variant="body2" color="text.secondary">
                   {raceInfo.description}
                 </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  Espérance de vie: <strong>{esperanceVie} ans</strong>
+                </Typography>
               </Paper>
               
               <Paper 
@@ -378,6 +392,9 @@ const CharacterCreation: React.FC = () => {
               />
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                 Points de Qi: 0 / {personnage.qiRequis} pour la prochaine percée
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                Âge: <strong>{personnage.age} ans</strong>
               </Typography>
             </Box>
           </Grid>
