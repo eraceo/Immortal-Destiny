@@ -80,10 +80,67 @@ const GameScreen: React.FC = () => {
   const [derniereAnneeEvenement, setDerniereAnneeEvenement] = useState<number>(0);
   const [historiqueEvenements, setHistoriqueEvenements] = useState<Evenement[]>([]);
   
-  // Référence pour le timer d'âge
+  // Référence pour les timers
   const ageTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const qiTimerRef = useRef<NodeJS.Timeout | null>(null);
   const tempsJeuTimerRef = useRef<NodeJS.Timeout | null>(null);
   const sauvegardeAutoTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const moisTimerRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // État pour suivre les mois écoulés
+  const [moisActuel, setMoisActuel] = useState<number>(0);
+
+  // Fonction pour calculer le gain de Qi par seconde
+  const calculerGainQiParSeconde = useCallback((personnageData: Personnage): number => {
+    if (!personnageData) return 0;
+    
+    // Calcul de base à partir des statistiques
+    const qiBase = personnageData.stats.qi;
+    const intelligenceBonus = personnageData.stats.intelligence * 0.08;
+    const perceptionBonus = personnageData.stats.perception * 0.04;
+    let gainCalcule = Math.max(0.01, parseFloat((qiBase * (1 + (intelligenceBonus + perceptionBonus) / 25)).toFixed(2)));
+    
+    // Appliquer les multiplicateurs en fonction du royaume de cultivation
+    switch (personnageData.royaumeCultivation) {
+      case RoyaumeCultivation.MORTEL:
+        gainCalcule *= 1;
+        break;
+      case RoyaumeCultivation.INITIATION:
+        gainCalcule *= 1.5;
+        break;
+      case RoyaumeCultivation.QI_CONDENSE:
+        gainCalcule *= 2;
+        break;
+      case RoyaumeCultivation.FONDATION:
+        gainCalcule *= 3;
+        break;
+      case RoyaumeCultivation.CORE_OR:
+        gainCalcule *= 5;
+        break;
+      case RoyaumeCultivation.NASCENT_SOUL:
+        gainCalcule *= 8;
+        break;
+      case RoyaumeCultivation.TRANSCENDANCE:
+        gainCalcule *= 12;
+        break;
+      case RoyaumeCultivation.SAINT_MARTIAL:
+        gainCalcule *= 20;
+        break;
+      case RoyaumeCultivation.DEMI_DIEU:
+        gainCalcule *= 35;
+        break;
+      case RoyaumeCultivation.DIVIN_SUPREME:
+        gainCalcule *= 50;
+        break;
+    }
+    
+    // Appliquer les bonus de secte
+    const bonusSecte = calculerBonusSecte(personnageData);
+    gainCalcule *= bonusSecte.multiplicateurQi;
+    
+    // Arrondir à 2 décimales
+    return parseFloat(gainCalcule.toFixed(2));
+  }, []);
 
   // Charger le personnage depuis le localStorage
   useEffect(() => {
@@ -124,11 +181,8 @@ const GameScreen: React.FC = () => {
       // Formater le temps de jeu total
       setTempsJeuFormate(formaterTempsJeu(personnageData.tempsJeuTotal));
       
-      // Calculer le gain de Qi par seconde basé sur les statistiques
-      const qiBase = personnageData.stats.qi;
-      const intelligenceBonus = personnageData.stats.intelligence * 0.08;
-      const perceptionBonus = personnageData.stats.perception * 0.04;
-      const gainCalcule = Math.max(1, Math.floor(qiBase * (1 + (intelligenceBonus + perceptionBonus) / 25)));
+      // Calculer le gain de Qi par seconde
+      const gainCalcule = calculerGainQiParSeconde(personnageData);
       setGainQiParSeconde(gainCalcule);
       
       setLoading(false);
@@ -137,7 +191,7 @@ const GameScreen: React.FC = () => {
       setLoading(false);
       console.error("Erreur lors du chargement du personnage:", err);
     }
-  }, []);
+  }, [calculerGainQiParSeconde]);
 
   // Sauvegarder le personnage dans le localStorage
   const sauvegarderPersonnage = useCallback((personnageToSave?: Personnage | null) => {
@@ -332,62 +386,83 @@ const GameScreen: React.FC = () => {
         clearInterval(ageTimerRef.current);
         ageTimerRef.current = null;
       }
+      if (qiTimerRef.current) {
+        clearInterval(qiTimerRef.current);
+        qiTimerRef.current = null;
+      }
+      if (moisTimerRef.current) {
+        clearInterval(moisTimerRef.current);
+        moisTimerRef.current = null;
+      }
     } else {
       // Démarrer la méditation
       setMeditationActive(true);
       
-      // Calculer le gain de Qi par seconde en fonction des stats et du royaume
-      let baseGainParSeconde = 0.1 + (personnage?.stats.qi || 0) * 0.05;
-      
-      // Appliquer les multiplicateurs en fonction du royaume de cultivation
-      switch (personnage?.royaumeCultivation) {
-        case RoyaumeCultivation.MORTEL:
-          baseGainParSeconde *= 1;
-          break;
-        case RoyaumeCultivation.INITIATION:
-          baseGainParSeconde *= 1.5;
-          break;
-        case RoyaumeCultivation.QI_CONDENSE:
-          baseGainParSeconde *= 2;
-          break;
-        case RoyaumeCultivation.FONDATION:
-          baseGainParSeconde *= 3;
-          break;
-        case RoyaumeCultivation.CORE_OR:
-          baseGainParSeconde *= 5;
-          break;
-        case RoyaumeCultivation.NASCENT_SOUL:
-          baseGainParSeconde *= 8;
-          break;
-        case RoyaumeCultivation.TRANSCENDANCE:
-          baseGainParSeconde *= 12;
-          break;
-        case RoyaumeCultivation.SAINT_MARTIAL:
-          baseGainParSeconde *= 20;
-          break;
-        case RoyaumeCultivation.DEMI_DIEU:
-          baseGainParSeconde *= 35;
-          break;
-        case RoyaumeCultivation.DIVIN_SUPREME:
-          baseGainParSeconde *= 50;
-          break;
-      }
-      
-      // Appliquer les bonus de secte
+      // Calculer le gain de Qi par seconde
       if (personnage) {
-        const bonusSecte = calculerBonusSecte(personnage);
-        baseGainParSeconde *= bonusSecte.multiplicateurQi;
+        const gainCalcule = calculerGainQiParSeconde(personnage);
+        setGainQiParSeconde(gainCalcule);
       }
       
-      setGainQiParSeconde(baseGainParSeconde);
+      // Timer pour mettre à jour les points de Qi chaque seconde
+      qiTimerRef.current = setInterval(() => {
+        setPersonnage(prevPersonnage => {
+          if (!prevPersonnage) return null;
+          
+          // Incrémenter les points de Qi
+          const nouveauxPointsQi = prevPersonnage.pointsQi + gainQiParSeconde;
+          const nouveauxPointsQiTotal = prevPersonnage.pointsQiTotal + gainQiParSeconde;
+          
+          // Vérifier si le personnage a atteint le Qi requis pour une percée
+          if (nouveauxPointsQi >= prevPersonnage.qiRequis) {
+            // Arrêter la méditation pour effectuer la percée
+            setMeditationActive(false);
+            if (qiTimerRef.current) {
+              clearInterval(qiTimerRef.current);
+              qiTimerRef.current = null;
+            }
+            if (ageTimerRef.current) {
+              clearInterval(ageTimerRef.current);
+              ageTimerRef.current = null;
+            }
+            if (moisTimerRef.current) {
+              clearInterval(moisTimerRef.current);
+              moisTimerRef.current = null;
+            }
+            setOpenPerceeDialog(true);
+          }
+          
+          return {
+            ...prevPersonnage,
+            pointsQi: nouveauxPointsQi,
+            pointsQiTotal: nouveauxPointsQiTotal
+          };
+        });
+      }, 1000); // Mise à jour chaque seconde
       
-      // Démarrer le timer pour l'âge
+      // Timer pour mettre à jour les mois plus fréquemment (environ 5 secondes = 1 mois)
+      moisTimerRef.current = setInterval(() => {
+        // Incrémenter le mois actuel
+        setMoisActuel(prevMois => {
+          const nouveauMois = (prevMois + 1) % 12;
+          
+          // Si on a fait un tour complet (12 mois = 1 an), on ne fait rien de spécial ici
+          // car l'âge est géré par le timer d'âge
+          
+          return nouveauMois;
+        });
+        
+        // Incrémenter le temps total de méditation (fraction d'une seconde)
+        setTempsTotalMeditation(prev => prev + (1/12));
+      }, 5000); // Mise à jour toutes les 5 secondes (1 minute / 12)
+      
+      // Démarrer le timer pour l'âge (1 an par minute)
       ageTimerRef.current = setInterval(() => {
         setPersonnage(prevPersonnage => {
           if (!prevPersonnage) return null;
           
           // Incrémenter l'âge (1 an par minute réelle)
-          const nouvelAge = prevPersonnage.age + (1 / 60);
+          const nouvelAge = prevPersonnage.age + 1;
           
           // Vérifier si le personnage a dépassé son espérance de vie
           const esperanceVieActuelle = calculerEsperanceVie(prevPersonnage.race, prevPersonnage.royaumeCultivation);
@@ -406,27 +481,20 @@ const GameScreen: React.FC = () => {
               clearInterval(ageTimerRef.current);
               ageTimerRef.current = null;
             }
+            if (qiTimerRef.current) {
+              clearInterval(qiTimerRef.current);
+              qiTimerRef.current = null;
+            }
+            if (moisTimerRef.current) {
+              clearInterval(moisTimerRef.current);
+              moisTimerRef.current = null;
+            }
             setOpenMortDialog(true);
             return prevPersonnage;
           }
           
-          // Incrémenter les points de Qi
-          const nouveauxPointsQi = prevPersonnage.pointsQi + gainQiParSeconde;
-          const nouveauxPointsQiTotal = prevPersonnage.pointsQiTotal + gainQiParSeconde;
-          
-          // Vérifier si le personnage a atteint le Qi requis pour une percée
-          if (nouveauxPointsQi >= prevPersonnage.qiRequis) {
-            // Arrêter la méditation pour effectuer la percée
-            setMeditationActive(false);
-            if (ageTimerRef.current) {
-              clearInterval(ageTimerRef.current);
-              ageTimerRef.current = null;
-            }
-            setOpenPerceeDialog(true);
-          }
-          
           // Mettre à jour le temps de méditation cumulé
-          setTempsMeditationCumule(prev => prev + 1);
+          setTempsMeditationCumule(prev => prev + 60);
           
           // Vérifier si un événement aléatoire doit se produire (tous les 10 ans de jeu)
           const anneeActuelle = Math.floor(nouvelAge);
@@ -446,18 +514,16 @@ const GameScreen: React.FC = () => {
           
           return {
             ...prevPersonnage,
-            age: nouvelAge,
-            pointsQi: nouveauxPointsQi,
-            pointsQiTotal: nouveauxPointsQiTotal
+            age: nouvelAge
           };
         });
         
         // Mettre à jour l'âge actuel
-        setAgeActuel(prevAge => prevAge + (1 / 60));
+        setAgeActuel(prevAge => prevAge + 1);
         
-        // Incrémenter le temps total de méditation
-        setTempsTotalMeditation(prev => prev + 1);
-      }, 1000); // Mise à jour chaque seconde
+        // Réinitialiser le mois actuel à 0 (début d'une nouvelle année)
+        setMoisActuel(0);
+      }, 60000); // Mise à jour chaque minute (60 secondes)
     }
   };
 
@@ -600,6 +666,7 @@ const GameScreen: React.FC = () => {
           perceeDisponible={personnage.pointsQi >= personnage.qiRequis}
           tempsTotalMeditation={tempsTotalMeditation}
           tempsMeditationCumule={tempsMeditationCumule}
+          moisActuel={moisActuel}
         />;
       case MenuType.INVENTORY:
         return <InventoryMenu personnage={personnage} />;
@@ -703,6 +770,32 @@ const GameScreen: React.FC = () => {
       </Dialog>
     );
   };
+
+  // Nettoyer les timers lors du démontage du composant
+  useEffect(() => {
+    return () => {
+      if (ageTimerRef.current) {
+        clearInterval(ageTimerRef.current);
+        ageTimerRef.current = null;
+      }
+      if (qiTimerRef.current) {
+        clearInterval(qiTimerRef.current);
+        qiTimerRef.current = null;
+      }
+      if (tempsJeuTimerRef.current) {
+        clearInterval(tempsJeuTimerRef.current);
+        tempsJeuTimerRef.current = null;
+      }
+      if (sauvegardeAutoTimerRef.current) {
+        clearInterval(sauvegardeAutoTimerRef.current);
+        sauvegardeAutoTimerRef.current = null;
+      }
+      if (moisTimerRef.current) {
+        clearInterval(moisTimerRef.current);
+        moisTimerRef.current = null;
+      }
+    };
+  }, []);
 
   if (loading) {
     return (

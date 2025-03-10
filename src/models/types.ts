@@ -105,7 +105,8 @@ export enum ElementCultivation {
 }
 
 // Constantes pour le système de temps et d'âge
-export const TEMPS_REEL_PAR_ANNEE_JEU = 60; // 1 minute réelle = 1 année dans le jeu
+export const TEMPS_REEL_PAR_ANNEE_JEU = 5; // 1 minute réelle = 12 mois (1 an) dans le jeu
+export const MOIS_PAR_MINUTE = 12; // 12 mois par minute de temps réel
 export const AGE_INITIAL_MIN = 16;
 export const AGE_INITIAL_MAX = 25;
 

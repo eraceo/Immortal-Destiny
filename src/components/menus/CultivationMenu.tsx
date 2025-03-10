@@ -11,7 +11,8 @@ import {
   Personnage, 
   getDescriptionRoyaume, 
   getRoyaumeColor, 
-  getNomCompletCultivation
+  getNomCompletCultivation,
+  MOIS_PAR_MINUTE
 } from '../../models/types';
 
 interface CultivationMenuProps {
@@ -23,6 +24,7 @@ interface CultivationMenuProps {
   toggleMeditation: () => void;
   onPercee?: () => void;
   perceeDisponible?: boolean;
+  moisActuel?: number;
 }
 
 const CultivationMenu: React.FC<CultivationMenuProps> = ({ 
@@ -33,11 +35,21 @@ const CultivationMenu: React.FC<CultivationMenuProps> = ({
   tempsMeditationCumule = 0,
   toggleMeditation,
   onPercee,
-  perceeDisponible
+  perceeDisponible,
+  moisActuel = 0
 }) => {
   const descriptionRoyaume = getDescriptionRoyaume(personnage.royaumeCultivation);
   const nomCultivation = getNomCompletCultivation(personnage.royaumeCultivation, personnage.niveauPercee);
   const pourcentageProgression = (personnage.pointsQi / personnage.qiRequis) * 100;
+
+  // Fonction pour obtenir le nom du mois
+  const getNomMois = (mois: number): string => {
+    const nomsMois = [
+      "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+      "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+    ];
+    return nomsMois[mois];
+  };
 
   return (
     <Box>
@@ -60,19 +72,26 @@ const CultivationMenu: React.FC<CultivationMenuProps> = ({
           <Typography variant="h6">
             {personnage.royaumeCultivation} - {nomCultivation}
           </Typography>
-          <Chip 
-            label={`+${gainQiParSeconde} Qi/s`} 
-            color="primary" 
-            size="small"
-            sx={{ 
-              animation: meditationActive ? 'pulse 2s infinite' : 'none',
-              '@keyframes pulse': {
-                '0%': { opacity: 1 },
-                '50%': { opacity: 0.7 },
-                '100%': { opacity: 1 }
-              }
-            }}
-          />
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            {meditationActive && (
+              <Typography variant="body2" sx={{ mr: 2, fontFamily: 'monospace' }}>
+                Mois actuel: <strong>{getNomMois(moisActuel)}</strong>
+              </Typography>
+            )}
+            <Chip 
+              label={`+${gainQiParSeconde.toFixed(2)} Qi/s`} 
+              color="primary" 
+              size="small"
+              sx={{ 
+                animation: meditationActive ? 'pulse 2s infinite' : 'none',
+                '@keyframes pulse': {
+                  '0%': { opacity: 1 },
+                  '50%': { opacity: 0.7 },
+                  '100%': { opacity: 1 }
+                }
+              }}
+            />
+          </Box>
         </Box>
         
         <Typography variant="body2" color="text.secondary" paragraph>
@@ -122,7 +141,7 @@ const CultivationMenu: React.FC<CultivationMenuProps> = ({
                 }
               }}
             >
-              +{gainQiParSeconde} Qi
+              +{gainQiParSeconde.toFixed(2)} Qi
             </Box>
           )}
           
@@ -148,7 +167,7 @@ const CultivationMenu: React.FC<CultivationMenuProps> = ({
             {meditationActive ? "Arrêter la Méditation" : "Commencer à Méditer"}
             {meditationActive && (
               <Box component="span" sx={{ ml: 1, display: 'flex', alignItems: 'center', fontSize: '0.85em' }}>
-                <span style={{ color: '#4caf50' }}>+{gainQiParSeconde}</span>
+                <span style={{ color: '#4caf50' }}>+{gainQiParSeconde.toFixed(2)}</span>
                 <span style={{ marginLeft: '2px' }}>Qi/s</span>
               </Box>
             )}
@@ -167,7 +186,7 @@ const CultivationMenu: React.FC<CultivationMenuProps> = ({
                 py: 0.5,
                 borderRadius: 1
               }}>
-                {Math.floor(tempsTotalMeditation / 60)}:{(tempsTotalMeditation % 60).toString().padStart(2, '0')}
+                {Math.floor((tempsTotalMeditation * MOIS_PAR_MINUTE) / 12)} ans {Math.floor((tempsTotalMeditation * MOIS_PAR_MINUTE) % 12)} mois
               </Box>
             </Typography>
           )}
@@ -184,7 +203,7 @@ const CultivationMenu: React.FC<CultivationMenuProps> = ({
               py: 0.5,
               borderRadius: 1
             }}>
-              {Math.floor(tempsMeditationCumule / 3600)}h {Math.floor((tempsMeditationCumule % 3600) / 60)}m {tempsMeditationCumule % 60}s
+              {Math.floor((tempsMeditationCumule * MOIS_PAR_MINUTE) / 12)} ans {(tempsMeditationCumule * MOIS_PAR_MINUTE) % 12} mois
             </Box>
           </Typography>
         </Box>
@@ -200,7 +219,7 @@ const CultivationMenu: React.FC<CultivationMenuProps> = ({
             Points de Qi Total Accumulés: <strong>{personnage.pointsQiTotal.toLocaleString()}</strong>
           </Typography>
           <Typography variant="body2" color="text.secondary" gutterBottom>
-            Taux de Gain Actuel: <strong>{gainQiParSeconde} Qi/seconde</strong>
+            Taux de Gain Actuel: <strong>{gainQiParSeconde.toFixed(2)} Qi/seconde</strong>
           </Typography>
           <Typography variant="body2" color="text.secondary">
             Prochain Palier: <strong>{personnage.qiRequis.toLocaleString()} points</strong>
@@ -223,7 +242,7 @@ const CultivationMenu: React.FC<CultivationMenuProps> = ({
           </Typography>
           
           <Typography variant="body2" sx={{ mt: 1, color: '#ff9800' }}>
-            <strong>Attention:</strong> Votre personnage vieillit d'un an par minute de cultivation cumulée. Le temps de cultivation est comptabilisé en permanence, même si vous arrêtez et reprenez la méditation. Cultivez avec sagesse pour ne pas atteindre prématurément votre espérance de vie.
+            <strong>Attention:</strong> Votre personnage vieillit de 12 mois (1 an) par minute de cultivation cumulée. Le temps de cultivation est comptabilisé en permanence, même si vous arrêtez et reprenez la méditation. Cultivez avec sagesse pour ne pas atteindre prématurément votre espérance de vie.
           </Typography>
         </Box>
       </Paper>
