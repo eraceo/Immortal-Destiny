@@ -54,7 +54,7 @@ Avec une esthétique moderne et sombre, ce jeu vous permet de progresser même l
 
 ```bash
 # Cloner le dépôt
-git clone https://github.com/eraceo/immortal-destiny.git
+git clone https://github.com/votre-nom/immortal-destiny.git
 cd immortal-destiny
 
 # Installer les dépendances
@@ -82,20 +82,6 @@ yarn build
 ```
 
 Les fichiers optimisés seront générés dans le dossier `build`.
-
-### Déploiement sur GitHub Pages
-
-Le projet est configuré pour être déployé automatiquement sur GitHub Pages à chaque push sur la branche principale.
-
-Pour déployer manuellement :
-
-```bash
-npm run deploy
-# ou
-yarn deploy
-```
-
-L'application sera accessible à l'adresse [https://eraceo.github.io/immortal-destiny](https://eraceo.github.io/immortal-destiny).
 
 ## 🗺️ Roadmap
 
