@@ -27,6 +27,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import ResetIcon from '@mui/icons-material/RestartAlt';
 import GroupIcon from '@mui/icons-material/Group';
 import SchoolIcon from '@mui/icons-material/School';
+import SettingsIcon from '@mui/icons-material/Settings';
 import { useNavigate } from 'react-router-dom';
 
 // Définition des menus disponibles
@@ -37,7 +38,8 @@ export enum MenuType {
   QUESTS = 'quests',
   STATS = 'stats',
   SECTE = 'secte',
-  TECHNIQUES = 'techniques'
+  TECHNIQUES = 'techniques',
+  SETTINGS = 'settings'
 }
 
 // Props pour le composant Layout
@@ -93,7 +95,8 @@ const Layout: React.FC<LayoutProps> = ({
     { type: MenuType.QUESTS, text: 'Quêtes', icon: <QuestIcon /> },
     { type: MenuType.STATS, text: 'Statistiques', icon: <StatsIcon /> },
     { type: MenuType.SECTE, text: 'Secte', icon: <GroupIcon /> },
-    { type: MenuType.TECHNIQUES, text: 'Techniques', icon: <SchoolIcon /> }
+    { type: MenuType.TECHNIQUES, text: 'Techniques', icon: <SchoolIcon /> },
+    { type: MenuType.SETTINGS, text: 'Paramètres', icon: <SettingsIcon /> }
   ];
 
   // Contenu du drawer
@@ -126,25 +129,15 @@ const Layout: React.FC<LayoutProps> = ({
         ))}
       </List>
       <Divider />
-      <Box sx={{ p: 2 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, p: 2 }}>
         <Button 
           fullWidth 
           variant="contained" 
           color="primary" 
           startIcon={<SaveIcon />}
-          onClick={handleSave}
-          sx={{ mb: 1 }}
+          onClick={onSave}
         >
           Sauvegarder
-        </Button>
-        <Button 
-          fullWidth 
-          variant="outlined" 
-          color="error" 
-          startIcon={<ResetIcon />}
-          onClick={onReset}
-        >
-          Réinitialiser
         </Button>
       </Box>
     </div>

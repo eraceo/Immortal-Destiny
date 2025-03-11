@@ -54,8 +54,10 @@ import {
   QuestsMenu, 
   StatsMenu,
   SecteMenu,
-  TechniquesMenu
+  TechniquesMenu,
+  Settings
 } from './menus';
+import { GameSettings, defaultSettings } from './menus/Settings';
 
 const GameScreen: React.FC = () => {
   const [personnage, setPersonnage] = useState<Personnage | null>(null);
@@ -70,9 +72,8 @@ const GameScreen: React.FC = () => {
   const [esperanceVie, setEsperanceVie] = useState<number>(0);
   const [tempsJeuFormate, setTempsJeuFormate] = useState<string>("00:00:00");
   const [openMortDialog, setOpenMortDialog] = useState<boolean>(false);
-  const [openResetDialog, setOpenResetDialog] = useState<boolean>(false);
-  const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>("");
+  const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const [activeMenu, setActiveMenu] = useState<MenuType>(MenuType.PROFILE);
   
   // Nouvel état pour les événements aléatoires
@@ -90,6 +91,11 @@ const GameScreen: React.FC = () => {
   
   // État pour suivre les mois écoulés
   const [moisActuel, setMoisActuel] = useState<number>(0);
+
+  // Ajout de l'état pour les paramètres du jeu
+  const [gameSettings, setGameSettings] = useState<GameSettings>(
+    JSON.parse(localStorage.getItem('gameSettings') || JSON.stringify(defaultSettings))
+  );
 
   // Fonction pour calculer le gain de Qi par seconde
   const calculerGainQiParSeconde = useCallback((personnageData: Personnage): number => {
@@ -234,14 +240,9 @@ const GameScreen: React.FC = () => {
 
   // Fonction pour sauvegarder manuellement
   const sauvegarderManuellement = () => {
-    const resultat = sauvegarderPersonnage(personnage);
-    if (resultat) {
-      setSnackbarMessage("Personnage sauvegardé avec succès !");
-      setSnackbarOpen(true);
-    } else {
-      setSnackbarMessage("Erreur lors de la sauvegarde !");
-      setSnackbarOpen(true);
-    }
+    sauvegarderPersonnage(personnage);
+    setSnackbarMessage("Personnage sauvegardé avec succès !");
+    setSnackbarOpen(true);
   };
 
   // Mettre en place la sauvegarde automatique toutes les 5 secondes
@@ -576,18 +577,6 @@ const GameScreen: React.FC = () => {
     sauvegarderPersonnage(nouveauPersonnage);
   };
 
-  // Fonction pour réinitialiser le personnage
-  const reinitialiserPersonnage = () => {
-    setOpenResetDialog(true);
-  };
-  
-  // Fonction pour confirmer la réinitialisation
-  const confirmerReinitialisation = () => {
-    localStorage.removeItem('wuxiaWorldSauvegarde');
-    setOpenResetDialog(false);
-    window.location.href = "/";
-  };
-
   // Fonction pour retourner à la création de personnage
   const retourCreation = () => {
     localStorage.removeItem('wuxiaWorldSauvegarde');
@@ -606,25 +595,49 @@ const GameScreen: React.FC = () => {
     setActiveMenu(menu);
   };
 
+  // Fonction pour sauvegarder les paramètres
+  const saveSettings = useCallback((newSettings: GameSettings) => {
+    setGameSettings(newSettings);
+    localStorage.setItem('gameSettings', JSON.stringify(newSettings));
+    setSnackbarMessage("Paramètres sauvegardés avec succès !");
+    setSnackbarOpen(true);
+    
+    // Pas besoin d'émettre un événement ici car il est déjà émis dans le composant Settings
+  }, []);
+
+  // Fonction pour réinitialiser les paramètres
+  const resetSettings = useCallback(() => {
+    setGameSettings(defaultSettings);
+    localStorage.setItem('gameSettings', JSON.stringify(defaultSettings));
+    
+    // Émettre un événement personnalisé pour le changement de thème
+    const themeChangeEvent = new CustomEvent('themeChange', {
+      detail: { darkMode: defaultSettings.darkMode }
+    });
+    window.dispatchEvent(themeChangeEvent);
+  }, []);
+
   // Obtenir le titre du menu actif
   const getMenuTitle = () => {
     switch (activeMenu) {
       case MenuType.PROFILE:
-        return 'Profil';
+        return "Profil";
       case MenuType.CULTIVATION:
-        return 'Cultivation';
+        return "Cultivation";
       case MenuType.INVENTORY:
-        return 'Inventaire';
+        return "Inventaire";
       case MenuType.QUESTS:
-        return 'Quêtes';
+        return "Quêtes";
       case MenuType.STATS:
-        return 'Statistiques';
+        return "Statistiques";
       case MenuType.SECTE:
-        return 'Secte';
+        return "Secte";
       case MenuType.TECHNIQUES:
-        return 'Techniques';
+        return "Techniques";
+      case MenuType.SETTINGS:
+        return "Paramètres";
       default:
-        return 'Wuxia Idle';
+        return "Profil";
     }
   };
 
@@ -681,6 +694,12 @@ const GameScreen: React.FC = () => {
         return <SecteMenu personnage={personnage} onUpdatePersonnage={setPersonnage} />;
       case MenuType.TECHNIQUES:
         return <TechniquesMenu personnage={personnage} onUpdatePersonnage={setPersonnage} />;
+      case MenuType.SETTINGS:
+        return <Settings 
+          settings={gameSettings} 
+          onSettingsChange={saveSettings} 
+          onReset={resetSettings} 
+        />;
       default:
         return <ProfileMenu 
           personnage={personnage} 
@@ -827,7 +846,7 @@ const GameScreen: React.FC = () => {
         activeMenu={activeMenu} 
         onMenuChange={handleMenuChange} 
         onSave={sauvegarderManuellement} 
-        onReset={confirmerReinitialisation}
+        onReset={resetSettings}
         title={getMenuTitle()}
       >
         {renderContent()}
@@ -976,31 +995,6 @@ const GameScreen: React.FC = () => {
             color="error"
           >
             Créer un Nouveau Personnage
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Dialogue de confirmation de réinitialisation */}
-      <Dialog
-        open={openResetDialog}
-        onClose={() => setOpenResetDialog(false)}
-        aria-labelledby="reset-dialog-title"
-        aria-describedby="reset-dialog-description"
-      >
-        <DialogTitle id="reset-dialog-title">
-          Confirmer la réinitialisation
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText id="reset-dialog-description">
-            Êtes-vous sûr de vouloir réinitialiser votre personnage ? Cette action est irréversible et toutes vos données seront perdues.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenResetDialog(false)} color="primary">
-            Annuler
-          </Button>
-          <Button onClick={confirmerReinitialisation} color="error" variant="contained">
-            Réinitialiser
           </Button>
         </DialogActions>
       </Dialog>

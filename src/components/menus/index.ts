@@ -4,4 +4,5 @@ export { default as InventoryMenu } from './InventoryMenu';
 export { default as QuestsMenu } from './QuestsMenu';
 export { default as StatsMenu } from './StatsMenu';
 export { default as SecteMenu } from './SecteMenu';
-export { default as TechniquesMenu } from './TechniquesMenu'; 
+export { default as TechniquesMenu } from './TechniquesMenu';
+export { default as Settings } from './Settings'; 
