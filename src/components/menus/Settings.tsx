@@ -368,6 +368,43 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange, onReset
         </Grid>
       </Paper>
 
+      <Paper sx={{ p: 3, mb: 4, boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)' }}>
+        <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', color: (theme) => theme.palette.mode === 'light' ? '#212121' : '#ffffff' }}>
+          Patch Note
+        </Typography>
+        <Divider sx={{ mb: 2 }} />
+        
+        <Grid container spacing={3}>
+          <Grid item xs={12}>
+            <Button 
+              variant="outlined" 
+              color="primary" 
+              sx={{ 
+                mt: 1,
+                borderWidth: 2,
+                '&:hover': {
+                  borderWidth: 2,
+                  backgroundColor: (theme) => theme.palette.mode === 'light' ? 'rgba(25, 118, 210, 0.04)' : 'rgba(33, 150, 243, 0.08)'
+                }
+              }}
+            >
+              Voir les notes de mise à jour
+            </Button>
+            <Typography 
+              variant="caption" 
+              display="block" 
+              sx={{ 
+                mt: 1, 
+                color: (theme) => theme.palette.mode === 'light' ? '#616161' : '#b0bec5',
+                fontWeight: 500
+              }}
+            >
+              Consultez les dernières mises à jour et améliorations du jeu.
+            </Typography>
+          </Grid>
+        </Grid>
+      </Paper>
+
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4, mb: 2 }}>
         <Button 
           variant="contained" 
