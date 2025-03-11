@@ -25,7 +25,6 @@ Avec une esthétique moderne et sombre, ce jeu vous permet de progresser même l
 - **Statistiques aléatoires** influençant votre parcours et vos aptitudes
 - **Races diverses** avec des avantages et inconvénients uniques
 - **Origines variées** déterminant votre histoire et vos affinités
-- **Possibilité de relancer** jusqu'à 3 fois pour optimiser votre départ
 
 ### 🔄 Système de progression
 - **Cultivation automatique** même en votre absence
