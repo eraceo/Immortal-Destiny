@@ -1,7 +1,15 @@
 {
-  "name": "wuxia-idle",
+  "name": "immortal-destiny",
   "version": "0.1.0",
   "private": true,
+  "description": "Un jeu idle captivant dans l'univers mystique des romans wuxia et xianxia",
+  "author": "Immortal Destiny Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/votre-nom/immortal-destiny.git"
+  },
+  "homepage": "https://github.com/votre-nom/immortal-destiny",
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
