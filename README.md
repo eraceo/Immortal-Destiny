@@ -124,5 +124,5 @@ Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de 
 
 <div align="center">
   <p>Développé avec ❤️ par les amateurs de wuxia</p>
-  <p>© 2023 Immortal Destiny</p>
+  <p>© 2025 Immortal Destiny</p>
 </div> 
