@@ -83,6 +83,20 @@ yarn build
 
 Les fichiers optimisés seront générés dans le dossier `build`.
 
+### Déploiement sur GitHub Pages
+
+Le projet est configuré pour être déployé automatiquement sur GitHub Pages à chaque push sur la branche principale.
+
+Pour déployer manuellement :
+
+```bash
+npm run deploy
+# ou
+yarn deploy
+```
+
+L'application sera accessible à l'adresse [https://votre-nom.github.io/immortal-destiny](https://votre-nom.github.io/immortal-destiny).
+
 ## 🗺️ Roadmap
 
 ### Phase 1 - Fondations
