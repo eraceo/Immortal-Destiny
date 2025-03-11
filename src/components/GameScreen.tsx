@@ -53,7 +53,8 @@ import {
   InventoryMenu, 
   QuestsMenu, 
   StatsMenu,
-  SecteMenu 
+  SecteMenu,
+  TechniquesMenu
 } from './menus';
 
 const GameScreen: React.FC = () => {
@@ -620,6 +621,8 @@ const GameScreen: React.FC = () => {
         return 'Statistiques';
       case MenuType.SECTE:
         return 'Secte';
+      case MenuType.TECHNIQUES:
+        return 'Techniques';
       default:
         return 'Wuxia Idle';
     }
@@ -676,6 +679,8 @@ const GameScreen: React.FC = () => {
         return <StatsMenu personnage={personnage} />;
       case MenuType.SECTE:
         return <SecteMenu personnage={personnage} onUpdatePersonnage={setPersonnage} />;
+      case MenuType.TECHNIQUES:
+        return <TechniquesMenu personnage={personnage} onUpdatePersonnage={setPersonnage} />;
       default:
         return <ProfileMenu 
           personnage={personnage} 

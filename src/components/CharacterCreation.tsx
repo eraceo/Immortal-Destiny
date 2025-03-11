@@ -433,33 +433,29 @@ const CharacterCreation: React.FC = () => {
       case ElementCultivation.METAL: return '#95a5a6'; // Gris
       case ElementCultivation.TERRE: return '#d35400'; // Marron
       case ElementCultivation.FOUDRE: return '#9b59b6'; // Violet
-      case ElementCultivation.VENT: return '#1abc9c'; // Turquoise
-      case ElementCultivation.GLACE: return '#00cec9'; // Cyan
       case ElementCultivation.LUMIERE: return '#f1c40f'; // Jaune
       case ElementCultivation.OBSCURITE: return '#34495e'; // Bleu foncé
-      case ElementCultivation.CHAOS: return '#6c5ce7'; // Indigo
-      case ElementCultivation.ESPACE: return '#0984e3'; // Bleu ciel
-      case ElementCultivation.TEMPS: return '#fdcb6e'; // Or
-      case ElementCultivation.SANG: return '#d63031'; // Rouge sang
       default: return '#bdc3c7'; // Gris clair
     }
   };
 
   return (
-    <Card sx={{ maxWidth: 800, margin: '0 auto', backgroundColor: 'background.paper' }}>
+    <Card sx={{ 
+      maxWidth: '100%', 
+      margin: '0 auto', 
+      backgroundColor: '#121212', 
+      color: '#fff',
+      height: 'calc(100vh - 40px)',
+      overflow: 'auto'
+    }}>
       <CardContent>
-        <Typography variant="h4" component="h2" gutterBottom align="center" sx={{ fontFamily: "'Cinzel', serif" }}>
+        <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ fontFamily: "'Cinzel', serif", mb: 1 }}>
           Création de Personnage
         </Typography>
-        <Typography variant="body1" color="text.secondary" align="center" gutterBottom>
-          Façonnez votre destin dans le monde des arts martiaux
-        </Typography>
         
-        <Divider sx={{ my: 2 }} />
-        
-        <Grid container spacing={3}>
-          {/* Informations de base */}
-          <Grid item xs={12} md={6}>
+        <Grid container spacing={2}>
+          {/* Colonne 1: Informations de base */}
+          <Grid item xs={12} md={4} lg={3}>
             <Typography variant="h6" gutterBottom>
               Informations Personnelles
             </Typography>
@@ -473,9 +469,10 @@ const CharacterCreation: React.FC = () => {
               margin="normal"
               required
               helperText="Choisissez un nom digne de votre légende"
+              size="small"
             />
             
-            <FormControl fullWidth margin="normal">
+            <FormControl fullWidth margin="normal" size="small">
               <InputLabel id="genre-label">Genre</InputLabel>
               <Select
                 labelId="genre-label"
@@ -491,12 +488,12 @@ const CharacterCreation: React.FC = () => {
               </Select>
             </FormControl>
             
-            <Box sx={{ mt: 3, mb: 2 }}>
+            <Box sx={{ mt: 2, mb: 1 }}>
               <Paper 
                 elevation={3} 
                 sx={{ 
-                  p: 2, 
-                  mb: 2, 
+                  p: 1.5, 
+                  mb: 1.5, 
                   backgroundColor: 'rgba(0,0,0,0.2)',
                   border: `1px solid ${getRareteColor(raceInfo.rarete)}`,
                   position: 'relative',
@@ -510,13 +507,13 @@ const CharacterCreation: React.FC = () => {
               >
                 <RareteBadge rarete={raceInfo.rarete} />
                 
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
                   <Typography variant="subtitle1">Race: <strong>{personnage.race}</strong></Typography>
                 </Box>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
                   {raceInfo.description}
                 </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, fontSize: '0.85rem' }}>
                   Espérance de vie: <strong>{esperanceVie} ans</strong>
                 </Typography>
               </Paper>
@@ -524,7 +521,7 @@ const CharacterCreation: React.FC = () => {
               <Paper 
                 elevation={3} 
                 sx={{ 
-                  p: 2, 
+                  p: 1.5, 
                   backgroundColor: 'rgba(0,0,0,0.2)',
                   border: `1px solid ${getRareteColor(origineInfo.rarete)}`,
                   position: 'relative',
@@ -538,19 +535,19 @@ const CharacterCreation: React.FC = () => {
               >
                 <RareteBadge rarete={origineInfo.rarete} />
                 
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
                   <Typography variant="subtitle1">Origine: <strong>{personnage.origine}</strong></Typography>
                 </Box>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
                   {origineInfo.description}
                 </Typography>
                 
                 {/* Affichage des bonus de l'origine */}
-                <Box sx={{ mt: 2 }}>
-                  <Typography variant="subtitle2" gutterBottom>
+                <Box sx={{ mt: 1 }}>
+                  <Typography variant="subtitle2" gutterBottom sx={{ fontSize: '0.85rem' }}>
                     Avantages de l'origine:
                   </Typography>
-                  <Grid container spacing={1}>
+                  <Grid container spacing={0.5}>
                     {/* Bonus de statistiques */}
                     {origineInfo.bonusStats && Object.entries(origineInfo.bonusStats).map(([stat, bonus]) => (
                       <Grid item xs={6} key={stat}>
@@ -561,6 +558,8 @@ const CharacterCreation: React.FC = () => {
                             backgroundColor: `${getStatColor(personnage.stats[stat as keyof Stats])}22`,
                             color: getStatColor(personnage.stats[stat as keyof Stats]),
                             border: `1px solid ${getStatColor(personnage.stats[stat as keyof Stats])}`,
+                            fontSize: '0.7rem',
+                            height: '22px'
                           }} 
                         />
                       </Grid>
@@ -572,7 +571,7 @@ const CharacterCreation: React.FC = () => {
                         <Chip 
                           label={`Pierres +${origineInfo.bonusPierresSpirituelles}`} 
                           size="small" 
-                          sx={{ backgroundColor: '#1e1e1e' }} 
+                          sx={{ backgroundColor: '#1e1e1e', fontSize: '0.7rem', height: '22px' }} 
                         />
                       </Grid>
                     )}
@@ -582,7 +581,7 @@ const CharacterCreation: React.FC = () => {
                         <Chip 
                           label={`Gain de Qi +${origineInfo.bonusQi}%`} 
                           size="small" 
-                          sx={{ backgroundColor: '#1e1e1e' }} 
+                          sx={{ backgroundColor: '#1e1e1e', fontSize: '0.7rem', height: '22px' }} 
                         />
                       </Grid>
                     )}
@@ -594,7 +593,9 @@ const CharacterCreation: React.FC = () => {
                           size="small" 
                           sx={{ 
                             backgroundColor: '#1e1e1e',
-                            color: origineInfo.bonusRelationSecte > 0 ? '#2ecc71' : '#e74c3c'
+                            color: origineInfo.bonusRelationSecte > 0 ? '#2ecc71' : '#e74c3c',
+                            fontSize: '0.7rem',
+                            height: '22px'
                           }} 
                         />
                       </Grid>
@@ -605,77 +606,25 @@ const CharacterCreation: React.FC = () => {
                         <Chip 
                           label={`Apprentissage +${origineInfo.bonusApprentissage}%`} 
                           size="small" 
-                          sx={{ backgroundColor: '#1e1e1e' }} 
+                          sx={{ backgroundColor: '#1e1e1e', fontSize: '0.7rem', height: '22px' }} 
                         />
                       </Grid>
                     )}
                   </Grid>
-                  
-                  {/* Bonus spécial */}
-                  {origineInfo.bonusSpecial && (
-                    <Box sx={{ mt: 1, p: 1, borderRadius: 1, backgroundColor: 'rgba(0,0,0,0.2)' }}>
-                      <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                        <strong>Bonus spécial:</strong> {origineInfo.bonusSpecial}
-                      </Typography>
-                    </Box>
-                  )}
                 </Box>
               </Paper>
             </Box>
             
-            <Box sx={{ mt: 3 }}>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
-                Niveau de Cultivation: <strong>{personnage.royaumeCultivation} - {nomCultivation}</strong>
-              </Typography>
-              <LinearProgress 
-                variant="determinate" 
-                value={0} 
-                sx={{ height: 8, borderRadius: 4 }} 
-              />
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                Points de Qi: 0 / {personnage.qiRequis} pour la prochaine percée
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                Âge: <strong>{personnage.age} ans</strong>
-              </Typography>
-            </Box>
-          </Grid>
-          
-          {/* Statistiques */}
-          <Grid item xs={12} md={6}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6">
-                Statistiques
-              </Typography>
-              <Box>
-                <Chip 
-                  label={`Moyenne: ${moyenneStats.toFixed(1)}`} 
-                  color={moyenneStats >= 7 ? "success" : moyenneStats >= 5 ? "warning" : "error"}
-                  size="small"
-                />
-              </Box>
-            </Box>
-            
-            <StatDisplay nom="Force" valeur={personnage.stats.force} />
-            <StatDisplay nom="Agilité" valeur={personnage.stats.agilite} />
-            <StatDisplay nom="Constitution" valeur={personnage.stats.constitution} />
-            <StatDisplay nom="Intelligence" valeur={personnage.stats.intelligence} />
-            <StatDisplay nom="Perception" valeur={personnage.stats.perception} />
-            <StatDisplay nom="Charisme" valeur={personnage.stats.charisme} />
-            <StatDisplay nom="Chance" valeur={personnage.stats.chance} />
-            <StatDisplay nom="Qi" valeur={personnage.stats.qi} />
-            
-            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
+            <Box sx={{ mt: 2 }}>
               <Button 
                 variant="contained" 
                 color="secondary" 
                 onClick={relancerTout}
                 startIcon={<span role="img" aria-label="dice">🎲</span>}
+                fullWidth
+                size="small"
                 sx={{ 
-                  px: 4, 
-                  py: 1.5,
                   fontWeight: 'bold',
-                  fontSize: '1.1rem',
                   background: 'linear-gradient(45deg, #9b59b6 30%, #8e44ad 90%)',
                   boxShadow: '0 3px 5px 2px rgba(142, 68, 173, .3)',
                   transition: 'all 0.3s ease',
@@ -691,412 +640,316 @@ const CharacterCreation: React.FC = () => {
               >
                 Relancer Tout
               </Button>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1, textAlign: 'center', fontStyle: 'italic' }}>
-                Vous pouvez relancer autant de fois que vous le souhaitez pour obtenir le personnage parfait
+            </Box>
+          </Grid>
+          
+          {/* Colonne 2: Statistiques et Cultivation */}
+          <Grid item xs={12} md={4} lg={3}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+              <Typography variant="h6">
+                Statistiques
               </Typography>
+              <Box>
+                <Chip 
+                  label={`Moyenne: ${moyenneStats.toFixed(1)}`} 
+                  color={moyenneStats >= 7 ? "success" : moyenneStats >= 5 ? "warning" : "error"}
+                  size="small"
+                  sx={{ height: '22px', fontSize: '0.75rem' }}
+                />
+              </Box>
+            </Box>
+            
+            <Box sx={{ mb: 2 }}>
+              <StatDisplay nom="Force" valeur={personnage.stats.force} />
+              <StatDisplay nom="Agilité" valeur={personnage.stats.agilite} />
+              <StatDisplay nom="Constitution" valeur={personnage.stats.constitution} />
+              <StatDisplay nom="Intelligence" valeur={personnage.stats.intelligence} />
+              <StatDisplay nom="Perception" valeur={personnage.stats.perception} />
+              <StatDisplay nom="Charisme" valeur={personnage.stats.charisme} />
+              <StatDisplay nom="Chance" valeur={personnage.stats.chance} />
+              <StatDisplay nom="Qi" valeur={personnage.stats.qi} />
+            </Box>
+            
+            <Box sx={{ mt: 2, mb: 2 }}>
+              <Typography variant="h6" gutterBottom>
+                Cultivation
+              </Typography>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                Niveau: <strong>{personnage.royaumeCultivation} - {nomCultivation}</strong>
+              </Typography>
+              <LinearProgress 
+                variant="determinate" 
+                value={0} 
+                sx={{ height: 8, borderRadius: 4 }} 
+              />
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                Points de Qi: 0 / {personnage.qiRequis} pour la prochaine percée
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                Âge: <strong>{personnage.age} ans</strong>
+              </Typography>
+            </Box>
+            
+            {/* Talent de Cultivation (version compacte) */}
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="h6" gutterBottom>
+                Talent de Cultivation
+              </Typography>
+              <Paper 
+                elevation={3} 
+                sx={{ 
+                  p: 1.5, 
+                  backgroundColor: 'rgba(0,0,0,0.2)',
+                  border: '1px solid #9b59b6',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}
+              >
+                {personnage.talentCultivation >= 90 && (
+                  <RareteBadge rarete={Rarete.MYTHIQUE} />
+                )}
+                {personnage.talentCultivation >= 80 && personnage.talentCultivation < 90 && (
+                  <RareteBadge rarete={Rarete.LEGENDAIRE} />
+                )}
+                {personnage.talentCultivation >= 70 && personnage.talentCultivation < 80 && (
+                  <RareteBadge rarete={Rarete.EPIQUE} />
+                )}
+                {personnage.talentCultivation >= 50 && personnage.talentCultivation < 70 && (
+                  <RareteBadge rarete={Rarete.RARE} />
+                )}
+                {personnage.talentCultivation < 50 && (
+                  <RareteBadge rarete={Rarete.COMMUN} />
+                )}
+                <Typography variant="subtitle1" gutterBottom>
+                  {personnage.talentCultivation >= 95 ? "Talent Transcendant" : 
+                   personnage.talentCultivation >= 85 ? "Talent Exceptionnel" : 
+                   personnage.talentCultivation >= 70 ? "Talent Excellent" : 
+                   personnage.talentCultivation >= 50 ? "Bon Talent" : 
+                   personnage.talentCultivation >= 30 ? "Talent Moyen" : "Talent Faible"}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
+                  {personnage.talentCultivation >= 90 ? "Un talent inné extraordinaire qui n'apparaît qu'une fois par millénaire." : 
+                   personnage.talentCultivation >= 80 ? "Un talent rare qui vous permettra d'atteindre les sommets de la cultivation." : 
+                   personnage.talentCultivation >= 70 ? "Un excellent talent qui vous ouvrira les portes des grandes sectes." : 
+                   personnage.talentCultivation >= 50 ? "Un bon talent qui vous permettra de progresser régulièrement." : 
+                   personnage.talentCultivation >= 30 ? "Un talent moyen qui nécessitera beaucoup d'efforts pour progresser." : 
+                   "Un talent faible qui limitera votre progression dans les arts martiaux."}
+                </Typography>
+                <Box sx={{ mt: 1 }}>
+                  <Chip 
+                    label={`Vitesse de Cultivation: ${(1 + personnage.talentCultivation / 100).toFixed(2)}x`} 
+                    size="small" 
+                    sx={{ 
+                      backgroundColor: '#1e1e1e', 
+                      mr: 0.5, 
+                      mb: 0.5,
+                      fontSize: '0.7rem',
+                      height: '22px'
+                    }} 
+                  />
+                </Box>
+              </Paper>
+            </Box>
+          </Grid>
+          
+          {/* Colonne 3: Affinités Élémentaires et Sectes */}
+          <Grid item xs={12} md={4} lg={3}>
+            <Typography variant="h6" gutterBottom>
+              Affinités Élémentaires
+            </Typography>
+            <Grid container spacing={1} sx={{ mb: 2 }}>
+              {Object.entries(personnage.affiniteElements).map(([element, affinite]) => (
+                <Grid item xs={6} key={element}>
+                  <Paper 
+                    elevation={3} 
+                    sx={{ 
+                      p: 1, 
+                      backgroundColor: 'rgba(0,0,0,0.2)',
+                      border: `1px solid ${getElementColor(element as ElementCultivation)}`,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <Typography variant="subtitle2" sx={{ color: getElementColor(element as ElementCultivation) }}>
+                      {element}
+                    </Typography>
+                    <Box sx={{ width: '100%', mt: 1 }}>
+                      <LinearProgress 
+                        variant="determinate" 
+                        value={affinite * 10} 
+                        sx={{ 
+                          height: 6, 
+                          borderRadius: 3,
+                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                          '& .MuiLinearProgress-bar': {
+                            backgroundColor: getElementColor(element as ElementCultivation),
+                          }
+                        }} 
+                      />
+                    </Box>
+                    <Typography variant="caption" sx={{ mt: 0.5 }}>
+                      {affinite}/10
+                    </Typography>
+                  </Paper>
+                </Grid>
+              ))}
+            </Grid>
+            
+            <Typography variant="h6" gutterBottom>
+              Secte
+            </Typography>
+            <Box sx={{ maxHeight: '250px', overflow: 'auto', pr: 1 }}>
+              <Grid container spacing={1}>
+                {/* Option pour ne rejoindre aucune secte */}
+                <Grid item xs={12}>
+                  <Paper 
+                    sx={{ 
+                      p: 1.5, 
+                      cursor: 'pointer',
+                      border: personnage.appartenanceSecte === null ? '1px solid #2ecc71' : '1px solid #333',
+                      borderRadius: 2,
+                      backgroundColor: personnage.appartenanceSecte === null ? 'rgba(46, 204, 113, 0.1)' : 'transparent',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 3px 8px rgba(255, 255, 255, 0.1)',
+                      }
+                    }}
+                    onClick={() => {
+                      setPersonnage({
+                        ...personnage,
+                        appartenanceSecte: null
+                      });
+                    }}
+                  >
+                    <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
+                      Cultivateur Indépendant
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
+                      Choisissez votre propre voie sans les contraintes d'une secte.
+                    </Typography>
+                  </Paper>
+                </Grid>
+                
+                {/* Liste des sectes */}
+                {SECTES.map((secte) => (
+                  <Grid item xs={12} key={secte.id}>
+                    <Paper 
+                      sx={{ 
+                        p: 1.5, 
+                        cursor: 'pointer',
+                        border: personnage.appartenanceSecte && personnage.appartenanceSecte.secteId === secte.id 
+                          ? '1px solid #2ecc71' 
+                          : '1px solid #333',
+                        borderRadius: 2,
+                        backgroundColor: personnage.appartenanceSecte && personnage.appartenanceSecte.secteId === secte.id 
+                          ? 'rgba(46, 204, 113, 0.1)' 
+                          : 'transparent',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 3px 8px rgba(255, 255, 255, 0.1)',
+                        }
+                      }}
+                      onClick={() => {
+                        setPersonnage({
+                          ...personnage,
+                          appartenanceSecte: {
+                            secteId: secte.id,
+                            rang: RangSecte.DISCIPLE_EXTERNE,
+                            pointsContribution: 0,
+                            dateAdhesion: Date.now(),
+                            techniquesApprises: [],
+                            missionsCompletees: [],
+                            ressourcesObtenues: {},
+                            relationAnciens: 50
+                          }
+                        });
+                      }}
+                    >
+                      <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
+                        {secte.nom}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
+                        {secte.type} • {secte.elementPrincipal}
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
+          </Grid>
+          
+          {/* Colonne 4: Bouton de création et informations supplémentaires */}
+          <Grid item xs={12} md={12} lg={3}>
+            <Box sx={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              height: '100%', 
+              justifyContent: 'space-between' 
+            }}>
+              <Box>
+                <Typography variant="h6" gutterBottom>
+                  Informations Supplémentaires
+                </Typography>
+                <Paper 
+                  elevation={3} 
+                  sx={{ 
+                    p: 2, 
+                    backgroundColor: 'rgba(0,0,0,0.2)',
+                    border: '1px solid #333',
+                    mb: 2
+                  }}
+                >
+                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
+                    Votre personnage commencera son voyage dans le monde de la cultivation avec 100 pierres spirituelles.
+                    Choisissez judicieusement votre race, origine et secte pour maximiser vos chances de survie.
+                  </Typography>
+                </Paper>
+                
+                {personnage.appartenanceSecte && (
+                  <Paper 
+                    elevation={3} 
+                    sx={{ 
+                      p: 2, 
+                      backgroundColor: 'rgba(0,0,0,0.2)',
+                      border: '1px solid #333',
+                      mb: 2
+                    }}
+                  >
+                    <Typography variant="subtitle1" gutterBottom>
+                      Secte Sélectionnée: {SECTES.find(s => s.id === personnage.appartenanceSecte?.secteId)?.nom || ""}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
+                      Vous commencerez comme Disciple Externe et pourrez progresser dans les rangs de la secte en accomplissant des missions et en gagnant de la réputation.
+                    </Typography>
+                  </Paper>
+                )}
+              </Box>
+              
+              <Box sx={{ mt: 'auto' }}>
+                <Button 
+                  variant="contained" 
+                  color="primary" 
+                  size="large" 
+                  onClick={creerPersonnage}
+                  fullWidth
+                  sx={{ 
+                    py: 1.5, 
+                    fontSize: '1.1rem',
+                    background: 'linear-gradient(45deg, #e63946 30%, #ff6b6b 90%)',
+                    boxShadow: '0 3px 5px 2px rgba(255, 105, 135, .3)',
+                    mt: 2
+                  }}
+                >
+                  Commencer l'Aventure
+                </Button>
+              </Box>
             </Box>
           </Grid>
         </Grid>
-        
-        <Divider sx={{ my: 3 }} />
-        
-        {/* Affichage du talent de cultivation */}
-        {renderTalentCultivation()}
-
-        {/* Affichage des affinités élémentaires */}
-        {renderAffiniteElements()}
-
-        <Divider sx={{ my: 3 }} />
-        
-        {/* Nouvelle section pour les sectes */}
-        <Typography variant="h4" component="h2" gutterBottom align="center" sx={{ fontFamily: "'Cinzel', serif" }}>
-          Secte et Appartenance
-        </Typography>
-        <Typography variant="body1" color="text.secondary" align="center" gutterBottom>
-          Choisissez votre voie dans le monde des arts martiaux
-        </Typography>
-        
-        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-          <Button 
-            variant="outlined" 
-            color="secondary" 
-            onClick={() => setAfficherInfosSectes(!afficherInfosSectes)}
-            startIcon={afficherInfosSectes ? <span>▼</span> : <span>▶</span>}
-            sx={{ mb: 2 }}
-          >
-            {afficherInfosSectes ? "Masquer les informations sur les sectes" : "Afficher plus d'informations sur les sectes"}
-          </Button>
-        </Box>
-        
-        {afficherInfosSectes && (
-          <Box sx={{ 
-            p: 3, 
-            mb: 3, 
-            borderRadius: 2, 
-            backgroundColor: 'rgba(0,0,0,0.2)', 
-            border: '1px solid #333'
-          }}>
-            <Typography variant="body2" color="text.secondary" paragraph>
-              Dans le monde de la cultivation, les sectes sont des organisations puissantes qui regroupent des cultivateurs partageant des techniques, des ressources et des objectifs communs. Rejoindre une secte vous donnera accès à des techniques exclusives, des ressources rares et la protection de cultivateurs plus puissants.
-            </Typography>
-            <Typography variant="body2" color="text.secondary" paragraph>
-              Chaque secte a ses propres spécialités, éléments de prédilection et avantages. Votre choix de secte influencera grandement votre parcours de cultivation et les opportunités qui s'offriront à vous.
-            </Typography>
-            
-            <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
-              Types de Sectes
-            </Typography>
-            <Grid container spacing={1} sx={{ mb: 2 }}>
-              {Object.values(TypeSecte).map((type) => (
-                <Grid item xs={6} sm={4} key={type}>
-                  <Chip 
-                    label={type} 
-                    size="small" 
-                    sx={{ 
-                      backgroundColor: 'rgba(0,0,0,0.3)',
-                      border: '1px solid #333',
-                    }} 
-                  />
-                </Grid>
-              ))}
-            </Grid>
-            
-            <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
-              Éléments de Cultivation
-            </Typography>
-            <Typography variant="body2" color="text.secondary" paragraph>
-              Chaque secte se spécialise dans un ou plusieurs éléments de cultivation. Votre affinité avec ces éléments déterminera votre compatibilité avec les techniques de la secte.
-            </Typography>
-            <Grid container spacing={1} sx={{ mb: 2 }}>
-              {Object.values(ElementCultivation).map((element) => (
-                <Grid item xs={4} sm={3} md={2} key={element}>
-                  <Chip 
-                    label={element} 
-                    size="small" 
-                    sx={{ 
-                      backgroundColor: `${getElementColor(element)}22`,
-                      color: getElementColor(element),
-                      border: `1px solid ${getElementColor(element)}`,
-                    }} 
-                  />
-                </Grid>
-              ))}
-            </Grid>
-            
-            <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
-              Hiérarchie des Sectes
-            </Typography>
-            <Typography variant="body2" color="text.secondary" paragraph>
-              La hiérarchie des sectes est stricte, avec plusieurs rangs à gravir :
-            </Typography>
-            <Grid container spacing={1}>
-              {Object.values(RangSecte).map((rang, index) => (
-                <Grid item xs={6} sm={4} md={3} key={rang}>
-                  <Chip 
-                    label={rang} 
-                    size="small" 
-                    sx={{ 
-                      backgroundColor: index === 0 ? '#2ecc7144' : 'rgba(0,0,0,0.3)',
-                      border: index === 0 ? '1px solid #2ecc71' : '1px solid #333',
-                      color: index === 0 ? '#2ecc71' : 'inherit',
-                      fontWeight: index === 0 ? 'bold' : 'normal',
-                    }} 
-                  />
-                </Grid>
-              ))}
-            </Grid>
-          </Box>
-        )}
-
-        {/* Sélection de secte */}
-        <Box sx={{ mt: 3, mb: 2 }}>
-          <Typography variant="h6" gutterBottom>
-            Rejoindre une Secte
-          </Typography>
-          <Typography variant="body2" color="text.secondary" gutterBottom>
-            En fonction de votre talent et de vos affinités, certaines sectes pourraient vous accepter comme disciple.
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', mb: 2 }}>
-            Vous commencerez toujours comme Disciple Externe, quel que soit votre talent. Vous pourrez progresser dans les rangs de la secte au fil de votre aventure.
-          </Typography>
-          
-          <Grid container spacing={2} sx={{ mt: 1 }}>
-            {SECTES.filter(secte => {
-              // Filtrer les sectes en fonction du talent
-              if (secte.rarete === Rarete.RARE && (!personnage.talentCultivation || personnage.talentCultivation < 50)) return false;
-              if (secte.rarete === Rarete.EPIQUE && (!personnage.talentCultivation || personnage.talentCultivation < 70)) return false;
-              if (secte.rarete === Rarete.LEGENDAIRE && (!personnage.talentCultivation || personnage.talentCultivation < 90)) return false;
-              if (secte.rarete === Rarete.MYTHIQUE && (!personnage.talentCultivation || personnage.talentCultivation < 95)) return false;
-              
-              // Vérifier les stats minimales requises
-              let statsOk = true;
-              Object.entries(secte.conditionsAdmission.statsMinimales).forEach(([stat, valeurMin]) => {
-                if (personnage.stats[stat as keyof Stats] < valeurMin) {
-                  statsOk = false;
-                }
-              });
-              
-              return statsOk;
-            }).map(secte => (
-              <Grid item xs={12} sm={6} key={secte.id}>
-                <Paper 
-                  sx={{ 
-                    p: 2, 
-                    cursor: 'pointer',
-                    border: '1px solid #333',
-                    borderRadius: 2,
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      transform: 'translateY(-5px)',
-                      boxShadow: `0 5px 15px ${getRareteColor(secte.rarete)}66`,
-                      borderColor: getRareteColor(secte.rarete)
-                    }
-                  }}
-                  onClick={() => {
-                    setPersonnage({
-                      ...personnage,
-                      appartenanceSecte: {
-                        secteId: secte.id,
-                        dateAdhesion: Date.now(),
-                        rang: RangSecte.DISCIPLE_EXTERNE,
-                        pointsContribution: 0,
-                        techniquesApprises: [],
-                        missionsCompletees: [],
-                        ressourcesObtenues: {},
-                        relationAnciens: 50
-                      }
-                    });
-                  }}
-                >
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                    <Typography variant="h6" sx={{ color: getElementColor(secte.elementPrincipal) }}>
-                      {secte.nom}
-                    </Typography>
-                    <Chip 
-                      label={secte.rarete} 
-                      size="small" 
-                      sx={{ 
-                        backgroundColor: getRareteColor(secte.rarete),
-                        color: 'white',
-                        fontWeight: 'bold'
-                      }} 
-                    />
-                  </Box>
-                  
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    {secte.description}
-                  </Typography>
-                  
-                  <Divider sx={{ my: 1 }} />
-                  
-                  <Typography variant="subtitle2" gutterBottom>
-                    Type: {secte.type}
-                  </Typography>
-                  
-                  <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
-                    <Chip 
-                      label={secte.elementPrincipal} 
-                      size="small" 
-                      sx={{ 
-                        backgroundColor: `${getElementColor(secte.elementPrincipal)}44`,
-                        color: getElementColor(secte.elementPrincipal),
-                        border: `1px solid ${getElementColor(secte.elementPrincipal)}`
-                      }} 
-                    />
-                    {secte.elementsSecondaires.map(element => (
-                      <Chip 
-                        key={element}
-                        label={element} 
-                        size="small" 
-                        sx={{ 
-                          backgroundColor: `${getElementColor(element)}22`,
-                          color: getElementColor(element),
-                          border: `1px solid ${getElementColor(element)}`
-                        }} 
-                      />
-                    ))}
-                  </Box>
-                  
-                  <Typography variant="subtitle2" gutterBottom>
-                    Avantages:
-                  </Typography>
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    <Chip 
-                      label={`Qi ×${secte.avantages.multiplicateurQi}`} 
-                      size="small" 
-                      sx={{ backgroundColor: '#1e1e1e' }} 
-                    />
-                    {Object.entries(secte.avantages.bonusStats).map(([stat, valeur]) => (
-                      <Chip 
-                        key={stat}
-                        label={`${stat} +${valeur}`} 
-                        size="small" 
-                        sx={{ backgroundColor: '#1e1e1e' }} 
-                      />
-                    ))}
-                    <Chip 
-                      label={`Percée -${secte.avantages.reductionTempsPercee}%`} 
-                      size="small" 
-                      sx={{ backgroundColor: '#1e1e1e' }} 
-                    />
-                    <Chip 
-                      label={`Longévité ${secte.avantages.bonusLongevite > 0 ? '+' : ''}${secte.avantages.bonusLongevite}%`} 
-                      size="small" 
-                      sx={{ 
-                        backgroundColor: '#1e1e1e',
-                        color: secte.avantages.bonusLongevite > 0 ? '#2ecc71' : '#e74c3c'
-                      }} 
-                    />
-                  </Box>
-                  
-                  <Typography variant="subtitle2" gutterBottom sx={{ mt: 1 }}>
-                    Inconvénients:
-                  </Typography>
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    <Chip 
-                      label="Pas de bonus de Qi" 
-                      size="small" 
-                      sx={{ backgroundColor: '#1e1e1e', color: '#e74c3c' }} 
-                    />
-                    <Chip 
-                      label="Pas de techniques exclusives" 
-                      size="small" 
-                      sx={{ backgroundColor: '#1e1e1e', color: '#e74c3c' }} 
-                    />
-                    <Chip 
-                      label="Pas de protection" 
-                      size="small" 
-                      sx={{ backgroundColor: '#1e1e1e', color: '#e74c3c' }} 
-                    />
-                  </Box>
-                  
-                  {/* Indicateur de sélection */}
-                  {personnage.appartenanceSecte && personnage.appartenanceSecte.secteId === secte.id && (
-                    <Box 
-                      sx={{ 
-                        mt: 2, 
-                        p: 1, 
-                        borderRadius: 1, 
-                        backgroundColor: '#2ecc7144',
-                        border: '1px solid #2ecc71',
-                        textAlign: 'center'
-                      }}
-                    >
-                      <Typography variant="subtitle2" sx={{ color: '#2ecc71' }}>
-                        Secte Sélectionnée
-                      </Typography>
-                    </Box>
-                  )}
-                </Paper>
-              </Grid>
-            ))}
-            
-            {/* Option pour ne rejoindre aucune secte */}
-            <Grid item xs={12} sm={6}>
-              <Paper 
-                sx={{ 
-                  p: 2, 
-                  cursor: 'pointer',
-                  border: '1px solid #333',
-                  borderRadius: 2,
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateY(-5px)',
-                    boxShadow: '0 5px 15px rgba(255, 255, 255, 0.1)',
-                  }
-                }}
-                onClick={() => {
-                  setPersonnage({
-                    ...personnage,
-                    appartenanceSecte: null
-                  });
-                }}
-              >
-                <Typography variant="h6" sx={{ mb: 1 }}>
-                  Cultivateur Indépendant
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  Choisissez votre propre voie sans les contraintes d'une secte. Vous serez libre mais devrez compter uniquement sur vos propres forces.
-                </Typography>
-                
-                <Divider sx={{ my: 1 }} />
-                
-                <Typography variant="subtitle2" gutterBottom>
-                  Avantages:
-                </Typography>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                  <Chip 
-                    label="Liberté totale" 
-                    size="small" 
-                    sx={{ backgroundColor: '#1e1e1e' }} 
-                  />
-                  <Chip 
-                    label="Pas de missions obligatoires" 
-                    size="small" 
-                    sx={{ backgroundColor: '#1e1e1e' }} 
-                  />
-                </Box>
-                
-                <Typography variant="subtitle2" gutterBottom sx={{ mt: 1 }}>
-                  Inconvénients:
-                </Typography>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                  <Chip 
-                    label="Pas de bonus de Qi" 
-                    size="small" 
-                    sx={{ backgroundColor: '#1e1e1e', color: '#e74c3c' }} 
-                  />
-                  <Chip 
-                    label="Pas de techniques exclusives" 
-                    size="small" 
-                    sx={{ backgroundColor: '#1e1e1e', color: '#e74c3c' }} 
-                  />
-                  <Chip 
-                    label="Pas de protection" 
-                    size="small" 
-                    sx={{ backgroundColor: '#1e1e1e', color: '#e74c3c' }} 
-                  />
-                </Box>
-                
-                {/* Indicateur de sélection */}
-                {personnage.appartenanceSecte === null && (
-                  <Box 
-                    sx={{ 
-                      mt: 2, 
-                      p: 1, 
-                      borderRadius: 1, 
-                      backgroundColor: '#2ecc7144',
-                      border: '1px solid #2ecc71',
-                      textAlign: 'center'
-                    }}
-                  >
-                    <Typography variant="subtitle2" sx={{ color: '#2ecc71' }}>
-                      Option Sélectionnée
-                    </Typography>
-                  </Box>
-                )}
-              </Paper>
-            </Grid>
-          </Grid>
-        </Box>
-
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-          <Button 
-            variant="contained" 
-            color="primary" 
-            size="large" 
-            onClick={creerPersonnage}
-            sx={{ 
-              px: 4, 
-              py: 1.5, 
-              fontSize: '1.1rem',
-              background: 'linear-gradient(45deg, #e63946 30%, #ff6b6b 90%)',
-              boxShadow: '0 3px 5px 2px rgba(255, 105, 135, .3)',
-            }}
-          >
-            Commencer l'Aventure
-          </Button>
-        </Box>
       </CardContent>
     </Card>
   );

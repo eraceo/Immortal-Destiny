@@ -26,6 +26,7 @@ import StatsIcon from '@mui/icons-material/BarChart';
 import SaveIcon from '@mui/icons-material/Save';
 import ResetIcon from '@mui/icons-material/RestartAlt';
 import GroupIcon from '@mui/icons-material/Group';
+import SchoolIcon from '@mui/icons-material/School';
 import { useNavigate } from 'react-router-dom';
 
 // Définition des menus disponibles
@@ -35,7 +36,8 @@ export enum MenuType {
   INVENTORY = 'inventory',
   QUESTS = 'quests',
   STATS = 'stats',
-  SECTE = 'secte'
+  SECTE = 'secte',
+  TECHNIQUES = 'techniques'
 }
 
 // Props pour le composant Layout
@@ -90,7 +92,8 @@ const Layout: React.FC<LayoutProps> = ({
     { type: MenuType.INVENTORY, text: 'Inventaire', icon: <InventoryIcon /> },
     { type: MenuType.QUESTS, text: 'Quêtes', icon: <QuestIcon /> },
     { type: MenuType.STATS, text: 'Statistiques', icon: <StatsIcon /> },
-    { type: MenuType.SECTE, text: 'Secte', icon: <GroupIcon /> }
+    { type: MenuType.SECTE, text: 'Secte', icon: <GroupIcon /> },
+    { type: MenuType.TECHNIQUES, text: 'Techniques', icon: <SchoolIcon /> }
   ];
 
   // Contenu du drawer

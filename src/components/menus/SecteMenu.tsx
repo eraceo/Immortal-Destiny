@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -17,7 +17,8 @@ import {
   Tab,
   Alert,
   LinearProgress,
-  Tooltip
+  Tooltip,
+  CircularProgress
 } from '@mui/material';
 import {
   Personnage,
@@ -27,8 +28,10 @@ import {
   getRareteColor,
   TechniqueCultivation,
   MissionSecte,
-  RessourceSecte
+  RessourceSecte,
+  ElementCultivation
 } from '../../models/types';
+import { getTechniquesSecte, peutApprendreTechnique, calculerCoutApprentissage } from '../../models/techniques';
 import GroupIcon from '@mui/icons-material/Group';
 import SchoolIcon from '@mui/icons-material/School';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
@@ -72,11 +75,27 @@ const TabPanel = (props: TabPanelProps) => {
 
 const SecteMenu: React.FC<SecteMenuProps> = ({ personnage, onUpdatePersonnage }) => {
   const [tabValue, setTabValue] = useState(0);
+  const [techniquesSecte, setTechniquesSecte] = useState<TechniqueCultivation[]>([]);
+  const [loadingTechniques, setLoadingTechniques] = useState(true);
   
   // Récupérer les informations de la secte si le personnage appartient à une secte
   const secte = personnage.appartenanceSecte 
     ? getSecteById(personnage.appartenanceSecte.secteId) 
     : undefined;
+  
+  // Charger les techniques de la secte
+  useEffect(() => {
+    if (secte) {
+      try {
+        const techniques = getTechniquesSecte(secte.id);
+        setTechniquesSecte(techniques);
+      } catch (error) {
+        console.error("Erreur lors du chargement des techniques:", error);
+      } finally {
+        setLoadingTechniques(false);
+      }
+    }
+  }, [secte]);
   
   // Gérer le changement d'onglet
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -102,6 +121,30 @@ const SecteMenu: React.FC<SecteMenuProps> = ({ personnage, onUpdatePersonnage })
         return '#ffd700'; // Or
       default:
         return '#ffffff'; // Blanc
+    }
+  };
+  
+  // Fonction pour obtenir la couleur de l'élément
+  const getElementColor = (element: ElementCultivation): string => {
+    switch (element) {
+      case ElementCultivation.FEU:
+        return '#f44336'; // Rouge
+      case ElementCultivation.EAU:
+        return '#2196f3'; // Bleu
+      case ElementCultivation.BOIS:
+        return '#4caf50'; // Vert
+      case ElementCultivation.METAL:
+        return '#9e9e9e'; // Gris
+      case ElementCultivation.TERRE:
+        return '#795548'; // Marron
+      case ElementCultivation.FOUDRE:
+        return '#ffeb3b'; // Jaune
+      case ElementCultivation.LUMIERE:
+        return '#ffeb3b'; // Jaune clair
+      case ElementCultivation.OBSCURITE:
+        return '#673ab7'; // Violet
+      default:
+        return '#9e9e9e'; // Gris par défaut
     }
   };
   
@@ -265,52 +308,172 @@ const SecteMenu: React.FC<SecteMenuProps> = ({ personnage, onUpdatePersonnage })
       
       <TabPanel value={tabValue} index={1}>
         <Typography variant="h6" gutterBottom>Techniques de cultivation</Typography>
-        {secte.techniques.length > 0 ? (
-          <Grid container spacing={2}>
-            {secte.techniques.map((technique) => (
-              <Grid item xs={12} md={6} key={technique.id}>
-                <Card variant="outlined" sx={{ mb: 2 }}>
-                  <CardContent>
-                    <Typography variant="subtitle1">
-                      {technique.nom}
-                      <Chip 
-                        label={technique.rarete} 
-                        size="small" 
-                        sx={{ ml: 1, backgroundColor: getRareteColor(technique.rarete), color: '#fff' }} 
-                      />
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" paragraph>
-                      {technique.description}
-                    </Typography>
-                    <Divider sx={{ my: 1 }} />
-                    <Typography variant="body2">
-                      Élément : {technique.element}
-                    </Typography>
-                    <Typography variant="body2">
-                      Niveau requis : {technique.niveauRequis}
-                    </Typography>
-                    <Box sx={{ mt: 1 }}>
-                      {personnage.appartenanceSecte?.techniquesApprises.includes(technique.id) ? (
-                        <Chip label="Apprise" color="success" size="small" />
-                      ) : (
-                        <Button 
-                          variant="outlined" 
-                          size="small"
-                          disabled={personnage.royaumeCultivation < technique.niveauRequis || personnage.pierresSpirituelles < technique.coutApprentissage}
-                        >
-                          Apprendre ({technique.coutApprentissage} PS)
-                        </Button>
-                      )}
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        ) : (
+        
+        {loadingTechniques ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+            <CircularProgress />
+          </Box>
+        ) : techniquesSecte.length === 0 ? (
           <Alert severity="info">
-            Aucune technique disponible actuellement. Augmentez votre rang dans la secte pour débloquer des techniques.
+            Aucune technique n'est disponible dans cette secte pour le moment.
           </Alert>
+        ) : (
+          <>
+            <Box sx={{ mb: 2 }}>
+              <Alert severity="info">
+                Votre rang actuel dans la secte ({personnage.appartenanceSecte?.rang}) vous donne accès à certaines techniques. Progressez dans la secte pour débloquer des techniques plus avancées.
+              </Alert>
+            </Box>
+            
+            <Grid container spacing={2}>
+              {techniquesSecte.map((technique) => {
+                const estApprise = personnage.techniquesApprises.some(t => t.id === technique.id);
+                const resultat = peutApprendreTechnique(personnage, technique);
+                const coutReel = calculerCoutApprentissage(
+                  personnage, 
+                  technique, 
+                  personnage.appartenanceSecte?.secteId
+                );
+                
+                // Vérifier si la technique est verrouillée en raison du rang
+                const rangInsuffisant = technique.rangRequis && personnage.appartenanceSecte && 
+                                       technique.rangRequis > personnage.appartenanceSecte.rang;
+                
+                return (
+                  <Grid item xs={12} sm={6} md={4} key={technique.id}>
+                    <Card 
+                      sx={{ 
+                        height: '100%', 
+                        display: 'flex', 
+                        flexDirection: 'column',
+                        borderLeft: `4px solid ${getElementColor(technique.element)}`,
+                        opacity: rangInsuffisant ? 0.5 : (estApprise ? 0.7 : 1),
+                        boxShadow: 3,
+                        position: 'relative'
+                      }}
+                    >
+                      {rangInsuffisant && (
+                        <Box 
+                          sx={{ 
+                            position: 'absolute', 
+                            top: 0, 
+                            left: 0, 
+                            width: '100%', 
+                            height: '100%', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            backgroundColor: 'rgba(0,0,0,0.5)',
+                            zIndex: 1
+                          }}
+                        >
+                          <Chip 
+                            label={`Rang ${technique.rangRequis} requis`} 
+                            color="error" 
+                            sx={{ fontWeight: 'bold' }}
+                          />
+                        </Box>
+                      )}
+                      <CardContent>
+                        <Typography variant="h6" component="div" gutterBottom>
+                          {technique.nom}
+                        </Typography>
+                        
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 1 }}>
+                          <Chip 
+                            label={technique.element} 
+                            size="small" 
+                            sx={{ 
+                              bgcolor: getElementColor(technique.element),
+                              color: 'white'
+                            }} 
+                          />
+                          <Chip 
+                            label={technique.rarete} 
+                            size="small" 
+                            sx={{ 
+                              bgcolor: getRareteColor(technique.rarete),
+                              color: 'white'
+                            }} 
+                          />
+                          {estApprise ? (
+                            <Chip 
+                              label="Apprise" 
+                              size="small" 
+                              color="success"
+                              variant="outlined"
+                            />
+                          ) : (
+                            <Chip 
+                              label={`${coutReel} PS`} 
+                              size="small" 
+                              variant="outlined"
+                            />
+                          )}
+                          {technique.rangRequis && (
+                            <Tooltip title="Rang requis dans la secte">
+                              <Chip 
+                                label={technique.rangRequis} 
+                                size="small" 
+                                sx={{ 
+                                  bgcolor: getRangColor(technique.rangRequis),
+                                  color: 'white'
+                                }} 
+                              />
+                            </Tooltip>
+                          )}
+                        </Box>
+                        
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                          {technique.description.length > 100 
+                            ? `${technique.description.substring(0, 100)}...` 
+                            : technique.description}
+                        </Typography>
+                        
+                        {!estApprise && !rangInsuffisant && (
+                          <Box sx={{ mt: 'auto', pt: 1 }}>
+                            {!resultat.peut ? (
+                              <Typography variant="caption" color="error">
+                                {resultat.raison}
+                              </Typography>
+                            ) : (
+                              <Button 
+                                variant="outlined" 
+                                size="small" 
+                                fullWidth
+                                onClick={() => {
+                                  // Mettre à jour le personnage
+                                  const personnageUpdated = {
+                                    ...personnage,
+                                    pierresSpirituelles: personnage.pierresSpirituelles - coutReel,
+                                    techniquesApprises: [...personnage.techniquesApprises, technique]
+                                  };
+                                  
+                                  onUpdatePersonnage(personnageUpdated);
+                                }}
+                              >
+                                Apprendre
+                              </Button>
+                            )}
+                          </Box>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                );
+              })}
+            </Grid>
+            
+            <Box sx={{ mt: 3, textAlign: 'center' }}>
+              <Button 
+                variant="contained" 
+                color="primary"
+                onClick={() => setTabValue(0)} // Rediriger vers l'onglet Avantages
+              >
+                Voir comment augmenter votre rang
+              </Button>
+            </Box>
+          </>
         )}
       </TabPanel>
       

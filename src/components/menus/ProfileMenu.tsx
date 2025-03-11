@@ -307,14 +307,8 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
                       case ElementCultivation.METAL: return '#95a5a6'; // Gris
                       case ElementCultivation.TERRE: return '#d35400'; // Marron
                       case ElementCultivation.FOUDRE: return '#9b59b6'; // Violet
-                      case ElementCultivation.VENT: return '#1abc9c'; // Turquoise
-                      case ElementCultivation.GLACE: return '#00cec9'; // Cyan
                       case ElementCultivation.LUMIERE: return '#f1c40f'; // Jaune
                       case ElementCultivation.OBSCURITE: return '#34495e'; // Bleu foncé
-                      case ElementCultivation.CHAOS: return '#6c5ce7'; // Indigo
-                      case ElementCultivation.ESPACE: return '#0984e3'; // Bleu ciel
-                      case ElementCultivation.TEMPS: return '#fdcb6e'; // Or
-                      case ElementCultivation.SANG: return '#d63031'; // Rouge sang
                       default: return '#bdc3c7'; // Gris clair
                     }
                   };

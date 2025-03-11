@@ -94,14 +94,8 @@ export enum ElementCultivation {
   METAL = "Métal",
   TERRE = "Terre",
   FOUDRE = "Foudre",
-  VENT = "Vent",
-  GLACE = "Glace",
   LUMIERE = "Lumière",
-  OBSCURITE = "Obscurité",
-  CHAOS = "Chaos",
-  ESPACE = "Espace",
-  TEMPS = "Temps",
-  SANG = "Sang"
+  OBSCURITE = "Obscurité"
 }
 
 // Constantes pour le système de temps et d'âge
@@ -283,6 +277,7 @@ export interface TechniqueCultivation {
   rarete: Rarete;
   element: ElementCultivation;
   niveauRequis: RoyaumeCultivation;
+  rangRequis?: RangSecte;         // Rang minimum requis dans la secte pour apprendre cette technique
   effets: {
     multiplicateurQi?: number;       // Multiplicateur pour le gain de Qi
     bonusStats?: Partial<Stats>;     // Bonus aux statistiques
@@ -1047,11 +1042,11 @@ export const SECTES: Secte[] = [
   {
     id: "secte-epee-azur",
     nom: "Secte de l'Épée d'Azur",
-    description: "Une secte ancienne spécialisée dans les arts de l'épée et la cultivation du Qi de métal. Leurs disciples sont connus pour leur discipline stricte et leur maîtrise inégalée des techniques d'épée.",
+    description: "Une secte ancienne spécialisée dans les arts de l'épée et la cultivation du Qi de métal. Leurs disciples sont connus pour leur discipline stricte et leur maîtrise inégalée des techniques d'épée. La secte possède une riche histoire et des techniques de forge légendaires qui permettent de créer des armes spirituelles de grande qualité.",
     type: TypeSecte.MARTIALE,
     rarete: Rarete.RARE,
     elementPrincipal: ElementCultivation.METAL,
-    elementsSecondaires: [ElementCultivation.VENT, ElementCultivation.EAU],
+    elementsSecondaires: [ElementCultivation.EAU],
     techniques: [],
     ressources: [],
     missions: [],
@@ -1070,7 +1065,7 @@ export const SECTES: Secte[] = [
   {
     id: "secte-lotus-pourpre",
     nom: "Secte du Lotus Pourpre",
-    description: "Une secte mystique qui cultive l'essence spirituelle à travers la méditation et l'alchimie. Leurs disciples excellent dans la création d'élixirs et la compréhension des mystères du monde.",
+    description: "Une secte mystique qui cultive l'essence spirituelle à travers la méditation et l'alchimie. Leurs disciples excellent dans la création d'élixirs et la compréhension des mystères du monde. Leur bibliothèque ancestrale contient des milliers de textes anciens sur les arts de cultivation et les remèdes médicinaux.",
     type: TypeSecte.SPIRITUELLE,
     rarete: Rarete.RARE,
     elementPrincipal: ElementCultivation.EAU,
@@ -1093,7 +1088,7 @@ export const SECTES: Secte[] = [
   {
     id: "secte-flamme-eternelle",
     nom: "Secte de la Flamme Éternelle",
-    description: "Une secte puissante qui maîtrise les arts du feu et de la forge. Leurs disciples sont réputés pour leur tempérament ardent et leur capacité à forger des artefacts légendaires.",
+    description: "Une secte puissante qui maîtrise les arts du feu et de la forge. Leurs disciples sont réputés pour leur tempérament ardent et leur capacité à forger des artefacts légendaires. Au cœur de leur territoire se trouve un volcan sacré dont la lave est utilisée dans leurs rituels les plus puissants et pour tremper leurs armes les plus redoutables.",
     type: TypeSecte.ALCHIMIQUE,
     rarete: Rarete.RARE,
     elementPrincipal: ElementCultivation.FEU,
@@ -1114,55 +1109,9 @@ export const SECTES: Secte[] = [
     relationSectes: {}
   },
   {
-    id: "secte-nuage-celeste",
-    nom: "Secte du Nuage Céleste",
-    description: "Une secte vénérable située au sommet des montagnes sacrées. Leurs disciples pratiquent des techniques de vol et de contrôle des vents, aspirant à l'immortalité céleste.",
-    type: TypeSecte.CELESTE,
-    rarete: Rarete.EPIQUE,
-    elementPrincipal: ElementCultivation.VENT,
-    elementsSecondaires: [ElementCultivation.LUMIERE, ElementCultivation.ESPACE],
-    techniques: [],
-    ressources: [],
-    missions: [],
-    avantages: {
-      multiplicateurQi: 1.4,
-      bonusStats: { agilite: 2, perception: 1 },
-      reductionTempsPercee: 15,
-      bonusLongevite: 20
-    },
-    conditionsAdmission: {
-      royaumeMinimum: RoyaumeCultivation.QI_CONDENSE,
-      statsMinimales: { agilite: 6, intelligence: 5, perception: 4 }
-    },
-    relationSectes: {}
-  },
-  {
-    id: "secte-sang-demon",
-    nom: "Secte du Sang Démoniaque",
-    description: "Une secte redoutée qui pratique des arts interdits et des rituels de sang. Leurs disciples sacrifient leur humanité pour obtenir un pouvoir immense et rapide.",
-    type: TypeSecte.DEMONIAQUE,
-    rarete: Rarete.EPIQUE,
-    elementPrincipal: ElementCultivation.OBSCURITE,
-    elementsSecondaires: [ElementCultivation.SANG, ElementCultivation.FEU],
-    techniques: [],
-    ressources: [],
-    missions: [],
-    avantages: {
-      multiplicateurQi: 1.5,
-      bonusStats: { force: 2, constitution: 1 },
-      reductionTempsPercee: 20,
-      bonusLongevite: -10 // Réduit la longévité
-    },
-    conditionsAdmission: {
-      royaumeMinimum: RoyaumeCultivation.INITIATION,
-      statsMinimales: { force: 5, constitution: 4 }
-    },
-    relationSectes: {}
-  },
-  {
     id: "secte-montagne-verte",
     nom: "Secte de la Montagne Verte",
-    description: "Une secte paisible qui vit en harmonie avec la nature. Leurs disciples cultivent l'essence naturelle et excellent dans les arts de guérison et d'herboristerie.",
+    description: "Une secte paisible qui vit en harmonie avec la nature. Leurs disciples cultivent l'essence naturelle et excellent dans les arts de guérison et d'herboristerie. Leurs jardins médicinaux sont réputés dans tout le continent pour abriter des plantes rares aux propriétés miraculeuses. Leur philosophie de vie en harmonie avec la nature leur a permis de développer des techniques de cultivation uniques.",
     type: TypeSecte.NEUTRE,
     rarete: Rarete.COMMUN,
     elementPrincipal: ElementCultivation.BOIS,
@@ -1183,59 +1132,13 @@ export const SECTES: Secte[] = [
     relationSectes: {}
   },
   {
-    id: "secte-paume-tonnerre",
-    nom: "Secte de la Paume du Tonnerre",
-    description: "Une secte dynamique qui maîtrise la foudre et les techniques de combat à mains nues. Leurs disciples sont connus pour leur vitesse fulgurante et leur puissance explosive.",
-    type: TypeSecte.MARTIALE,
-    rarete: Rarete.RARE,
-    elementPrincipal: ElementCultivation.FOUDRE,
-    elementsSecondaires: [ElementCultivation.VENT, ElementCultivation.FEU],
-    techniques: [],
-    ressources: [],
-    missions: [],
-    avantages: {
-      multiplicateurQi: 1.25,
-      bonusStats: { agilite: 2, force: 1 },
-      reductionTempsPercee: 12,
-      bonusLongevite: 8
-    },
-    conditionsAdmission: {
-      royaumeMinimum: RoyaumeCultivation.INITIATION,
-      statsMinimales: { agilite: 5, force: 4 }
-    },
-    relationSectes: {}
-  },
-  {
-    id: "secte-givre-eternel",
-    nom: "Secte du Givre Éternel",
-    description: "Une secte mystérieuse qui réside dans les terres gelées du nord. Leurs disciples maîtrisent les arts de la glace et possèdent une résistance extraordinaire aux conditions extrêmes.",
-    type: TypeSecte.SPIRITUELLE,
-    rarete: Rarete.RARE,
-    elementPrincipal: ElementCultivation.GLACE,
-    elementsSecondaires: [ElementCultivation.EAU, ElementCultivation.VENT],
-    techniques: [],
-    ressources: [],
-    missions: [],
-    avantages: {
-      multiplicateurQi: 1.2,
-      bonusStats: { constitution: 2, perception: 1 },
-      reductionTempsPercee: 10,
-      bonusLongevite: 12
-    },
-    conditionsAdmission: {
-      royaumeMinimum: RoyaumeCultivation.INITIATION,
-      statsMinimales: { constitution: 5, perception: 4 }
-    },
-    relationSectes: {}
-  },
-  {
-    id: "secte-voile-temps",
-    nom: "Secte du Voile du Temps",
-    description: "Une secte légendaire qui étudie les mystères du temps et de l'espace. Leurs disciples sont rares mais extrêmement puissants, capables de manipuler le flux temporel.",
+    id: "secte-voile-obscur",
+    nom: "Secte du Voile Obscur",
+    description: "Une secte mystérieuse qui étudie les mystères de l'obscurité et de la lumière. Leurs disciples sont rares mais extrêmement puissants, capables de manipuler les ombres et d'illuminer les ténèbres. Leur siège se trouve dans une vallée cachée où le jour et la nuit semblent coexister en permanence. Leurs techniques de divination sont considérées comme les plus précises du monde connu.",
     type: TypeSecte.CELESTE,
     rarete: Rarete.LEGENDAIRE,
-    elementPrincipal: ElementCultivation.TEMPS,
-    elementsSecondaires: [ElementCultivation.ESPACE, ElementCultivation.CHAOS],
+    elementPrincipal: ElementCultivation.OBSCURITE,
+    elementsSecondaires: [ElementCultivation.LUMIERE, ElementCultivation.FOUDRE],
     techniques: [],
     ressources: [],
     missions: [],
@@ -1387,7 +1290,21 @@ export const genererAffinitesElementaires = (): Record<ElementCultivation, numbe
   
   // Générer une affinité pour chaque élément
   Object.values(ElementCultivation).forEach(element => {
-    affinites[element] = Math.floor(Math.random() * 100) + 1; // Valeur entre 1 et 100
+    // Valeur entre 1 et 100, avec une distribution plus équilibrée
+    // Les valeurs plus élevées sont plus rares
+    let valeur = Math.floor(Math.random() * 60) + 1; // Base entre 1 et 60
+    
+    // 30% de chance d'avoir une affinité plus élevée (61-80)
+    if (Math.random() < 0.3) {
+      valeur = Math.floor(Math.random() * 20) + 61;
+    }
+    
+    // 10% de chance d'avoir une affinité exceptionnelle (81-100)
+    if (Math.random() < 0.1) {
+      valeur = Math.floor(Math.random() * 20) + 81;
+    }
+    
+    affinites[element] = valeur;
   });
   
   return affinites as Record<ElementCultivation, number>;
