@@ -83,6 +83,8 @@ const SecteMenu: React.FC<SecteMenuProps> = ({ personnage, onUpdatePersonnage })
   const [loadingTechniques, setLoadingTechniques] = useState(true);
   const [selectedTechnique, setSelectedTechnique] = useState<TechniqueCultivation | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
+  const [coutReel, setCoutReel] = useState(0);
   
   // Récupérer les informations de la secte si le personnage appartient à une secte
   const secte = personnage.appartenanceSecte 
@@ -118,6 +120,43 @@ const SecteMenu: React.FC<SecteMenuProps> = ({ personnage, onUpdatePersonnage })
   const handleCloseDialog = () => {
     setDialogOpen(false);
     setSelectedTechnique(null);
+  };
+  
+  const handleOpenConfirmation = (technique: TechniqueCultivation) => {
+    // Calculer le coût réel en tenant compte des bonus
+    const cout = calculerCoutApprentissage(
+      personnage, 
+      technique,
+      personnage.appartenanceSecte?.secteId
+    );
+    setSelectedTechnique(technique);
+    setCoutReel(cout);
+    setConfirmationDialogOpen(true);
+  };
+
+  const handleCloseConfirmation = () => {
+    setConfirmationDialogOpen(false);
+  };
+
+  const handleApprendreTechnique = () => {
+    // Vérifier à nouveau les conditions avant d'apprendre
+    if (!selectedTechnique) return;
+    
+    const verificationFinale = peutApprendreTechnique(personnage, selectedTechnique);
+    if (!verificationFinale.peut) {
+      return; // Ne pas continuer si les conditions ne sont plus remplies
+    }
+    
+    // Mettre à jour le personnage
+    const personnageUpdated = {
+      ...personnage,
+      techniquesApprises: [...personnage.techniquesApprises, selectedTechnique],
+      pierresSpirituelles: personnage.pierresSpirituelles - coutReel
+    };
+    
+    onUpdatePersonnage(personnageUpdated);
+    handleCloseConfirmation();
+    handleCloseDialog();
   };
   
   // Fonction pour obtenir la couleur du rang
@@ -480,15 +519,9 @@ const SecteMenu: React.FC<SecteMenuProps> = ({ personnage, onUpdatePersonnage })
                                 variant="outlined" 
                                 size="small" 
                                 fullWidth
-                                onClick={() => {
-                                  // Mettre à jour le personnage
-                                  const personnageUpdated = {
-                                    ...personnage,
-                                    pierresSpirituelles: personnage.pierresSpirituelles - coutReel,
-                                    techniquesApprises: [...personnage.techniquesApprises, technique]
-                                  };
-                                  
-                                  onUpdatePersonnage(personnageUpdated);
+                                onClick={(e) => {
+                                  e.stopPropagation(); // Empêcher l'ouverture du détail de la technique
+                                  handleOpenConfirmation(technique);
                                 }}
                               >
                                 Apprendre
@@ -821,30 +854,7 @@ const SecteMenu: React.FC<SecteMenuProps> = ({ personnage, onUpdatePersonnage })
                 if (peutApprendre) {
                   return (
                     <Button 
-                      onClick={() => {
-                        // Vérifier à nouveau les conditions avant d'apprendre
-                        const verificationFinale = peutApprendreTechnique(personnage, selectedTechnique);
-                        if (!verificationFinale.peut) {
-                          return; // Ne pas continuer si les conditions ne sont plus remplies
-                        }
-                        
-                        // Calculer le coût réel en tenant compte des bonus
-                        const coutReel = calculerCoutApprentissage(
-                          personnage, 
-                          selectedTechnique,
-                          personnage.appartenanceSecte?.secteId
-                        );
-                        
-                        // Mettre à jour le personnage
-                        const personnageUpdated = {
-                          ...personnage,
-                          techniquesApprises: [...personnage.techniquesApprises, selectedTechnique],
-                          pierresSpirituelles: personnage.pierresSpirituelles - coutReel
-                        };
-                        
-                        onUpdatePersonnage(personnageUpdated);
-                        handleCloseDialog();
-                      }} 
+                      onClick={() => handleOpenConfirmation(selectedTechnique)} 
                       color="primary" 
                       variant="contained"
                     >
@@ -857,6 +867,35 @@ const SecteMenu: React.FC<SecteMenuProps> = ({ personnage, onUpdatePersonnage })
             </DialogActions>
           </>
         )}
+      </Dialog>
+
+      {/* Dialogue de confirmation */}
+      <Dialog open={confirmationDialogOpen} onClose={handleCloseConfirmation}>
+        <DialogTitle>Confirmation d'apprentissage</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1">
+            Êtes-vous sûr de vouloir apprendre la technique <strong>{selectedTechnique?.nom}</strong> ?
+          </Typography>
+          <Typography variant="body2" sx={{ mt: 2 }}>
+            Coût: <strong>{coutReel} pierres spirituelles</strong>
+          </Typography>
+          <Typography variant="body2">
+            Pierres disponibles: <strong>{personnage.pierresSpirituelles}</strong>
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseConfirmation} color="primary">
+            Annuler
+          </Button>
+          <Button 
+            onClick={handleApprendreTechnique} 
+            color="primary" 
+            variant="contained"
+            disabled={personnage.pierresSpirituelles < coutReel}
+          >
+            Confirmer
+          </Button>
+        </DialogActions>
       </Dialog>
     </Box>
   );

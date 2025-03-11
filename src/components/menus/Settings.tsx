@@ -62,6 +62,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange, onReset
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [openResetDialog, setOpenResetDialog] = useState(false);
+  const [patchNotesOpen, setPatchNotesOpen] = useState(false);
 
   // Fonction pour mettre à jour un paramètre
   const updateSetting = <K extends keyof GameSettings>(key: K, value: GameSettings[K]) => {
@@ -109,6 +110,16 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange, onReset
     setTimeout(() => {
       window.location.href = "/";
     }, 2000);
+  };
+
+  // Fonction pour ouvrir la boîte de dialogue des patch notes
+  const handleOpenPatchNotes = () => {
+    setPatchNotesOpen(true);
+  };
+
+  // Fonction pour fermer la boîte de dialogue des patch notes
+  const handleClosePatchNotes = () => {
+    setPatchNotesOpen(false);
   };
 
   return (
@@ -379,6 +390,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange, onReset
             <Button 
               variant="outlined" 
               color="primary" 
+              onClick={handleOpenPatchNotes}
               sx={{ 
                 mt: 1,
                 borderWidth: 2,
@@ -486,6 +498,78 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange, onReset
             }}
           >
             Confirmer
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Boîte de dialogue des patch notes */}
+      <Dialog
+        open={patchNotesOpen}
+        onClose={handleClosePatchNotes}
+        aria-labelledby="patch-notes-dialog-title"
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            boxShadow: (theme) => theme.palette.mode === 'light' ? '0 4px 20px rgba(0, 0, 0, 0.15)' : '0 4px 20px rgba(0, 0, 0, 0.4)'
+          }
+        }}
+      >
+        <DialogTitle id="patch-notes-dialog-title" sx={{ 
+          fontWeight: 'bold',
+          bgcolor: (theme) => theme.palette.primary.main,
+          color: 'white'
+        }}>
+          Notes de mise à jour
+        </DialogTitle>
+        <DialogContent dividers>
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h6" gutterBottom sx={{ color: (theme) => theme.palette.primary.main, fontWeight: 'bold' }}>
+              Version 1.1.0 (Actuelle)
+            </Typography>
+            <Typography variant="subtitle2" gutterBottom sx={{ color: 'text.secondary' }}>
+              Date: 11 Mars 2025
+            </Typography>
+            <Box component="ul" sx={{ pl: 2 }}>
+              <Typography component="li" variant="body1" sx={{ mb: 1 }}>
+                <strong>Amélioration:</strong> Ajout d'une confirmation lors de l'apprentissage d'une technique, à la fois depuis la liste des techniques et depuis la vue détaillée.
+              </Typography>
+              <Typography component="li" variant="body1" sx={{ mb: 1 }}>
+                <strong>Interface:</strong> Suppression de l'affichage du temps total de cultivation dans le menu cultivation pour une interface plus épurée.
+              </Typography>
+              <Typography component="li" variant="body1" sx={{ mb: 1 }}>
+                <strong>Nouvelle fonctionnalité:</strong> Ajout d'un récapitulatif détaillé des bonus de cultivation dans le menu cultivation, montrant tous les multiplicateurs appliqués (secte, techniques, origine, etc.).
+              </Typography>
+              <Typography component="li" variant="body1" sx={{ mb: 1 }}>
+                <strong>Correction:</strong> Résolution d'une incohérence entre le gain de Qi affiché dans le récapitulatif et le gain réel utilisé dans le jeu.
+              </Typography>
+              <Typography component="li" variant="body1" sx={{ mb: 1 }}>
+                <strong>Correction:</strong> Résolution de divers bugs mineurs et améliorations de performance.
+              </Typography>
+            </Box>
+          </Box>
+          
+          <Box>
+            <Typography variant="h6" gutterBottom sx={{ color: (theme) => theme.palette.primary.main, fontWeight: 'bold' }}>
+              Version 1.0.0
+            </Typography>
+            <Typography variant="subtitle2" gutterBottom sx={{ color: 'text.secondary' }}>
+              Date: 11 Mars 2025
+            </Typography>
+            <Box component="ul" sx={{ pl: 2 }}>
+              <Typography component="li" variant="body1" sx={{ mb: 1 }}>
+                <strong>Lancement initial:</strong> Première version publique du jeu.
+              </Typography>
+              <Typography component="li" variant="body1" sx={{ mb: 1 }}>
+                <strong>Fonctionnalités:</strong> Système de cultivation, création de personnage, et exploration de base.
+              </Typography>
+            </Box>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClosePatchNotes} color="primary">
+            Fermer
           </Button>
         </DialogActions>
       </Dialog>

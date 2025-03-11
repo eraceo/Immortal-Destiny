@@ -91,63 +91,119 @@ const GameScreen: React.FC = () => {
   
   // État pour suivre les mois écoulés
   const [moisActuel, setMoisActuel] = useState<number>(0);
+  // Ajout de l'état pour vérifier si une percée est disponible
+  const [perceeDisponible, setPerceeDisponible] = useState<boolean>(false);
 
   // Ajout de l'état pour les paramètres du jeu
   const [gameSettings, setGameSettings] = useState<GameSettings>(
     JSON.parse(localStorage.getItem('gameSettings') || JSON.stringify(defaultSettings))
   );
 
-  // Fonction pour calculer le gain de Qi par seconde
-  const calculerGainQiParSeconde = useCallback((personnageData: Personnage): number => {
-    if (!personnageData) return 0;
+  // Fonction pour calculer tous les buffs appliqués sur la vitesse de cultivation
+  const calculerBuffsCultivation = useCallback((personnageData: Personnage): {
+    baseQi: number,
+    bonusIntelligence: number,
+    bonusPerception: number,
+    multiplicateurRoyaume: number,
+    bonusSecte: number,
+    bonusTechniques: { nom: string, valeur: number }[],
+    bonusOrigine: number,
+    total: number
+  } => {
+    if (!personnageData) return {
+      baseQi: 0,
+      bonusIntelligence: 0,
+      bonusPerception: 0,
+      multiplicateurRoyaume: 0,
+      bonusSecte: 0,
+      bonusTechniques: [],
+      bonusOrigine: 0,
+      total: 0
+    };
     
     // Calcul de base à partir des statistiques
     const qiBase = personnageData.stats.qi;
     const intelligenceBonus = personnageData.stats.intelligence * 0.08;
     const perceptionBonus = personnageData.stats.perception * 0.04;
-    let gainCalcule = Math.max(0.01, parseFloat((qiBase * (1 + (intelligenceBonus + perceptionBonus) / 25)).toFixed(2)));
+    const gainBase = Math.max(0.01, parseFloat((qiBase * (1 + (intelligenceBonus + perceptionBonus) / 25)).toFixed(2)));
     
-    // Appliquer les multiplicateurs en fonction du royaume de cultivation
+    // Multiplicateur du royaume de cultivation
+    let multiplicateurRoyaume = 1;
     switch (personnageData.royaumeCultivation) {
       case RoyaumeCultivation.MORTEL:
-        gainCalcule *= 1;
+        multiplicateurRoyaume = 1;
         break;
       case RoyaumeCultivation.INITIATION:
-        gainCalcule *= 1.5;
+        multiplicateurRoyaume = 1.5;
         break;
       case RoyaumeCultivation.QI_CONDENSE:
-        gainCalcule *= 2;
+        multiplicateurRoyaume = 2;
         break;
       case RoyaumeCultivation.FONDATION:
-        gainCalcule *= 3;
+        multiplicateurRoyaume = 3;
         break;
       case RoyaumeCultivation.CORE_OR:
-        gainCalcule *= 5;
+        multiplicateurRoyaume = 5;
         break;
       case RoyaumeCultivation.NASCENT_SOUL:
-        gainCalcule *= 8;
+        multiplicateurRoyaume = 8;
         break;
       case RoyaumeCultivation.TRANSCENDANCE:
-        gainCalcule *= 12;
+        multiplicateurRoyaume = 12;
         break;
       case RoyaumeCultivation.SAINT_MARTIAL:
-        gainCalcule *= 20;
+        multiplicateurRoyaume = 20;
         break;
       case RoyaumeCultivation.DEMI_DIEU:
-        gainCalcule *= 35;
+        multiplicateurRoyaume = 35;
         break;
       case RoyaumeCultivation.DIVIN_SUPREME:
-        gainCalcule *= 50;
+        multiplicateurRoyaume = 50;
         break;
     }
     
-    // Appliquer les bonus de secte
+    // Bonus de secte
     const bonusSecte = calculerBonusSecte(personnageData);
-    gainCalcule *= bonusSecte.multiplicateurQi;
+    const multiplicateurSecte = bonusSecte.multiplicateurQi;
     
-    // Arrondir à 2 décimales
-    return parseFloat(gainCalcule.toFixed(2));
+    // Bonus des techniques
+    const bonusTechniques = personnageData.techniquesApprises
+      .filter(technique => technique.effets.multiplicateurQi)
+      .map(technique => ({
+        nom: technique.nom,
+        valeur: technique.effets.multiplicateurQi || 1
+      }));
+    
+    // Bonus de l'origine
+    const bonusOrigine = personnageData.bonusQi ? (1 + personnageData.bonusQi / 100) : 1;
+    
+    // Calcul du gain total
+    let gainTotal = gainBase * multiplicateurRoyaume * multiplicateurSecte;
+    bonusTechniques.forEach(bonus => {
+      gainTotal *= bonus.valeur;
+    });
+    gainTotal *= bonusOrigine;
+    
+    return {
+      baseQi: gainBase,
+      bonusIntelligence: intelligenceBonus,
+      bonusPerception: perceptionBonus,
+      multiplicateurRoyaume,
+      bonusSecte: multiplicateurSecte,
+      bonusTechniques,
+      bonusOrigine,
+      total: parseFloat(gainTotal.toFixed(2))
+    };
   }, []);
+
+  // Fonction pour calculer le gain de Qi par seconde
+  const calculerGainQiParSeconde = useCallback((personnageData: Personnage): number => {
+    if (!personnageData) return 0;
+    
+    // Utiliser la fonction calculerBuffsCultivation pour obtenir le gain total
+    const buffs = calculerBuffsCultivation(personnageData);
+    return buffs.total;
+  }, [calculerBuffsCultivation]);
 
   // Charger le personnage depuis le localStorage
   useEffect(() => {
@@ -411,9 +467,13 @@ const GameScreen: React.FC = () => {
         setPersonnage(prevPersonnage => {
           if (!prevPersonnage) return null;
           
-          // Incrémenter les points de Qi
-          const nouveauxPointsQi = prevPersonnage.pointsQi + gainQiParSeconde;
-          const nouveauxPointsQiTotal = prevPersonnage.pointsQiTotal + gainQiParSeconde;
+          // Calculer le gain de Qi en utilisant directement calculerBuffsCultivation
+          const buffs = calculerBuffsCultivation(prevPersonnage);
+          const gainReel = buffs.total;
+          
+          // Incrémenter les points de Qi avec le gain réel calculé
+          const nouveauxPointsQi = prevPersonnage.pointsQi + gainReel;
+          const nouveauxPointsQiTotal = prevPersonnage.pointsQiTotal + gainReel;
           
           // Vérifier si le personnage a atteint le Qi requis pour une percée
           if (nouveauxPointsQi >= prevPersonnage.qiRequis) {
@@ -432,6 +492,7 @@ const GameScreen: React.FC = () => {
               moisTimerRef.current = null;
             }
             setOpenPerceeDialog(true);
+            setPerceeDisponible(true);
           }
           
           return {
@@ -568,6 +629,9 @@ const GameScreen: React.FC = () => {
     // Fermer la boîte de dialogue
     setOpenPerceeDialog(false);
     
+    // Réinitialiser l'état perceeDisponible
+    setPerceeDisponible(false);
+    
     // Afficher un message de félicitations
     const message = `Félicitations ! Vous avez atteint ${getNomCompletCultivation(prochainNiveau.royaume, prochainNiveau.niveau)} !`;
     setSnackbarMessage(message);
@@ -673,17 +737,20 @@ const GameScreen: React.FC = () => {
           historiqueEvenements={historiqueEvenements}
         />;
       case MenuType.CULTIVATION:
-        return <CultivationMenu 
-          personnage={personnage} 
-          gainQiParSeconde={gainQiParSeconde} 
-          meditationActive={meditationActive} 
-          toggleMeditation={toggleMeditation} 
-          onPercee={effectuerPercee}
-          perceeDisponible={personnage.pointsQi >= personnage.qiRequis}
-          tempsTotalMeditation={tempsTotalMeditation}
-          tempsMeditationCumule={tempsMeditationCumule}
-          moisActuel={moisActuel}
-        />;
+        return (
+          <CultivationMenu 
+            personnage={personnage} 
+            meditationActive={meditationActive} 
+            gainQiParSeconde={gainQiParSeconde} 
+            tempsTotalMeditation={tempsTotalMeditation}
+            tempsMeditationCumule={tempsMeditationCumule}
+            toggleMeditation={toggleMeditation}
+            onPercee={perceeDisponible ? effectuerPercee : undefined}
+            perceeDisponible={perceeDisponible}
+            moisActuel={moisActuel}
+            buffsCultivation={calculerBuffsCultivation(personnage)}
+          />
+        );
       case MenuType.INVENTORY:
         return <InventoryMenu personnage={personnage} />;
       case MenuType.QUESTS:
@@ -794,6 +861,21 @@ const GameScreen: React.FC = () => {
       </Dialog>
     );
   };
+
+  // Mettre à jour l'état perceeDisponible lorsque les points de Qi changent
+  useEffect(() => {
+    if (personnage) {
+      setPerceeDisponible(personnage.pointsQi >= personnage.qiRequis);
+    }
+  }, [personnage?.pointsQi, personnage?.qiRequis]);
+
+  // Mettre à jour le gain de Qi par seconde à chaque changement du personnage
+  useEffect(() => {
+    if (personnage) {
+      const buffs = calculerBuffsCultivation(personnage);
+      setGainQiParSeconde(buffs.total);
+    }
+  }, [personnage, calculerBuffsCultivation]);
 
   // Nettoyer les timers lors du démontage du composant
   useEffect(() => {

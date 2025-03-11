@@ -5,7 +5,8 @@ import {
   Paper, 
   Button, 
   Chip,
-  LinearProgress
+  LinearProgress,
+  Divider
 } from '@mui/material';
 import { 
   Personnage, 
@@ -25,6 +26,16 @@ interface CultivationMenuProps {
   onPercee?: () => void;
   perceeDisponible?: boolean;
   moisActuel?: number;
+  buffsCultivation?: {
+    baseQi: number,
+    bonusIntelligence: number,
+    bonusPerception: number,
+    multiplicateurRoyaume: number,
+    bonusSecte: number,
+    bonusTechniques: { nom: string, valeur: number }[],
+    bonusOrigine: number,
+    total: number
+  };
 }
 
 const CultivationMenu: React.FC<CultivationMenuProps> = ({ 
@@ -36,7 +47,8 @@ const CultivationMenu: React.FC<CultivationMenuProps> = ({
   toggleMeditation,
   onPercee,
   perceeDisponible,
-  moisActuel = 0
+  moisActuel = 0,
+  buffsCultivation
 }) => {
   const descriptionRoyaume = getDescriptionRoyaume(personnage.royaumeCultivation);
   const nomCultivation = getNomCompletCultivation(personnage.royaumeCultivation, personnage.niveauPercee);
@@ -79,7 +91,7 @@ const CultivationMenu: React.FC<CultivationMenuProps> = ({
               </Typography>
             )}
             <Chip 
-              label={`+${gainQiParSeconde.toFixed(2)} Qi/s`} 
+              label={`+${buffsCultivation ? buffsCultivation.total.toFixed(2) : gainQiParSeconde.toFixed(2)} Qi/s`} 
               color="primary" 
               size="small"
               sx={{ 
@@ -141,7 +153,7 @@ const CultivationMenu: React.FC<CultivationMenuProps> = ({
                 }
               }}
             >
-              +{gainQiParSeconde.toFixed(2)} Qi
+              +{buffsCultivation ? buffsCultivation.total.toFixed(2) : gainQiParSeconde.toFixed(2)} Qi
             </Box>
           )}
           
@@ -167,7 +179,7 @@ const CultivationMenu: React.FC<CultivationMenuProps> = ({
             {meditationActive ? "Arrêter la Méditation" : "Commencer à Méditer"}
             {meditationActive && (
               <Box component="span" sx={{ ml: 1, display: 'flex', alignItems: 'center', fontSize: '0.85em' }}>
-                <span style={{ color: '#4caf50' }}>+{gainQiParSeconde.toFixed(2)}</span>
+                <span style={{ color: '#4caf50' }}>+{buffsCultivation ? buffsCultivation.total.toFixed(2) : gainQiParSeconde.toFixed(2)}</span>
                 <span style={{ marginLeft: '2px' }}>Qi/s</span>
               </Box>
             )}
@@ -191,21 +203,7 @@ const CultivationMenu: React.FC<CultivationMenuProps> = ({
             </Typography>
           )}
           
-          <Typography variant="body2" sx={{ mt: meditationActive ? 1 : 2, color: 'text.secondary', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span>Temps total de cultivation: </span>
-            <Box component="span" sx={{ 
-              ml: 1, 
-              fontFamily: 'monospace', 
-              fontWeight: 'bold',
-              color: getRoyaumeColor(personnage.royaumeCultivation),
-              backgroundColor: 'rgba(0,0,0,0.1)',
-              px: 1,
-              py: 0.5,
-              borderRadius: 1
-            }}>
-              {Math.floor((tempsMeditationCumule * MOIS_PAR_MINUTE) / 12)} ans {(tempsMeditationCumule * MOIS_PAR_MINUTE) % 12} mois
-            </Box>
-          </Typography>
+          {/* Le bloc d'affichage du temps total de cultivation a été supprimé */}
         </Box>
       </Paper>
       
@@ -219,12 +217,74 @@ const CultivationMenu: React.FC<CultivationMenuProps> = ({
             Points de Qi Total Accumulés: <strong>{personnage.pointsQiTotal.toLocaleString()}</strong>
           </Typography>
           <Typography variant="body2" color="text.secondary" gutterBottom>
-            Taux de Gain Actuel: <strong>{gainQiParSeconde.toFixed(2)} Qi/seconde</strong>
+            Taux de Gain Actuel: <strong>{buffsCultivation ? buffsCultivation.total.toFixed(2) : gainQiParSeconde.toFixed(2)} Qi/seconde</strong>
           </Typography>
           <Typography variant="body2" color="text.secondary">
             Prochain Palier: <strong>{personnage.qiRequis.toLocaleString()} points</strong>
           </Typography>
         </Box>
+        
+        {buffsCultivation && (
+          <Box sx={{ mt: 3, mb: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              Récapitulatif des Bonus de Cultivation
+            </Typography>
+            
+            <Paper variant="outlined" sx={{ p: 2, bgcolor: 'rgba(0,0,0,0.02)' }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Typography variant="body2">Qi de Base:</Typography>
+                <Typography variant="body2" fontWeight="bold">{buffsCultivation.baseQi.toFixed(2)}</Typography>
+              </Box>
+              
+              <Divider sx={{ my: 1 }} />
+              
+              <Typography variant="subtitle2" sx={{ mt: 1, mb: 1, fontWeight: 'bold' }}>
+                Multiplicateurs:
+              </Typography>
+              
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Typography variant="body2">Royaume de Cultivation ({personnage.royaumeCultivation}):</Typography>
+                <Typography variant="body2" fontWeight="bold" color="primary">×{buffsCultivation.multiplicateurRoyaume.toFixed(2)}</Typography>
+              </Box>
+              
+              {buffsCultivation.bonusSecte > 1 && (
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                  <Typography variant="body2">Secte:</Typography>
+                  <Typography variant="body2" fontWeight="bold" color="primary">×{buffsCultivation.bonusSecte.toFixed(2)}</Typography>
+                </Box>
+              )}
+              
+              {buffsCultivation.bonusOrigine > 1 && (
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                  <Typography variant="body2">Origine ({personnage.origine}):</Typography>
+                  <Typography variant="body2" fontWeight="bold" color="primary">×{buffsCultivation.bonusOrigine.toFixed(2)}</Typography>
+                </Box>
+              )}
+              
+              {buffsCultivation.bonusTechniques.length > 0 && (
+                <>
+                  <Typography variant="subtitle2" sx={{ mt: 2, mb: 1, fontWeight: 'bold' }}>
+                    Techniques:
+                  </Typography>
+                  
+                  {buffsCultivation.bonusTechniques.map((technique, index) => (
+                    <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                      <Typography variant="body2">{technique.nom}:</Typography>
+                      <Typography variant="body2" fontWeight="bold" color="primary">×{technique.valeur.toFixed(2)}</Typography>
+                    </Box>
+                  ))}
+                </>
+              )}
+              
+              <Divider sx={{ my: 2 }} />
+              
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Typography variant="subtitle1" fontWeight="bold">Total:</Typography>
+                <Typography variant="subtitle1" fontWeight="bold" color="primary">{buffsCultivation.total.toFixed(2)} Qi/s</Typography>
+              </Box>
+            </Paper>
+          </Box>
+        )}
         
         <Typography variant="body2" paragraph>
           La méditation est la clé pour accumuler du Qi et progresser dans votre chemin de cultivation. 
