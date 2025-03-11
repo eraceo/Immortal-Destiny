@@ -7,9 +7,9 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/VOTRE-NOM-UTILISATEUR/immortal-destiny.git"
+    "url": "https://github.com/REMPLACEZ-PAR-VOTRE-NOM-UTILISATEUR-GITHUB/immortal-destiny.git"
   },
-  "homepage": "https://VOTRE-NOM-UTILISATEUR.github.io/immortal-destiny",
+  "homepage": "https://REMPLACEZ-PAR-VOTRE-NOM-UTILISATEUR-GITHUB.github.io/immortal-destiny",
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
