@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://via.placeholder.com/150?text=Immortal+Destiny" alt="Immortal Destiny Logo" width="150" height="150">
+  <img src="./logo.png" alt="Immortal Destiny Logo" width="150" height="150">
   <h1>🐉 Immortal Destiny 🐉</h1>
   <p><em>Votre voyage vers l'immortalité commence ici</em></p>
 </div>
