@@ -1,6 +1,6 @@
 <div align="center">
-  <img src="https://via.placeholder.com/150?text=Wuxia+Idle" alt="Wuxia Idle Logo" width="150" height="150">
-  <h1>🐉 Wuxia Idle 🐉</h1>
+  <img src="https://via.placeholder.com/150?text=Immortal+Destiny" alt="Immortal Destiny Logo" width="150" height="150">
+  <h1>🐉 Immortal Destiny 🐉</h1>
   <p><em>Votre voyage vers l'immortalité commence ici</em></p>
 </div>
 
@@ -15,7 +15,7 @@
 
 ## 📜 À propos
 
-**Wuxia Idle** est un jeu idle captivant qui vous plonge dans l'univers mystique des romans wuxia et xianxia. Commencez votre voyage sur le chemin de l'immortalité, cultivez votre énergie qi, maîtrisez des techniques ancestrales et devenez une légende dans le monde des arts martiaux.
+**Immortal Destiny** est un jeu idle captivant qui vous plonge dans l'univers mystique des romans wuxia et xianxia. Commencez votre voyage sur le chemin de l'immortalité, cultivez votre énergie qi, maîtrisez des techniques ancestrales et devenez une légende dans le monde des arts martiaux.
 
 Avec une esthétique moderne et sombre, ce jeu vous permet de progresser même lorsque vous êtes absent, tout en offrant une expérience immersive dans l'univers fascinant de la cultivation.
 
@@ -35,7 +35,7 @@ Avec une esthétique moderne et sombre, ce jeu vous permet de progresser même l
 ### 🏯 Monde riche et immersif
 - **Interface élégante** inspirée de l'esthétique wuxia/xianxia
 - **Système de quêtes** pour enrichir votre expérience
-- **Factions et secteurs** à découvrir et rejoindre
+- **Factions et sects** à découvrir et rejoindre
 
 ## 🛠️ Technologies utilisées
 
@@ -55,8 +55,8 @@ Avec une esthétique moderne et sombre, ce jeu vous permet de progresser même l
 
 ```bash
 # Cloner le dépôt
-git clone https://github.com/votre-nom/wuxia-idle.git
-cd wuxia-idle
+git clone https://github.com/votre-nom/immortal-destiny.git
+cd immortal-destiny
 
 # Installer les dépendances
 npm install
@@ -125,5 +125,5 @@ Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de 
 
 <div align="center">
   <p>Développé avec ❤️ par les amateurs de wuxia</p>
-  <p>© 2023 Wuxia Idle</p>
+  <p>© 2023 Immortal Destiny</p>
 </div> 
