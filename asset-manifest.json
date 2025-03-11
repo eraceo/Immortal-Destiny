@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/Immortal-Destiny/static/css/main.c1d8bcfa.css",
-    "main.js": "/Immortal-Destiny/static/js/main.a6d4e36f.js",
+    "main.js": "/Immortal-Destiny/static/js/main.d8e1b936.js",
     "static/js/453.6c5ba137.chunk.js": "/Immortal-Destiny/static/js/453.6c5ba137.chunk.js",
     "index.html": "/Immortal-Destiny/index.html",
     "main.c1d8bcfa.css.map": "/Immortal-Destiny/static/css/main.c1d8bcfa.css.map",
-    "main.a6d4e36f.js.map": "/Immortal-Destiny/static/js/main.a6d4e36f.js.map",
+    "main.d8e1b936.js.map": "/Immortal-Destiny/static/js/main.d8e1b936.js.map",
     "453.6c5ba137.chunk.js.map": "/Immortal-Destiny/static/js/453.6c5ba137.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.c1d8bcfa.css",
-    "static/js/main.a6d4e36f.js"
+    "static/js/main.d8e1b936.js"
   ]
 }
