@@ -351,9 +351,6 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
                           Relation avec les Anciens: <strong>{personnage.appartenanceSecte.relationAnciens}/100</strong>
                         </Typography>
                         
-                        <Typography variant="body2" color="text.secondary" gutterBottom>
-                          Date d'adhésion: <strong>{new Date(personnage.appartenanceSecte.dateAdhesion).toLocaleDateString()}</strong>
-                        </Typography>
                       </Box>
                       
                       <Divider sx={{ my: 2 }} />

@@ -44,15 +44,23 @@ import {
   calculerEsperanceVie,
   genererAffinitesElementaires,
   genererTalentCultivation,
+  calculerTalentCultivation,
   TypeSecte,
   RangSecte,
   ElementCultivation,
   SECTES,
-  AppartenanceSecte
+  AppartenanceSecte,
+  getSecteDisponibles,
+  STAT_MAX_CREATION
 } from '../models/types';
 
 // Composant pour afficher une statistique avec une barre de progression
-const StatDisplay = ({ nom, valeur }: { nom: string, valeur: number }) => {
+const StatDisplay = ({ nom, valeur, isDerivee = false }: { nom: string, valeur: number, isDerivee?: boolean }) => {
+  // Pour les statistiques dérivées, on utilise une échelle différente
+  const progressValue = isDerivee 
+    ? Math.min(100, valeur) // Limiter à 100% pour les statistiques dérivées
+    : (valeur / STAT_MAX_CREATION) * 100; // Pourcentage par rapport à STAT_MAX_CREATION
+  
   return (
     <Box sx={{ mb: 1 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
@@ -61,13 +69,13 @@ const StatDisplay = ({ nom, valeur }: { nom: string, valeur: number }) => {
       </Box>
       <LinearProgress 
         variant="determinate" 
-        value={valeur * 10} 
+        value={progressValue} 
         sx={{ 
           height: 8, 
           borderRadius: 4,
           backgroundColor: 'rgba(255, 255, 255, 0.1)',
           '& .MuiLinearProgress-bar': {
-            backgroundColor: getStatColor(valeur),
+            backgroundColor: getStatColor(isDerivee ? valeur / 10 : valeur),
           }
         }} 
       />
@@ -75,12 +83,67 @@ const StatDisplay = ({ nom, valeur }: { nom: string, valeur: number }) => {
   );
 };
 
+// Composant pour afficher une statistique de combat sans barre de progression
+const CombatStatDisplay = ({ nom, valeur }: { nom: string, valeur: number }) => {
+  return (
+    <Box sx={{ mb: 1 }}>
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        p: 1,
+        borderRadius: 2,
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        border: '1px solid rgba(255, 255, 255, 0.1)'
+      }}>
+        <Typography variant="body2">{nom}</Typography>
+        <Typography 
+          variant="body2" 
+          fontWeight="bold" 
+          sx={{ 
+            color: getStatColor(valeur / 10) 
+          }}
+        >
+          {valeur}
+        </Typography>
+      </Box>
+    </Box>
+  );
+};
+
 // Fonction pour obtenir la couleur en fonction de la valeur de la statistique
 const getStatColor = (value: number): string => {
-  if (value <= 3) return '#e74c3c'; // Faible - rouge
-  if (value <= 6) return '#f1c40f'; // Moyen - jaune
-  if (value <= 8) return '#2ecc71'; // Bon - vert
-  return '#9b59b6'; // Excellent - violet
+  // Normaliser la valeur par rapport à STAT_MAX_CREATION
+  const normalizedValue = value / STAT_MAX_CREATION * 10;
+  
+  if (normalizedValue <= 3) return '#e74c3c'; // Faible - rouge
+  if (normalizedValue <= 5) return '#e67e22'; // Moyen - orange
+  if (normalizedValue <= 7) return '#f1c40f'; // Bon - jaune
+  if (normalizedValue <= 9) return '#2ecc71'; // Excellent - vert
+  return '#3498db'; // Exceptionnel - bleu
+};
+
+// Fonction pour obtenir l'affinité élémentaire requise en fonction de la rareté de la secte
+const getAffiniteRequise = (rarete: Rarete): number => {
+  switch (rarete) {
+    case Rarete.COMMUN: return 30;
+    case Rarete.RARE: return 50;
+    case Rarete.EPIQUE: return 65;
+    case Rarete.LEGENDAIRE: return 80;
+    case Rarete.MYTHIQUE: return 90;
+    default: return 0;
+  }
+};
+
+// Fonction pour obtenir le talent requis en fonction de la rareté de la secte
+const getTalentRequis = (rarete: Rarete): number => {
+  switch (rarete) {
+    case Rarete.COMMUN: return 0;
+    case Rarete.RARE: return 50;
+    case Rarete.EPIQUE: return 70;
+    case Rarete.LEGENDAIRE: return 90;
+    case Rarete.MYTHIQUE: return 95;
+    default: return 0;
+  }
 };
 
 // Composant pour afficher un badge de rareté
@@ -137,6 +200,52 @@ const RareteBadge = ({ rarete }: { rarete: Rarete }) => {
   );
 };
 
+// Composant pour afficher un chip de rareté (pour les sectes)
+const RareteChip = ({ rarete }: { rarete: Rarete }) => {
+  // Définir les styles en fonction de la rareté
+  let styles = {
+    backgroundColor: getRareteColor(rarete),
+    padding: '4px 8px',
+    borderRadius: '4px',
+    color: 'white',
+    fontWeight: 'bold' as const,
+    fontSize: '0.7rem',
+    boxShadow: 'none',
+    animation: 'none',
+    border: 'none',
+    display: 'inline-block'
+  };
+
+  // Ajouter des effets visuels pour les raretés élevées
+  if (rarete === Rarete.EPIQUE) {
+    styles = {
+      ...styles,
+      boxShadow: '0 0 5px 2px rgba(156, 39, 176, 0.5)',
+      animation: 'pulse 2s infinite'
+    };
+  } else if (rarete === Rarete.LEGENDAIRE) {
+    styles = {
+      ...styles,
+      boxShadow: '0 0 8px 3px rgba(255, 152, 0, 0.7)',
+      animation: 'pulse 1.5s infinite',
+      border: '1px solid gold'
+    };
+  } else if (rarete === Rarete.MYTHIQUE) {
+    styles = {
+      ...styles,
+      boxShadow: '0 0 12px 4px rgba(244, 67, 54, 0.8)',
+      animation: 'pulse 1s infinite, float 3s infinite',
+      border: '1px solid white'
+    };
+  }
+
+  return (
+    <Box sx={styles}>
+      {rarete}
+    </Box>
+  );
+};
+
 const CharacterCreation: React.FC = () => {
   const navigate = useNavigate();
   
@@ -170,15 +279,20 @@ const CharacterCreation: React.FC = () => {
   
   // Fonction pour relancer tous les éléments du personnage
   const relancerTout = () => {
-    const nouvelleRace = genererRaceAleatoire();
+    const stats = genererStatsAleatoires();
+    const race = genererRaceAleatoire();
+    const origine = genererOrigineAleatoire();
+    const affiniteElements = genererAffinitesElementaires();
+    const talent = calculerTalentCultivation(stats);
+    
     setPersonnage({
       ...personnage,
-      race: nouvelleRace,
-      origine: genererOrigineAleatoire(),
-      stats: genererStatsAleatoires(),
-      age: genererAgeInitial(), // Générer un nouvel âge initial car la race a changé
-      affiniteElements: genererAffinitesElementaires(),
-      talentCultivation: genererTalentCultivation()
+      race,
+      origine,
+      stats,
+      age: genererAgeInitial(),
+      affiniteElements,
+      talentCultivation: talent
     });
   };
 
@@ -223,12 +337,21 @@ const CharacterCreation: React.FC = () => {
       if (origineInfo.bonusStats) {
         Object.entries(origineInfo.bonusStats).forEach(([stat, bonus]) => {
           statsFinales[stat as keyof Stats] += bonus;
-          // S'assurer que les statistiques ne dépassent pas 10
-          if (statsFinales[stat as keyof Stats] > 10) {
-            statsFinales[stat as keyof Stats] = 10;
+          // S'assurer que les statistiques ne dépassent pas STAT_MAX_CREATION
+          if (statsFinales[stat as keyof Stats] > STAT_MAX_CREATION) {
+            statsFinales[stat as keyof Stats] = STAT_MAX_CREATION;
           }
         });
       }
+
+      // Recalculer les statistiques dérivées après avoir appliqué les bonus
+      statsFinales.hp = statsFinales.constitution * 10 + statsFinales.force * 5;
+      statsFinales.degat = statsFinales.force * 2 + statsFinales.qi;
+      statsFinales.esquive = statsFinales.agilite * 1.5 + statsFinales.perception * 0.5;
+      statsFinales.resistance = statsFinales.constitution * 1.5 + statsFinales.force * 0.5;
+
+      // Recalculer le talent de cultivation avec les statistiques finales
+      const talentFinal = calculerTalentCultivation(statsFinales);
 
       // Calculer les pierres spirituelles initiales avec le bonus de l'origine
       const pierresInitiales = 100 + (origineInfo.bonusPierresSpirituelles || 0);
@@ -255,7 +378,7 @@ const CharacterCreation: React.FC = () => {
         appartenanceSecte: appartenanceSecteFinale,
         techniquesApprises: personnage.techniquesApprises,
         affiniteElements: personnage.affiniteElements,
-        talentCultivation: personnage.talentCultivation,
+        talentCultivation: talentFinal,
         // Ajouter les bonus de l'origine comme propriétés du personnage
         bonusQi: origineInfo.bonusQi || 0,
         bonusApprentissage: origineInfo.bonusApprentissage || 0,
@@ -362,8 +485,8 @@ const CharacterCreation: React.FC = () => {
   // Composant pour afficher le talent de cultivation
   const renderTalentCultivation = () => {
     if (!personnage.talentCultivation) {
-      // Générer le talent s'il n'existe pas encore
-      const talent = genererTalentCultivation();
+      // Calculer le talent en fonction des statistiques
+      const talent = calculerTalentCultivation(personnage.stats);
       setPersonnage({
         ...personnage,
         talentCultivation: talent
@@ -659,15 +782,40 @@ const CharacterCreation: React.FC = () => {
               </Box>
             </Box>
             
-            <Box sx={{ mb: 2 }}>
-              <StatDisplay nom="Force" valeur={personnage.stats.force} />
-              <StatDisplay nom="Agilité" valeur={personnage.stats.agilite} />
-              <StatDisplay nom="Constitution" valeur={personnage.stats.constitution} />
-              <StatDisplay nom="Intelligence" valeur={personnage.stats.intelligence} />
-              <StatDisplay nom="Perception" valeur={personnage.stats.perception} />
-              <StatDisplay nom="Charisme" valeur={personnage.stats.charisme} />
-              <StatDisplay nom="Chance" valeur={personnage.stats.chance} />
-              <StatDisplay nom="Qi" valeur={personnage.stats.qi} />
+            <Box sx={{ mt: 2, mb: 2 }}>
+              <Typography variant="h6" gutterBottom>
+                Statistiques
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <StatDisplay nom="Force" valeur={personnage.stats.force} />
+                  <StatDisplay nom="Agilité" valeur={personnage.stats.agilite} />
+                  <StatDisplay nom="Constitution" valeur={personnage.stats.constitution} />
+                  <StatDisplay nom="Intelligence" valeur={personnage.stats.intelligence} />
+                </Grid>
+                <Grid item xs={6}>
+                  <StatDisplay nom="Perception" valeur={personnage.stats.perception} />
+                  <StatDisplay nom="Charisme" valeur={personnage.stats.charisme} />
+                  <StatDisplay nom="Chance" valeur={personnage.stats.chance} />
+                  <StatDisplay nom="Qi" valeur={personnage.stats.qi} />
+                </Grid>
+              </Grid>
+              
+              <Divider sx={{ my: 2 }} />
+              
+              <Typography variant="h6" gutterBottom>
+                Statistiques de Combat
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <CombatStatDisplay nom="Points de Vie" valeur={personnage.stats.hp} />
+                  <CombatStatDisplay nom="Dégâts" valeur={personnage.stats.degat} />
+                </Grid>
+                <Grid item xs={6}>
+                  <CombatStatDisplay nom="Esquive" valeur={personnage.stats.esquive} />
+                  <CombatStatDisplay nom="Résistance" valeur={personnage.stats.resistance} />
+                </Grid>
+              </Grid>
             </Box>
             
             <Box sx={{ mt: 2, mb: 2 }}>
@@ -778,7 +926,7 @@ const CharacterCreation: React.FC = () => {
                     <Box sx={{ width: '100%', mt: 1 }}>
                       <LinearProgress 
                         variant="determinate" 
-                        value={affinite * 10} 
+                        value={affinite} 
                         sx={{ 
                           height: 6, 
                           borderRadius: 3,
@@ -790,7 +938,7 @@ const CharacterCreation: React.FC = () => {
                       />
                     </Box>
                     <Typography variant="caption" sx={{ mt: 0.5 }}>
-                      {affinite}/10
+                      {affinite}/100
                     </Typography>
                   </Paper>
                 </Grid>
@@ -833,8 +981,8 @@ const CharacterCreation: React.FC = () => {
                   </Paper>
                 </Grid>
                 
-                {/* Liste des sectes */}
-                {SECTES.map((secte) => (
+                {/* Liste des sectes disponibles */}
+                {getSecteDisponibles(personnage).map((secte) => (
                   <Grid item xs={12} key={secte.id}>
                     <Paper 
                       sx={{ 
@@ -848,6 +996,8 @@ const CharacterCreation: React.FC = () => {
                           ? 'rgba(46, 204, 113, 0.1)' 
                           : 'transparent',
                         transition: 'all 0.3s ease',
+                        position: 'relative',
+                        overflow: 'hidden',
                         '&:hover': {
                           transform: 'translateY(-2px)',
                           boxShadow: '0 3px 8px rgba(255, 255, 255, 0.1)',
@@ -858,26 +1008,124 @@ const CharacterCreation: React.FC = () => {
                           ...personnage,
                           appartenanceSecte: {
                             secteId: secte.id,
+                            dateAdhesion: Date.now(),
                             rang: RangSecte.DISCIPLE_EXTERNE,
                             pointsContribution: 0,
-                            dateAdhesion: Date.now(),
                             techniquesApprises: [],
                             missionsCompletees: [],
                             ressourcesObtenues: {},
-                            relationAnciens: 50
+                            relationAnciens: 50 // Relation neutre au départ
                           }
                         });
                       }}
                     >
-                      <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
-                        {secte.nom}
+                      <RareteBadge rarete={secte.rarete} />
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                        <Box>
+                          <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
+                            {secte.nom}
+                          </Typography>
+                          <Chip 
+                            size="small" 
+                            label={secte.rarete} 
+                            sx={{ 
+                              height: '20px', 
+                              fontSize: '0.7rem',
+                              backgroundColor: `${getRareteColor(secte.rarete)}33`,
+                              color: getRareteColor(secte.rarete),
+                              border: `1px solid ${getRareteColor(secte.rarete)}`
+                            }} 
+                          />
+                        </Box>
+                      </Box>
+                      <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem', mb: 1, clear: 'both' }}>
+                        {secte.description.substring(0, 100)}...
                       </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
-                        {secte.type} • {secte.elementPrincipal}
-                      </Typography>
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1 }}>
+                        <Chip 
+                          size="small" 
+                          label={secte.type} 
+                          sx={{ 
+                            height: '20px', 
+                            fontSize: '0.7rem',
+                            backgroundColor: '#1e1e1e'
+                          }} 
+                        />
+                        <Chip 
+                          size="small" 
+                          label={secte.elementPrincipal} 
+                          sx={{ 
+                            height: '20px', 
+                            fontSize: '0.7rem',
+                            backgroundColor: `${getElementColor(secte.elementPrincipal)}33`,
+                            color: getElementColor(secte.elementPrincipal),
+                            border: `1px solid ${getElementColor(secte.elementPrincipal)}`
+                          }} 
+                        />
+                        <Tooltip title={`Affinité requise: ${personnage.affiniteElements[secte.elementPrincipal]}/${getAffiniteRequise(secte.rarete)}`}>
+                          <Chip 
+                            size="small" 
+                            label={`Affinité: ${Math.round(personnage.affiniteElements[secte.elementPrincipal] / getAffiniteRequise(secte.rarete) * 100)}%`} 
+                            sx={{ 
+                              height: '20px', 
+                              fontSize: '0.7rem',
+                              backgroundColor: personnage.affiniteElements[secte.elementPrincipal] >= getAffiniteRequise(secte.rarete) 
+                                ? 'rgba(46, 204, 113, 0.2)' 
+                                : 'rgba(231, 76, 60, 0.2)',
+                              color: personnage.affiniteElements[secte.elementPrincipal] >= getAffiniteRequise(secte.rarete) 
+                                ? '#2ecc71' 
+                                : '#e74c3c',
+                              border: `1px solid ${personnage.affiniteElements[secte.elementPrincipal] >= getAffiniteRequise(secte.rarete) 
+                                ? '#2ecc71' 
+                                : '#e74c3c'}`
+                            }} 
+                          />
+                        </Tooltip>
+                        <Tooltip title={`Talent requis: ${personnage.talentCultivation}/${getTalentRequis(secte.rarete)}`}>
+                          <Chip 
+                            size="small" 
+                            label={`Talent: ${Math.round(personnage.talentCultivation / getTalentRequis(secte.rarete) * 100)}%`} 
+                            sx={{ 
+                              height: '20px', 
+                              fontSize: '0.7rem',
+                              backgroundColor: personnage.talentCultivation >= getTalentRequis(secte.rarete) 
+                                ? 'rgba(46, 204, 113, 0.2)' 
+                                : 'rgba(231, 76, 60, 0.2)',
+                              color: personnage.talentCultivation >= getTalentRequis(secte.rarete) 
+                                ? '#2ecc71' 
+                                : '#e74c3c',
+                              border: `1px solid ${personnage.talentCultivation >= getTalentRequis(secte.rarete) 
+                                ? '#2ecc71' 
+                                : '#e74c3c'}`
+                            }} 
+                          />
+                        </Tooltip>
+                      </Box>
                     </Paper>
                   </Grid>
                 ))}
+                
+                {/* Message si aucune secte n'est disponible */}
+                {getSecteDisponibles(personnage).length === 0 && (
+                  <Grid item xs={12}>
+                    <Paper 
+                      sx={{ 
+                        p: 1.5, 
+                        borderRadius: 2,
+                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                        border: '1px solid #e74c3c'
+                      }}
+                    >
+                      <Typography variant="subtitle1" sx={{ mb: 0.5, color: '#e74c3c' }}>
+                        Aucune secte disponible
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
+                        Votre talent ou vos affinités élémentaires ne sont pas suffisants pour rejoindre une secte. 
+                        Vous pouvez continuer en tant que cultivateur indépendant ou relancer vos statistiques.
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                )}
               </Grid>
             </Box>
           </Grid>

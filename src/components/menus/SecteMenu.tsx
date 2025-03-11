@@ -18,7 +18,11 @@ import {
   Alert,
   LinearProgress,
   Tooltip,
-  CircularProgress
+  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
 import {
   Personnage,
@@ -77,6 +81,8 @@ const SecteMenu: React.FC<SecteMenuProps> = ({ personnage, onUpdatePersonnage })
   const [tabValue, setTabValue] = useState(0);
   const [techniquesSecte, setTechniquesSecte] = useState<TechniqueCultivation[]>([]);
   const [loadingTechniques, setLoadingTechniques] = useState(true);
+  const [selectedTechnique, setSelectedTechnique] = useState<TechniqueCultivation | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
   
   // Récupérer les informations de la secte si le personnage appartient à une secte
   const secte = personnage.appartenanceSecte 
@@ -102,6 +108,18 @@ const SecteMenu: React.FC<SecteMenuProps> = ({ personnage, onUpdatePersonnage })
     setTabValue(newValue);
   };
   
+  // Fonction pour ouvrir le dialogue de détail d'une technique
+  const handleTechniqueClick = (technique: TechniqueCultivation) => {
+    setSelectedTechnique(technique);
+    setDialogOpen(true);
+  };
+  
+  // Fonction pour fermer le dialogue
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+    setSelectedTechnique(null);
+  };
+  
   // Fonction pour obtenir la couleur du rang
   const getRangColor = (rang: RangSecte): string => {
     switch (rang) {
@@ -124,7 +142,7 @@ const SecteMenu: React.FC<SecteMenuProps> = ({ personnage, onUpdatePersonnage })
     }
   };
   
-  // Fonction pour obtenir la couleur de l'élément
+  // Fonction pour obtenir la couleur d'un élément
   const getElementColor = (element: ElementCultivation): string => {
     switch (element) {
       case ElementCultivation.FEU:
@@ -140,11 +158,11 @@ const SecteMenu: React.FC<SecteMenuProps> = ({ personnage, onUpdatePersonnage })
       case ElementCultivation.FOUDRE:
         return '#ffeb3b'; // Jaune
       case ElementCultivation.LUMIERE:
-        return '#ffeb3b'; // Jaune clair
+        return '#ffc107'; // Ambre
       case ElementCultivation.OBSCURITE:
         return '#673ab7'; // Violet
       default:
-        return '#9e9e9e'; // Gris par défaut
+        return '#000000'; // Noir
     }
   };
   
@@ -319,11 +337,6 @@ const SecteMenu: React.FC<SecteMenuProps> = ({ personnage, onUpdatePersonnage })
           </Alert>
         ) : (
           <>
-            <Box sx={{ mb: 2 }}>
-              <Alert severity="info">
-                Votre rang actuel dans la secte ({personnage.appartenanceSecte?.rang}) vous donne accès à certaines techniques. Progressez dans la secte pour débloquer des techniques plus avancées.
-              </Alert>
-            </Box>
             
             <Grid container spacing={2}>
               {techniquesSecte.map((technique) => {
@@ -339,6 +352,12 @@ const SecteMenu: React.FC<SecteMenuProps> = ({ personnage, onUpdatePersonnage })
                 const rangInsuffisant = technique.rangRequis && personnage.appartenanceSecte && 
                                        technique.rangRequis > personnage.appartenanceSecte.rang;
                 
+                // Vérifier si le niveau de cultivation est insuffisant
+                const niveauInsuffisant = personnage.royaumeCultivation < technique.niveauRequis;
+                
+                // Technique verrouillée si rang ou niveau insuffisant
+                const techniqueVerrouillee = rangInsuffisant || niveauInsuffisant;
+                
                 return (
                   <Grid item xs={12} sm={6} md={4} key={technique.id}>
                     <Card 
@@ -347,12 +366,12 @@ const SecteMenu: React.FC<SecteMenuProps> = ({ personnage, onUpdatePersonnage })
                         display: 'flex', 
                         flexDirection: 'column',
                         borderLeft: `4px solid ${getElementColor(technique.element)}`,
-                        opacity: rangInsuffisant ? 0.5 : (estApprise ? 0.7 : 1),
+                        opacity: techniqueVerrouillee ? 0.5 : (estApprise ? 0.7 : 1),
                         boxShadow: 3,
                         position: 'relative'
                       }}
                     >
-                      {rangInsuffisant && (
+                      {techniqueVerrouillee && (
                         <Box 
                           sx={{ 
                             position: 'absolute', 
@@ -364,17 +383,37 @@ const SecteMenu: React.FC<SecteMenuProps> = ({ personnage, onUpdatePersonnage })
                             alignItems: 'center', 
                             justifyContent: 'center',
                             backgroundColor: 'rgba(0,0,0,0.5)',
-                            zIndex: 1
+                            zIndex: 1,
+                            flexDirection: 'column',
+                            gap: 1
                           }}
                         >
-                          <Chip 
-                            label={`Rang ${technique.rangRequis} requis`} 
-                            color="error" 
-                            sx={{ fontWeight: 'bold' }}
-                          />
+                          {rangInsuffisant && (
+                            <Chip 
+                              label={`Rang ${technique.rangRequis} requis`} 
+                              color="error" 
+                              sx={{ fontWeight: 'bold' }}
+                            />
+                          )}
+                          {niveauInsuffisant && (
+                            <Chip 
+                              label={`Niveau ${technique.niveauRequis} requis`} 
+                              color="error" 
+                              sx={{ fontWeight: 'bold' }}
+                            />
+                          )}
                         </Box>
                       )}
-                      <CardContent>
+                      <CardContent 
+                        sx={{ 
+                          flexGrow: 1,
+                          cursor: 'pointer',
+                          '&:hover': {
+                            backgroundColor: 'rgba(0, 0, 0, 0.03)'
+                          }
+                        }}
+                        onClick={() => handleTechniqueClick(technique)}
+                      >
                         <Typography variant="h6" component="div" gutterBottom>
                           {technique.nom}
                         </Typography>
@@ -430,7 +469,7 @@ const SecteMenu: React.FC<SecteMenuProps> = ({ personnage, onUpdatePersonnage })
                             : technique.description}
                         </Typography>
                         
-                        {!estApprise && !rangInsuffisant && (
+                        {!estApprise && !techniqueVerrouillee && (
                           <Box sx={{ mt: 'auto', pt: 1 }}>
                             {!resultat.peut ? (
                               <Typography variant="caption" color="error">
@@ -463,16 +502,6 @@ const SecteMenu: React.FC<SecteMenuProps> = ({ personnage, onUpdatePersonnage })
                 );
               })}
             </Grid>
-            
-            <Box sx={{ mt: 3, textAlign: 'center' }}>
-              <Button 
-                variant="contained" 
-                color="primary"
-                onClick={() => setTabValue(0)} // Rediriger vers l'onglet Avantages
-              >
-                Voir comment augmenter votre rang
-              </Button>
-            </Box>
           </>
         )}
       </TabPanel>
@@ -608,6 +637,227 @@ const SecteMenu: React.FC<SecteMenuProps> = ({ personnage, onUpdatePersonnage })
           </Alert>
         )}
       </TabPanel>
+      
+      {/* Dialogue de détail de la technique */}
+      <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth="md" fullWidth>
+        {selectedTechnique && (
+          <>
+            <DialogTitle sx={{ 
+              bgcolor: getRareteColor(selectedTechnique.rarete),
+              color: 'white',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              {selectedTechnique.nom}
+              <Chip 
+                label={selectedTechnique.rarete} 
+                sx={{ 
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  color: 'white',
+                  fontWeight: 'bold'
+                }} 
+              />
+            </DialogTitle>
+            <DialogContent>
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                  {selectedTechnique.description}
+                </Typography>
+                
+                <Divider sx={{ my: 2 }} />
+                
+                <Typography variant="h6" sx={{ mb: 1, color: getElementColor(selectedTechnique.element) }}>
+                  Élément: {selectedTechnique.element}
+                </Typography>
+                
+                <Typography variant="h6" sx={{ mb: 1 }}>
+                  Niveau requis: {selectedTechnique.niveauRequis}
+                  {personnage.royaumeCultivation < selectedTechnique.niveauRequis && (
+                    <Chip 
+                      label="Insuffisant" 
+                      color="error" 
+                      size="small" 
+                      sx={{ ml: 1, fontWeight: 'bold' }}
+                    />
+                  )}
+                </Typography>
+                
+                {selectedTechnique.rangRequis && (
+                  <Typography variant="h6" sx={{ mb: 1, color: getRangColor(selectedTechnique.rangRequis) }}>
+                    Rang requis: {selectedTechnique.rangRequis}
+                    {personnage.appartenanceSecte && personnage.appartenanceSecte.rang < selectedTechnique.rangRequis && (
+                      <Chip 
+                        label="Insuffisant" 
+                        color="error" 
+                        size="small" 
+                        sx={{ ml: 1, fontWeight: 'bold' }}
+                      />
+                    )}
+                  </Typography>
+                )}
+                
+                <Divider sx={{ my: 2 }} />
+                
+                <Typography variant="h6" sx={{ mb: 1 }}>
+                  Utilisations pratiques:
+                </Typography>
+                <Box component="ul" sx={{ pl: 2 }}>
+                  {selectedTechnique.utilite.map((util, index) => (
+                    <Typography component="li" key={index} variant="body1" sx={{ mb: 0.5 }}>
+                      {util}
+                    </Typography>
+                  ))}
+                </Box>
+                
+                <Divider sx={{ my: 2 }} />
+                
+                <Typography variant="h6" sx={{ mb: 1 }}>
+                  Effets:
+                </Typography>
+                <Box sx={{ pl: 2 }}>
+                  {selectedTechnique.effets.multiplicateurQi && (
+                    <Typography variant="body1" sx={{ mb: 0.5 }}>
+                      Multiplicateur de Qi: <strong>×{selectedTechnique.effets.multiplicateurQi.toFixed(2)}</strong>
+                    </Typography>
+                  )}
+                  
+                  {selectedTechnique.effets.reductionTemps && (
+                    <Typography variant="body1" sx={{ mb: 0.5 }}>
+                      Réduction du temps de cultivation: <strong>{selectedTechnique.effets.reductionTemps}%</strong>
+                    </Typography>
+                  )}
+                  
+                  {selectedTechnique.effets.bonusLongevite && (
+                    <Typography variant="body1" sx={{ mb: 0.5 }}>
+                      Bonus de longévité: <strong>+{selectedTechnique.effets.bonusLongevite}%</strong>
+                    </Typography>
+                  )}
+                  
+                  {selectedTechnique.effets.bonusStats && (
+                    <Box sx={{ mb: 0.5 }}>
+                      <Typography variant="body1">
+                        Bonus aux statistiques:
+                      </Typography>
+                      <Box component="ul" sx={{ pl: 2, mt: 0.5 }}>
+                        {Object.entries(selectedTechnique.effets.bonusStats).map(([stat, value]) => (
+                          <Typography component="li" key={stat} variant="body2">
+                            {stat.charAt(0).toUpperCase() + stat.slice(1)}: <strong>+{value}</strong>
+                          </Typography>
+                        ))}
+                      </Box>
+                    </Box>
+                  )}
+                  
+                  {selectedTechnique.effets.resistanceElement && selectedTechnique.effets.resistanceElement.length > 0 && (
+                    <Box sx={{ mb: 0.5 }}>
+                      <Typography variant="body1">
+                        Résistance aux éléments:
+                      </Typography>
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 0.5 }}>
+                        {selectedTechnique.effets.resistanceElement.map(element => (
+                          <Chip 
+                            key={element}
+                            label={element} 
+                            size="small"
+                            sx={{ bgcolor: getElementColor(element), color: 'white' }}
+                          />
+                        ))}
+                      </Box>
+                    </Box>
+                  )}
+                </Box>
+                
+                <Divider sx={{ my: 2 }} />
+                
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="h6">
+                    Coût d'apprentissage: 
+                    <Tooltip title="Coût en pierres spirituelles pour apprendre cette technique">
+                      <span> {calculerCoutApprentissage(personnage, selectedTechnique, personnage.appartenanceSecte?.secteId)} </span>
+                    </Tooltip>
+                    pierres spirituelles
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                    (Coût de base: {selectedTechnique.coutApprentissage})
+                  </Typography>
+                </Box>
+                
+                {(() => {
+                  const estApprise = personnage.techniquesApprises.some(t => t.id === selectedTechnique.id);
+                  const resultat = peutApprendreTechnique(personnage, selectedTechnique);
+                  
+                  if (estApprise) {
+                    return (
+                      <Alert severity="success" sx={{ mt: 2 }}>
+                        Vous avez déjà appris cette technique.
+                      </Alert>
+                    );
+                  } else if (!resultat.peut && resultat.raison) {
+                    return (
+                      <Alert severity="warning" sx={{ mt: 2 }}>
+                        {resultat.raison}
+                      </Alert>
+                    );
+                  }
+                  return null;
+                })()}
+              </Box>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCloseDialog} color="primary">
+                Fermer
+              </Button>
+              {(() => {
+                const estApprise = personnage.techniquesApprises.some(t => t.id === selectedTechnique.id);
+                const resultat = peutApprendreTechnique(personnage, selectedTechnique);
+                
+                // Double vérification des conditions
+                const rangInsuffisant = selectedTechnique.rangRequis && personnage.appartenanceSecte && 
+                                       selectedTechnique.rangRequis > personnage.appartenanceSecte.rang;
+                const niveauInsuffisant = personnage.royaumeCultivation < selectedTechnique.niveauRequis;
+                const peutApprendre = !estApprise && resultat.peut && !rangInsuffisant && !niveauInsuffisant;
+                
+                if (peutApprendre) {
+                  return (
+                    <Button 
+                      onClick={() => {
+                        // Vérifier à nouveau les conditions avant d'apprendre
+                        const verificationFinale = peutApprendreTechnique(personnage, selectedTechnique);
+                        if (!verificationFinale.peut) {
+                          return; // Ne pas continuer si les conditions ne sont plus remplies
+                        }
+                        
+                        // Calculer le coût réel en tenant compte des bonus
+                        const coutReel = calculerCoutApprentissage(
+                          personnage, 
+                          selectedTechnique,
+                          personnage.appartenanceSecte?.secteId
+                        );
+                        
+                        // Mettre à jour le personnage
+                        const personnageUpdated = {
+                          ...personnage,
+                          techniquesApprises: [...personnage.techniquesApprises, selectedTechnique],
+                          pierresSpirituelles: personnage.pierresSpirituelles - coutReel
+                        };
+                        
+                        onUpdatePersonnage(personnageUpdated);
+                        handleCloseDialog();
+                      }} 
+                      color="primary" 
+                      variant="contained"
+                    >
+                      Apprendre ({calculerCoutApprentissage(personnage, selectedTechnique, personnage.appartenanceSecte?.secteId)} pierres)
+                    </Button>
+                  );
+                }
+                return null;
+              })()}
+            </DialogActions>
+          </>
+        )}
+      </Dialog>
     </Box>
   );
 };

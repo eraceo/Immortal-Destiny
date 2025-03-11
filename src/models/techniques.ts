@@ -10,6 +10,11 @@ export const TECHNIQUES_LOTUS_POURPRE: TechniqueCultivation[] = [
     element: ElementCultivation.EAU,
     niveauRequis: RoyaumeCultivation.INITIATION,
     rangRequis: RangSecte.DISCIPLE_EXTERNE,
+    utilite: [
+      "Méditation quotidienne pour accélérer la cultivation",
+      "Purification du corps des impuretés",
+      "Amélioration de la concentration lors des études"
+    ],
     effets: {
       multiplicateurQi: 1.2,
       reductionTemps: 5,
@@ -25,6 +30,12 @@ export const TECHNIQUES_LOTUS_POURPRE: TechniqueCultivation[] = [
     element: ElementCultivation.EAU,
     niveauRequis: RoyaumeCultivation.QI_CONDENSE,
     rangRequis: RangSecte.DISCIPLE_INTERNE,
+    utilite: [
+      "Soins d'urgence pour les blessures légères",
+      "Détoxification du corps après empoisonnement",
+      "Création d'eau pure dans des environnements hostiles",
+      "Amélioration de l'efficacité des herbes médicinales"
+    ],
     effets: {
       bonusStats: { constitution: 1, intelligence: 1 },
       bonusLongevite: 5
@@ -39,6 +50,12 @@ export const TECHNIQUES_LOTUS_POURPRE: TechniqueCultivation[] = [
     element: ElementCultivation.EAU,
     niveauRequis: RoyaumeCultivation.FONDATION,
     rangRequis: RangSecte.DISCIPLE_PRINCIPAL,
+    utilite: [
+      "Protection contre les attaques physiques et spirituelles",
+      "Purification des énergies négatives dans l'environnement",
+      "Création d'une zone de méditation sécurisée",
+      "Dissipation des illusions et des poisons spirituels"
+    ],
     effets: {
       bonusStats: { constitution: 2 },
       resistanceElement: [ElementCultivation.FEU, ElementCultivation.TERRE]
@@ -53,6 +70,12 @@ export const TECHNIQUES_LOTUS_POURPRE: TechniqueCultivation[] = [
     element: ElementCultivation.EAU,
     niveauRequis: RoyaumeCultivation.CORE_OR,
     rangRequis: RangSecte.DOYEN,
+    utilite: [
+      "Combat contre des adversaires puissants",
+      "Paralysie temporaire du système de circulation du Qi d'un ennemi",
+      "Destruction de barrières spirituelles",
+      "Démonstration de puissance lors de duels ou tournois"
+    ],
     effets: {
       bonusStats: { force: 2, agilite: 1, intelligence: 2 },
       multiplicateurQi: 1.4
@@ -67,12 +90,84 @@ export const TECHNIQUES_LOTUS_POURPRE: TechniqueCultivation[] = [
     element: ElementCultivation.EAU,
     niveauRequis: RoyaumeCultivation.NASCENT_SOUL,
     rangRequis: RangSecte.ANCIEN,
+    utilite: [
+      "Évasion de situations dangereuses",
+      "Infiltration dans des zones sécurisées",
+      "Traversée d'obstacles physiques",
+      "Récupération d'énergie dans des environnements humides",
+      "Dissimulation et espionnage"
+    ],
     effets: {
       bonusStats: { agilite: 3, perception: 2 },
       multiplicateurQi: 1.6,
       bonusLongevite: 15
     },
     coutApprentissage: 15000
+  },
+  {
+    id: "technique-miroir-aquatique",
+    nom: "Miroir Aquatique",
+    description: "Une technique spirituelle qui permet au cultivateur de créer une surface d'eau parfaitement calme qui reflète non seulement les images, mais aussi les souvenirs et les pensées. Ce miroir peut révéler des vérités cachées, détecter les mensonges et même entrevoir des fragments du passé ou du futur.",
+    rarete: Rarete.EPIQUE,
+    element: ElementCultivation.EAU,
+    niveauRequis: RoyaumeCultivation.FONDATION,
+    rangRequis: RangSecte.DISCIPLE_PRINCIPAL,
+    utilite: [
+      "Divination et recherche de vérités cachées",
+      "Détection de mensonges lors d'interrogatoires",
+      "Exploration de souvenirs personnels oubliés",
+      "Communication à distance avec d'autres pratiquants de la technique",
+      "Observation d'événements distants"
+    ],
+    effets: {
+      bonusStats: { intelligence: 2, perception: 2 },
+      multiplicateurQi: 1.3
+    },
+    coutApprentissage: 2000
+  },
+  {
+    id: "technique-danse-pluie",
+    nom: "Danse de la Pluie Céleste",
+    description: "Une technique rituelle qui permet au cultivateur d'invoquer la pluie en exécutant une danse sacrée. La pluie invoquée est chargée d'énergie spirituelle et peut nourrir les plantes, purifier une zone ou renforcer les techniques d'eau des alliés. Dans les cas extrêmes, elle peut se transformer en déluge purificateur.",
+    rarete: Rarete.LEGENDAIRE,
+    element: ElementCultivation.EAU,
+    niveauRequis: RoyaumeCultivation.CORE_OR,
+    rangRequis: RangSecte.DOYEN,
+    utilite: [
+      "Invocation de pluie dans des régions arides",
+      "Purification de zones corrompues par des énergies maléfiques",
+      "Renforcement des cultivateurs d'eau alliés",
+      "Création d'un environnement favorable à la cultivation",
+      "Extinction d'incendies massifs"
+    ],
+    effets: {
+      bonusStats: { intelligence: 2, charisme: 2 },
+      multiplicateurQi: 1.5,
+      bonusLongevite: 10
+    },
+    coutApprentissage: 8000
+  },
+  {
+    id: "technique-dragon-eau",
+    nom: "Manifestation du Dragon d'Eau",
+    description: "Une technique légendaire qui permet au cultivateur de condenser une immense quantité de Qi aquatique pour créer un dragon d'eau semi-conscient. Ce dragon peut attaquer les ennemis, protéger son invocateur ou transporter des personnes sur de longues distances. La connexion spirituelle avec le dragon permet également au cultivateur de voir à travers ses yeux.",
+    rarete: Rarete.MYTHIQUE,
+    element: ElementCultivation.EAU,
+    niveauRequis: RoyaumeCultivation.TRANSCENDANCE,
+    rangRequis: RangSecte.GRAND_ANCIEN,
+    utilite: [
+      "Attaque dévastatrice contre des ennemis puissants",
+      "Transport rapide sur de longues distances",
+      "Protection de zones importantes comme les territoires de la secte",
+      "Exploration de zones dangereuses via la vision partagée",
+      "Démonstration de puissance pour intimider des sectes rivales"
+    ],
+    effets: {
+      bonusStats: { force: 3, intelligence: 3, charisme: 2 },
+      multiplicateurQi: 1.8,
+      bonusLongevite: 20
+    },
+    coutApprentissage: 30000
   }
 ];
 
@@ -86,6 +181,12 @@ export const TECHNIQUES_FLAMME_ETERNELLE: TechniqueCultivation[] = [
     element: ElementCultivation.FEU,
     niveauRequis: RoyaumeCultivation.INITIATION,
     rangRequis: RangSecte.DISCIPLE_EXTERNE,
+    utilite: [
+      "Attaque à distance contre des ennemis",
+      "Allumage de feux dans des conditions difficiles",
+      "Fonte de métaux et travail de forge",
+      "Réchauffement dans des environnements froids"
+    ],
     effets: {
       bonusStats: { force: 1, constitution: 1 },
       resistanceElement: [ElementCultivation.EAU]
@@ -100,6 +201,12 @@ export const TECHNIQUES_FLAMME_ETERNELLE: TechniqueCultivation[] = [
     element: ElementCultivation.FEU,
     niveauRequis: RoyaumeCultivation.QI_CONDENSE,
     rangRequis: RangSecte.DISCIPLE_INTERNE,
+    utilite: [
+      "Protection contre les attaques physiques",
+      "Survie dans des environnements extrêmement froids",
+      "Intimidation des adversaires",
+      "Résistance aux poisons de contact"
+    ],
     effets: {
       bonusStats: { constitution: 2 },
       resistanceElement: [ElementCultivation.METAL, ElementCultivation.BOIS]
@@ -114,6 +221,13 @@ export const TECHNIQUES_FLAMME_ETERNELLE: TechniqueCultivation[] = [
     element: ElementCultivation.FEU,
     niveauRequis: RoyaumeCultivation.FONDATION,
     rangRequis: RangSecte.DISCIPLE_PRINCIPAL,
+    utilite: [
+      "Création d'armes et d'équipements spirituels",
+      "Réparation d'objets magiques endommagés",
+      "Amélioration d'artefacts existants",
+      "Extraction de matériaux précieux des minerais",
+      "Création de talismans de feu"
+    ],
     effets: {
       bonusStats: { force: 1, intelligence: 2 },
       multiplicateurQi: 1.3
@@ -128,6 +242,13 @@ export const TECHNIQUES_FLAMME_ETERNELLE: TechniqueCultivation[] = [
     element: ElementCultivation.FEU,
     niveauRequis: RoyaumeCultivation.CORE_OR,
     rangRequis: RangSecte.DOYEN,
+    utilite: [
+      "Attaque dévastatrice contre des groupes d'ennemis",
+      "Destruction de barrières et fortifications",
+      "Création de diversions",
+      "Signal de détresse visible à grande distance",
+      "Purification de zones corrompues par des énergies maléfiques"
+    ],
     effets: {
       bonusStats: { force: 3 },
       multiplicateurQi: 1.5
@@ -142,12 +263,86 @@ export const TECHNIQUES_FLAMME_ETERNELLE: TechniqueCultivation[] = [
     element: ElementCultivation.FEU,
     niveauRequis: RoyaumeCultivation.NASCENT_SOUL,
     rangRequis: RangSecte.ANCIEN,
+    utilite: [
+      "Auto-guérison de blessures graves ou mortelles",
+      "Purification du corps des poisons et malédictions",
+      "Dernier recours dans des situations désespérées",
+      "Renouvellement complet du Qi en cas d'épuisement",
+      "Transcendance temporaire des limites du corps"
+    ],
     effets: {
       bonusStats: { constitution: 3, chance: 2 },
       bonusLongevite: 20,
       multiplicateurQi: 1.7
     },
     coutApprentissage: 15000
+  },
+  {
+    id: "technique-alchimie-flamme-celeste",
+    nom: "Alchimie de la Flamme Céleste",
+    description: "Une technique alchimique avancée qui permet au cultivateur de manipuler une flamme spirituelle spéciale capable de raffiner des ingrédients ordinaires en élixirs puissants. Cette flamme peut également purifier les impuretés des matériaux alchimiques et révéler leurs propriétés cachées.",
+    rarete: Rarete.EPIQUE,
+    element: ElementCultivation.FEU,
+    niveauRequis: RoyaumeCultivation.FONDATION,
+    rangRequis: RangSecte.DISCIPLE_PRINCIPAL,
+    utilite: [
+      "Création d'élixirs médicinaux et de cultivation",
+      "Purification d'ingrédients alchimiques contaminés",
+      "Analyse des propriétés cachées de matériaux rares",
+      "Extraction d'essences spirituelles de plantes et minéraux",
+      "Amélioration de la qualité des pilules alchimiques"
+    ],
+    effets: {
+      bonusStats: { intelligence: 2, perception: 1 },
+      multiplicateurQi: 1.2,
+      bonusLongevite: 5
+    },
+    coutApprentissage: 2000
+  },
+  {
+    id: "technique-coeur-fournaise",
+    nom: "Cœur de la Fournaise",
+    description: "Une technique qui transforme le cœur du cultivateur en une fournaise spirituelle, lui permettant de générer et de contrôler des températures extrêmes. Le pratiquant devient insensible à la chaleur et peut faire fondre presque n'importe quel matériau par simple contact.",
+    rarete: Rarete.LEGENDAIRE,
+    element: ElementCultivation.FEU,
+    niveauRequis: RoyaumeCultivation.CORE_OR,
+    rangRequis: RangSecte.DOYEN,
+    utilite: [
+      "Raffinage de métaux précieux et de matériaux spirituels",
+      "Destruction d'artefacts corrompus ou maudits",
+      "Survie dans des environnements de chaleur extrême",
+      "Combat contre des entités de glace ou d'eau",
+      "Création d'armes forgées directement à partir du Qi"
+    ],
+    effets: {
+      bonusStats: { force: 2, constitution: 2 },
+      resistanceElement: [ElementCultivation.EAU, ElementCultivation.METAL],
+      multiplicateurQi: 1.4
+    },
+    coutApprentissage: 7000
+  },
+  {
+    id: "technique-soleil-interieur",
+    nom: "Soleil Intérieur",
+    description: "Une technique mythique qui permet au cultivateur de créer un véritable soleil miniature dans son dantian. Cette source d'énergie quasi-inépuisable alimente toutes les techniques de feu du pratiquant et rayonne d'une aura qui inspire crainte et respect. À son niveau ultime, le cultivateur peut brièvement manifester ce soleil dans le monde extérieur.",
+    rarete: Rarete.MYTHIQUE,
+    element: ElementCultivation.FEU,
+    niveauRequis: RoyaumeCultivation.TRANSCENDANCE,
+    rangRequis: RangSecte.GRAND_ANCIEN,
+    utilite: [
+      "Source d'énergie quasi-illimitée pour les techniques de feu",
+      "Création d'un domaine de chaleur extrême autour du cultivateur",
+      "Manifestation d'un soleil miniature pour des attaques dévastatrices",
+      "Illumination de vastes zones plongées dans les ténèbres",
+      "Intimidation d'adversaires par la simple présence du cultivateur"
+    ],
+    effets: {
+      bonusStats: { force: 3, constitution: 2, charisme: 3 },
+      multiplicateurQi: 2.0,
+      bonusLongevite: 25,
+      resistanceElement: [ElementCultivation.EAU, ElementCultivation.OBSCURITE]
+    },
+    coutApprentissage: 35000
   }
 ];
 
@@ -161,6 +356,12 @@ export const TECHNIQUES_MONTAGNE_VERTE: TechniqueCultivation[] = [
     element: ElementCultivation.BOIS,
     niveauRequis: RoyaumeCultivation.MORTEL,
     rangRequis: RangSecte.DISCIPLE_EXTERNE,
+    utilite: [
+      "Méditation en milieu naturel pour accélérer la cultivation",
+      "Purification du corps des toxines",
+      "Détection des plantes médicinales et des herbes rares",
+      "Communication basique avec la flore environnante"
+    ],
     effets: {
       multiplicateurQi: 1.1,
       bonusLongevite: 2,
@@ -176,6 +377,13 @@ export const TECHNIQUES_MONTAGNE_VERTE: TechniqueCultivation[] = [
     element: ElementCultivation.BOIS,
     niveauRequis: RoyaumeCultivation.INITIATION,
     rangRequis: RangSecte.DISCIPLE_INTERNE,
+    utilite: [
+      "Culture accélérée d'herbes médicinales et de plantes rares",
+      "Création de barrières végétales pour la protection",
+      "Amélioration des récoltes et lutte contre la famine",
+      "Restauration d'écosystèmes endommagés",
+      "Communication avec les plantes pour obtenir des informations"
+    ],
     effets: {
       bonusStats: { intelligence: 1, perception: 1 },
       reductionTemps: 7
@@ -190,6 +398,12 @@ export const TECHNIQUES_MONTAGNE_VERTE: TechniqueCultivation[] = [
     element: ElementCultivation.BOIS,
     niveauRequis: RoyaumeCultivation.QI_CONDENSE,
     rangRequis: RangSecte.DISCIPLE_PRINCIPAL,
+    utilite: [
+      "Protection contre les attaques physiques et spirituelles",
+      "Survie dans des environnements hostiles",
+      "Camouflage en milieu forestier",
+      "Absorption de dégâts pour protéger des alliés"
+    ],
     effets: {
       bonusStats: { constitution: 2 },
       resistanceElement: [ElementCultivation.TERRE, ElementCultivation.METAL]
@@ -204,6 +418,13 @@ export const TECHNIQUES_MONTAGNE_VERTE: TechniqueCultivation[] = [
     element: ElementCultivation.BOIS,
     niveauRequis: RoyaumeCultivation.FONDATION,
     rangRequis: RangSecte.DOYEN,
+    utilite: [
+      "Immobilisation d'adversaires",
+      "Création de pièges",
+      "Escalade de surfaces verticales",
+      "Drainage d'énergie spirituelle d'ennemis",
+      "Capture de créatures ou d'individus vivants"
+    ],
     effets: {
       bonusStats: { force: 1, agilite: 2, perception: 1 },
       multiplicateurQi: 1.3
@@ -218,12 +439,86 @@ export const TECHNIQUES_MONTAGNE_VERTE: TechniqueCultivation[] = [
     element: ElementCultivation.BOIS,
     niveauRequis: RoyaumeCultivation.CORE_OR,
     rangRequis: RangSecte.ANCIEN,
+    utilite: [
+      "Guérison de blessures graves",
+      "Régénération de membres ou d'organes perdus",
+      "Prolongation de la vie de personnes mourantes",
+      "Purification de zones corrompues",
+      "Restauration de terres stériles"
+    ],
     effets: {
       bonusStats: { constitution: 3, intelligence: 2 },
       bonusLongevite: 25,
       multiplicateurQi: 1.5
     },
     coutApprentissage: 10000
+  },
+  {
+    id: "technique-communion-arbre-ancestral",
+    nom: "Communion avec l'Arbre Ancestral",
+    description: "Une technique méditative qui permet au cultivateur d'établir une connexion spirituelle avec l'Arbre Ancestral de la secte, un être végétal millénaire doté d'une conscience propre. Cette communion permet d'accéder à la sagesse accumulée par l'arbre au fil des siècles et d'obtenir des conseils sur des questions complexes.",
+    rarete: Rarete.RARE,
+    element: ElementCultivation.BOIS,
+    niveauRequis: RoyaumeCultivation.INITIATION,
+    rangRequis: RangSecte.DISCIPLE_INTERNE,
+    utilite: [
+      "Consultation sur des questions de cultivation difficiles",
+      "Obtention d'informations historiques oubliées",
+      "Guidance spirituelle lors de dilemmes moraux",
+      "Localisation de ressources naturelles rares",
+      "Apaisement de l'esprit troublé"
+    ],
+    effets: {
+      bonusStats: { intelligence: 2, charisme: 1 },
+      reductionTemps: 10,
+      bonusLongevite: 5
+    },
+    coutApprentissage: 800
+  },
+  {
+    id: "technique-metamorphose-vegetale",
+    nom: "Métamorphose Végétale",
+    description: "Une technique avancée qui permet au cultivateur de transformer temporairement son corps en une forme végétale. Dans cet état, le pratiquant peut fusionner avec les plantes environnantes, absorber les nutriments directement du sol et se régénérer à la lumière du soleil.",
+    rarete: Rarete.EPIQUE,
+    element: ElementCultivation.BOIS,
+    niveauRequis: RoyaumeCultivation.FONDATION,
+    rangRequis: RangSecte.DISCIPLE_PRINCIPAL,
+    utilite: [
+      "Camouflage parfait en milieu naturel",
+      "Récupération accélérée de Qi à la lumière du soleil",
+      "Survie prolongée sans nourriture conventionnelle",
+      "Communication avancée avec toutes formes de végétation",
+      "Résistance aux toxines et poisons"
+    ],
+    effets: {
+      bonusStats: { constitution: 2, perception: 1 },
+      multiplicateurQi: 1.3,
+      bonusLongevite: 8
+    },
+    coutApprentissage: 2500
+  },
+  {
+    id: "technique-gardien-foret",
+    nom: "Gardien de la Forêt Primordiale",
+    description: "Une technique légendaire qui fait du cultivateur un véritable gardien de la nature. Le pratiquant peut éveiller la conscience des plantes environnantes, commander aux créatures de la forêt et invoquer l'essence même de la forêt primordiale pour créer un domaine sacré où la nature règne en maître absolu.",
+    rarete: Rarete.MYTHIQUE,
+    element: ElementCultivation.BOIS,
+    niveauRequis: RoyaumeCultivation.TRANSCENDANCE,
+    rangRequis: RangSecte.GRAND_ANCIEN,
+    utilite: [
+      "Création d'un domaine naturel sacré et inviolable",
+      "Commandement des créatures et plantes sur un vaste territoire",
+      "Purification de corruptions spirituelles à grande échelle",
+      "Invocation de gardiens végétaux anciens pour la protection",
+      "Restauration d'écosystèmes entiers en quelques jours"
+    ],
+    effets: {
+      bonusStats: { force: 2, constitution: 3, charisme: 3 },
+      multiplicateurQi: 1.8,
+      bonusLongevite: 30,
+      resistanceElement: [ElementCultivation.FEU, ElementCultivation.METAL]
+    },
+    coutApprentissage: 30000
   }
 ];
 
@@ -237,6 +532,13 @@ export const TECHNIQUES_VOILE_OBSCUR: TechniqueCultivation[] = [
     element: ElementCultivation.OBSCURITE,
     niveauRequis: RoyaumeCultivation.CORE_OR,
     rangRequis: RangSecte.DISCIPLE_INTERNE,
+    utilite: [
+      "Navigation dans l'obscurité totale",
+      "Détection d'énergies spirituelles cachées",
+      "Perception des illusions et des dissimulations",
+      "Lecture de textes anciens dans des tombeaux obscurs",
+      "Repérage d'adversaires cachés"
+    ],
     effets: {
       bonusStats: { perception: 2 },
       resistanceElement: [ElementCultivation.LUMIERE]
@@ -251,6 +553,13 @@ export const TECHNIQUES_VOILE_OBSCUR: TechniqueCultivation[] = [
     element: ElementCultivation.OBSCURITE,
     niveauRequis: RoyaumeCultivation.CORE_OR,
     rangRequis: RangSecte.DISCIPLE_PRINCIPAL,
+    utilite: [
+      "Déplacement rapide entre zones d'ombre",
+      "Évasion de situations dangereuses",
+      "Infiltration discrète",
+      "Embuscades surprises",
+      "Traversée de barrières physiques via les ombres"
+    ],
     effets: {
       bonusStats: { agilite: 3 },
       multiplicateurQi: 1.3
@@ -265,6 +574,13 @@ export const TECHNIQUES_VOILE_OBSCUR: TechniqueCultivation[] = [
     element: ElementCultivation.LUMIERE,
     niveauRequis: RoyaumeCultivation.CORE_OR,
     rangRequis: RangSecte.DISCIPLE_PRINCIPAL,
+    utilite: [
+      "Attaque perçante contre des défenses spirituelles",
+      "Dissipation des ténèbres et des énergies négatives",
+      "Révélation d'entités cachées ou invisibles",
+      "Purification de zones corrompues",
+      "Signal lumineux visible à grande distance"
+    ],
     effets: {
       bonusStats: { force: 2, intelligence: 1 },
       resistanceElement: [ElementCultivation.OBSCURITE]
@@ -279,6 +595,13 @@ export const TECHNIQUES_VOILE_OBSCUR: TechniqueCultivation[] = [
     element: ElementCultivation.LUMIERE, // L'élément principal peut varier selon l'utilisation
     niveauRequis: RoyaumeCultivation.NASCENT_SOUL,
     rangRequis: RangSecte.DOYEN,
+    utilite: [
+      "Adaptation à différents environnements spirituels",
+      "Création d'illusions complexes mêlant lumière et ombre",
+      "Manipulation des perceptions d'autrui",
+      "Neutralisation de techniques basées sur la lumière ou l'obscurité",
+      "Accès à des domaines spirituels normalement inaccessibles"
+    ],
     effets: {
       bonusStats: { intelligence: 2, perception: 2, chance: 1 },
       multiplicateurQi: 1.5,
@@ -287,19 +610,92 @@ export const TECHNIQUES_VOILE_OBSCUR: TechniqueCultivation[] = [
     coutApprentissage: 10000
   },
   {
-    id: "technique-eclipse-eternelle",
-    nom: "Éclipse Éternelle",
-    description: "Une technique mythique qui permet au cultivateur de créer une zone où la lumière et l'obscurité fusionnent en une énergie primordiale. Dans cette zone, le temps et l'espace deviennent fluides, et le pratiquant peut manipuler la réalité à un niveau fondamental. Cette technique est considérée comme un pas vers la divinité.",
+    id: "technique-vide-absolu",
+    nom: "Vide Absolu",
+    description: "La technique ultime de la Secte du Voile Obscur, qui permet au cultivateur de créer un espace de vide absolu où ni la lumière ni l'obscurité n'existent. Dans cet espace, le pratiquant devient presque omnipotent, pouvant manipuler la réalité elle-même pour une courte durée.",
     rarete: Rarete.MYTHIQUE,
-    element: ElementCultivation.OBSCURITE,
+    element: ElementCultivation.OBSCURITE, // Bien que ce soit un mélange des deux
     niveauRequis: RoyaumeCultivation.TRANSCENDANCE,
     rangRequis: RangSecte.ANCIEN,
+    utilite: [
+      "Création d'un domaine personnel où les lois normales ne s'appliquent pas",
+      "Isolement complet d'une zone de combat",
+      "Manipulation temporaire de la réalité",
+      "Protection absolue contre les attaques extérieures",
+      "Méditation profonde pour des percées spirituelles majeures"
+    ],
     effets: {
       bonusStats: { intelligence: 3, perception: 3, chance: 2 },
       multiplicateurQi: 2.0,
-      bonusLongevite: 50
+      bonusLongevite: 30
     },
     coutApprentissage: 50000
+  },
+  {
+    id: "technique-meditation-dualite",
+    nom: "Méditation de la Dualité Céleste",
+    description: "Une technique méditative fondamentale de la Secte du Voile Obscur qui enseigne au cultivateur à percevoir et à comprendre la nature duelle de l'univers. En alternant entre la contemplation de la lumière et de l'obscurité, le pratiquant développe une compréhension profonde de l'équilibre cosmique.",
+    rarete: Rarete.COMMUN,
+    element: ElementCultivation.LUMIERE, // Alterne entre lumière et obscurité
+    niveauRequis: RoyaumeCultivation.INITIATION,
+    rangRequis: RangSecte.DISCIPLE_EXTERNE,
+    utilite: [
+      "Méditation quotidienne pour renforcer l'esprit",
+      "Développement d'une affinité avec la lumière et l'obscurité",
+      "Préparation mentale pour des techniques plus avancées",
+      "Perception des déséquilibres énergétiques subtils",
+      "Résistance aux influences spirituelles extérieures"
+    ],
+    effets: {
+      bonusStats: { intelligence: 1, perception: 1 },
+      multiplicateurQi: 1.15,
+      reductionTemps: 5
+    },
+    coutApprentissage: 200
+  },
+  {
+    id: "technique-illusion-miroir",
+    nom: "Illusion du Miroir Céleste",
+    description: "Une technique qui permet au cultivateur de créer des illusions complexes en manipulant la lumière et l'ombre. Ces illusions peuvent sembler totalement réelles aux sens et même posséder une substance semi-physique capable d'interagir avec le monde réel.",
+    rarete: Rarete.RARE,
+    element: ElementCultivation.LUMIERE,
+    niveauRequis: RoyaumeCultivation.QI_CONDENSE,
+    rangRequis: RangSecte.DISCIPLE_INTERNE,
+    utilite: [
+      "Création de diversions lors de situations dangereuses",
+      "Dissimulation d'objets ou de personnes",
+      "Tests psychologiques pour les disciples",
+      "Représentation visuelle de concepts abstraits lors de l'enseignement",
+      "Manipulation subtile des perceptions d'autrui"
+    ],
+    effets: {
+      bonusStats: { intelligence: 2, charisme: 1 },
+      multiplicateurQi: 1.2
+    },
+    coutApprentissage: 1500
+  },
+  {
+    id: "technique-ascension-astrale",
+    nom: "Ascension Astrale",
+    description: "Une technique mystique qui permet au cultivateur de séparer son esprit de son corps physique, lui permettant de voyager dans le plan astral. Dans cet état, le pratiquant peut observer des lieux distants, communiquer avec d'autres êtres spirituels et accéder à des connaissances normalement inaccessibles.",
+    rarete: Rarete.MYTHIQUE,
+    element: ElementCultivation.LUMIERE,
+    niveauRequis: RoyaumeCultivation.SAINT_MARTIAL,
+    rangRequis: RangSecte.PATRIARCHE,
+    utilite: [
+      "Exploration de domaines spirituels inaccessibles physiquement",
+      "Communication avec des entités célestes et des esprits anciens",
+      "Observation d'événements distants en temps réel",
+      "Acquisition de connaissances cosmiques transcendantes",
+      "Préparation à la véritable transcendance spirituelle"
+    ],
+    effets: {
+      bonusStats: { intelligence: 4, perception: 3, chance: 3 },
+      multiplicateurQi: 2.5,
+      bonusLongevite: 50,
+      resistanceElement: [ElementCultivation.OBSCURITE, ElementCultivation.LUMIERE, ElementCultivation.FOUDRE]
+    },
+    coutApprentissage: 100000
   }
 ];
 
@@ -313,6 +709,12 @@ export const TECHNIQUES_GENERIQUES: TechniqueCultivation[] = [
     element: ElementCultivation.TERRE, // Neutre, compatible avec tous les éléments
     niveauRequis: RoyaumeCultivation.MORTEL,
     rangRequis: RangSecte.DISCIPLE_EXTERNE,
+    utilite: [
+      "Pratique quotidienne pour renforcer les bases de cultivation",
+      "Détection du Qi environnant",
+      "Préparation mentale avant l'apprentissage de techniques avancées",
+      "Récupération d'énergie spirituelle"
+    ],
     effets: {
       multiplicateurQi: 1.05,
       reductionTemps: 2
@@ -327,6 +729,12 @@ export const TECHNIQUES_GENERIQUES: TechniqueCultivation[] = [
     element: ElementCultivation.TERRE,
     niveauRequis: RoyaumeCultivation.INITIATION,
     rangRequis: RangSecte.DISCIPLE_EXTERNE,
+    utilite: [
+      "Entraînement physique quotidien",
+      "Résistance aux maladies et aux poisons faibles",
+      "Amélioration des capacités physiques de base",
+      "Préparation du corps pour des techniques plus exigeantes"
+    ],
     effets: {
       bonusStats: { force: 1, constitution: 1 },
       bonusLongevite: 1
@@ -341,11 +749,101 @@ export const TECHNIQUES_GENERIQUES: TechniqueCultivation[] = [
     element: ElementCultivation.TERRE,
     niveauRequis: RoyaumeCultivation.QI_CONDENSE,
     rangRequis: RangSecte.DISCIPLE_INTERNE,
+    utilite: [
+      "Détection de trésors naturels et de ressources spirituelles",
+      "Évaluation de la puissance d'autres cultivateurs",
+      "Identification de formations spirituelles et de pièges",
+      "Localisation de veines de Qi terrestres pour la méditation",
+      "Analyse des flux de Qi dans les artefacts et talismans"
+    ],
     effets: {
       bonusStats: { perception: 2 },
       reductionTemps: 5
     },
     coutApprentissage: 200
+  },
+  {
+    id: "technique-pas-leger",
+    nom: "Pas Léger",
+    description: "Une technique de déplacement de base qui permet au cultivateur de réduire son poids et de se déplacer rapidement et silencieusement. Elle est utile pour la furtivité, l'esquive et les déplacements sur des surfaces instables.",
+    rarete: Rarete.COMMUN,
+    element: ElementCultivation.TERRE,
+    niveauRequis: RoyaumeCultivation.INITIATION,
+    rangRequis: RangSecte.DISCIPLE_EXTERNE,
+    utilite: [
+      "Déplacement silencieux pour la furtivité",
+      "Esquive rapide lors de combats",
+      "Traversée de surfaces instables comme l'eau ou les sables mouvants",
+      "Course sur de longues distances sans fatigue",
+      "Réduction des dégâts lors de chutes"
+    ],
+    effets: {
+      bonusStats: { agilite: 1 }
+    },
+    coutApprentissage: 30
+  },
+  {
+    id: "technique-poing-tonnerre",
+    nom: "Poing du Tonnerre",
+    description: "Une technique de combat basique mais efficace qui concentre le Qi dans les poings pour augmenter considérablement la force d'impact. Lorsqu'elle est exécutée correctement, l'impact produit un son semblable au tonnerre.",
+    rarete: Rarete.RARE,
+    element: ElementCultivation.FOUDRE,
+    niveauRequis: RoyaumeCultivation.QI_CONDENSE,
+    rangRequis: RangSecte.DISCIPLE_INTERNE,
+    utilite: [
+      "Combat rapproché contre des adversaires",
+      "Destruction d'obstacles physiques",
+      "Intimidation d'adversaires plus faibles",
+      "Entraînement pour renforcer les poings et les bras",
+      "Création d'ondes de choc pour déstabiliser plusieurs ennemis"
+    ],
+    effets: {
+      bonusStats: { force: 2 }
+    },
+    coutApprentissage: 300
+  },
+  {
+    id: "technique-respiration-purificatrice",
+    nom: "Respiration Purificatrice",
+    description: "Une technique de respiration qui permet au cultivateur de purifier son corps des toxines et des énergies négatives. Elle est particulièrement utile après avoir été exposé à des poisons ou des miasmes spirituels.",
+    rarete: Rarete.RARE,
+    element: ElementCultivation.TERRE,
+    niveauRequis: RoyaumeCultivation.FONDATION,
+    rangRequis: RangSecte.DISCIPLE_INTERNE,
+    utilite: [
+      "Détoxification du corps après empoisonnement",
+      "Purification du Qi corrompu",
+      "Récupération accélérée après un combat",
+      "Résistance temporaire aux environnements toxiques",
+      "Préparation du corps avant l'absorption d'élixirs puissants"
+    ],
+    effets: {
+      bonusStats: { constitution: 1 },
+      bonusLongevite: 3
+    },
+    coutApprentissage: 400
+  },
+  {
+    id: "technique-meditation-etoiles",
+    nom: "Méditation des Étoiles",
+    description: "Une technique de méditation avancée qui permet au cultivateur d'absorber l'essence des étoiles pendant la nuit. Cette énergie céleste pure est particulièrement bénéfique pour raffiner l'esprit et élargir la conscience.",
+    rarete: Rarete.EPIQUE,
+    element: ElementCultivation.LUMIERE,
+    niveauRequis: RoyaumeCultivation.CORE_OR,
+    rangRequis: RangSecte.DISCIPLE_PRINCIPAL,
+    utilite: [
+      "Méditation nocturne pour accélérer la cultivation",
+      "Expansion de la conscience spirituelle",
+      "Amélioration de la clarté mentale et de l'intuition",
+      "Préparation aux percées spirituelles majeures",
+      "Connexion avec les énergies cosmiques"
+    ],
+    effets: {
+      bonusStats: { intelligence: 2, perception: 1 },
+      multiplicateurQi: 1.3,
+      bonusLongevite: 7
+    },
+    coutApprentissage: 2000
   }
 ];
 

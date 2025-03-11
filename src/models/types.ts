@@ -278,6 +278,7 @@ export interface TechniqueCultivation {
   element: ElementCultivation;
   niveauRequis: RoyaumeCultivation;
   rangRequis?: RangSecte;         // Rang minimum requis dans la secte pour apprendre cette technique
+  utilite: string[];              // Liste des utilisations pratiques de la technique
   effets: {
     multiplicateurQi?: number;       // Multiplicateur pour le gain de Qi
     bonusStats?: Partial<Stats>;     // Bonus aux statistiques
@@ -372,6 +373,11 @@ export interface Stats {
   charisme: number;     // Influence sociale
   chance: number;       // Chance et destin
   qi: number;           // Énergie spirituelle
+  // Nouvelles statistiques dérivées
+  hp: number;           // Points de vie
+  degat: number;        // Dégâts infligés
+  esquive: number;      // Capacité d'esquive
+  resistance: number;   // Résistance aux dégâts
 }
 
 // Interface pour le personnage
@@ -404,6 +410,10 @@ export interface Personnage {
   bonusApprentissage?: number; // Bonus d'apprentissage des techniques (pourcentage)
   bonusSpecial?: string; // Description d'un bonus spécial unique
 }
+
+// Constantes pour les limites de statistiques
+export const STAT_MAX_CREATION = 10; // Maximum lors de la création du personnage
+export const STAT_MAX_JEU = 100;     // Maximum atteignable pendant le jeu
 
 // Fonction pour calculer l'espérance de vie d'un personnage
 export const calculerEsperanceVie = (race: Race, royaumeCultivation: RoyaumeCultivation): number => {
@@ -618,15 +628,35 @@ export const getOrigineInfo = (origine: Origine): OrigineInfo => {
 
 // Fonction pour générer des statistiques aléatoires
 export const genererStatsAleatoires = (): Stats => {
+  // Générer d'abord les statistiques de base
+  const force = Math.floor(Math.random() * 10) + 1;
+  const agilite = Math.floor(Math.random() * 10) + 1;
+  const constitution = Math.floor(Math.random() * 10) + 1;
+  const intelligence = Math.floor(Math.random() * 10) + 1;
+  const perception = Math.floor(Math.random() * 10) + 1;
+  const charisme = Math.floor(Math.random() * 10) + 1;
+  const chance = Math.floor(Math.random() * 10) + 1;
+  const qi = Math.floor(Math.random() * 10) + 1;
+  
+  // Calculer les statistiques dérivées
+  const hp = constitution * 10 + force * 5;
+  const degat = force * 2 + qi;
+  const esquive = agilite * 1.5 + perception * 0.5;
+  const resistance = constitution * 1.5 + force * 0.5;
+  
   return {
-    force: Math.floor(Math.random() * 10) + 1,
-    agilite: Math.floor(Math.random() * 10) + 1,
-    constitution: Math.floor(Math.random() * 10) + 1,
-    intelligence: Math.floor(Math.random() * 10) + 1,
-    perception: Math.floor(Math.random() * 10) + 1,
-    charisme: Math.floor(Math.random() * 10) + 1,
-    chance: Math.floor(Math.random() * 10) + 1,
-    qi: Math.floor(Math.random() * 10) + 1
+    force,
+    agilite,
+    constitution,
+    intelligence,
+    perception,
+    charisme,
+    chance,
+    qi,
+    hp,
+    degat,
+    esquive,
+    resistance
   };
 };
 
@@ -1019,9 +1049,22 @@ export const appliquerEffetsEvenement = (personnage: Personnage, evenement: Even
   if (evenement.effets.stats) {
     Object.entries(evenement.effets.stats).forEach(([stat, valeur]) => {
       if (stat in personnageModifie.stats) {
-        personnageModifie.stats[stat as keyof Stats] = Math.max(1, personnageModifie.stats[stat as keyof Stats] + (valeur as number));
+        // Limiter les statistiques entre 1 et STAT_MAX_JEU (100)
+        personnageModifie.stats[stat as keyof Stats] = Math.min(
+          STAT_MAX_JEU, 
+          Math.max(1, personnageModifie.stats[stat as keyof Stats] + (valeur as number))
+        );
       }
     });
+    
+    // Recalculer les statistiques dérivées
+    personnageModifie.stats.hp = personnageModifie.stats.constitution * 10 + personnageModifie.stats.force * 5;
+    personnageModifie.stats.degat = personnageModifie.stats.force * 2 + personnageModifie.stats.qi;
+    personnageModifie.stats.esquive = personnageModifie.stats.agilite * 1.5 + personnageModifie.stats.perception * 0.5;
+    personnageModifie.stats.resistance = personnageModifie.stats.constitution * 1.5 + personnageModifie.stats.force * 0.5;
+    
+    // Recalculer le talent de cultivation
+    personnageModifie.talentCultivation = calculerTalentCultivation(personnageModifie.stats);
   }
   
   // Appliquer les modifications d'âge
@@ -1159,10 +1202,11 @@ export const SECTES: Secte[] = [
 // Fonction pour obtenir les sectes disponibles en fonction du talent et des stats
 export const getSecteDisponibles = (personnage: Personnage): Secte[] => {
   // Calculer un score de talent basé sur les stats et le talent de cultivation
+  // Utiliser le talent calculé à partir des statistiques
   const scoreTalent = personnage.talentCultivation + 
-                     (personnage.stats.intelligence * 0.8) + 
-                     (personnage.stats.perception * 0.6) + 
-                     (personnage.stats.chance * 0.4);
+                     (personnage.stats.esquive * 0.3) + 
+                     (personnage.stats.resistance * 0.3) + 
+                     (personnage.stats.degat * 0.2);
   
   // Filtrer les sectes en fonction du royaume de cultivation et des stats minimales
   return SECTES.filter(secte => {
@@ -1184,6 +1228,18 @@ export const getSecteDisponibles = (personnage: Personnage): Secte[] => {
       raceOk = false;
     }
     
+    // Vérifier l'affinité élémentaire avec l'élément principal de la secte
+    let affiniteOk = true;
+    const affiniteRequise = secte.rarete === Rarete.COMMUN ? 30 :
+                           secte.rarete === Rarete.RARE ? 50 :
+                           secte.rarete === Rarete.EPIQUE ? 65 :
+                           secte.rarete === Rarete.LEGENDAIRE ? 80 :
+                           secte.rarete === Rarete.MYTHIQUE ? 90 : 0;
+    
+    if (personnage.affiniteElements[secte.elementPrincipal] < affiniteRequise) {
+      affiniteOk = false;
+    }
+    
     // Vérifier le score de talent pour les sectes rares
     let talentOk = true;
     if (secte.rarete === Rarete.RARE && scoreTalent < 50) talentOk = false;
@@ -1191,7 +1247,7 @@ export const getSecteDisponibles = (personnage: Personnage): Secte[] => {
     if (secte.rarete === Rarete.LEGENDAIRE && scoreTalent < 90) talentOk = false;
     if (secte.rarete === Rarete.MYTHIQUE && scoreTalent < 95) talentOk = false;
     
-    return royaumeOk && statsOk && raceOk && talentOk;
+    return royaumeOk && statsOk && raceOk && affiniteOk && talentOk;
   });
 };
 
@@ -1284,6 +1340,38 @@ export const calculerBonusSecte = (personnage: Personnage): {
   };
 };
 
+// Fonction pour appliquer les bonus de secte au personnage
+export const appliquerBonusSecte = (personnage: Personnage): Personnage => {
+  const personnageModifie = { ...personnage };
+  
+  // Calculer les bonus de secte
+  const bonus = calculerBonusSecte(personnage);
+  
+  // Appliquer les bonus aux statistiques
+  if (bonus.bonusStats) {
+    Object.entries(bonus.bonusStats).forEach(([stat, valeur]) => {
+      if (stat in personnageModifie.stats) {
+        // Limiter les statistiques à STAT_MAX_JEU (100)
+        personnageModifie.stats[stat as keyof Stats] = Math.min(
+          STAT_MAX_JEU,
+          personnageModifie.stats[stat as keyof Stats] + valeur
+        );
+      }
+    });
+    
+    // Recalculer les statistiques dérivées
+    personnageModifie.stats.hp = personnageModifie.stats.constitution * 10 + personnageModifie.stats.force * 5;
+    personnageModifie.stats.degat = personnageModifie.stats.force * 2 + personnageModifie.stats.qi;
+    personnageModifie.stats.esquive = personnageModifie.stats.agilite * 1.5 + personnageModifie.stats.perception * 0.5;
+    personnageModifie.stats.resistance = personnageModifie.stats.constitution * 1.5 + personnageModifie.stats.force * 0.5;
+    
+    // Recalculer le talent de cultivation
+    personnageModifie.talentCultivation = calculerTalentCultivation(personnageModifie.stats);
+  }
+  
+  return personnageModifie;
+};
+
 // Fonction pour générer des affinités élémentaires aléatoires
 export const genererAffinitesElementaires = (): Record<ElementCultivation, number> => {
   const affinites: Partial<Record<ElementCultivation, number>> = {};
@@ -1310,18 +1398,35 @@ export const genererAffinitesElementaires = (): Record<ElementCultivation, numbe
   return affinites as Record<ElementCultivation, number>;
 };
 
+// Fonction pour calculer le talent de cultivation basé sur les statistiques
+export const calculerTalentCultivation = (stats: Stats): number => {
+  // Calculer la moyenne des statistiques de base (sur 10)
+  const moyenneStats = (
+    stats.force + 
+    stats.agilite + 
+    stats.constitution + 
+    stats.intelligence + 
+    stats.perception + 
+    stats.charisme + 
+    stats.chance + 
+    stats.qi
+  ) / 8;
+  
+  // Appliquer une formule exponentielle pour favoriser les moyennes élevées
+  // Une moyenne de 5 donnera un talent de 50
+  // Une moyenne de 7 donnera un talent d'environ 70
+  // Une moyenne de 9 donnera un talent d'environ 90
+  // Une moyenne de 10 donnera un talent de 100
+  const talent = Math.pow(moyenneStats / 10, 1.5) * 100;
+  
+  // Arrondir et s'assurer que le talent est entre 1 et 100
+  return Math.min(100, Math.max(1, Math.round(talent)));
+};
+
 // Fonction pour générer un talent de cultivation aléatoire
+// Maintenue pour compatibilité avec le code existant
 export const genererTalentCultivation = (): number => {
-  // Distribution normale centrée autour de 50 avec un écart-type de 15
-  let talent = Math.floor(Math.random() * 100) + 1;
-  
-  // Appliquer une distribution plus réaliste (plus rare d'avoir un talent très élevé)
-  if (talent > 90) {
-    // 10% de chance de garder un talent > 90
-    if (Math.random() > 0.1) {
-      talent = 90 - Math.floor(Math.random() * 20);
-    }
-  }
-  
-  return talent;
+  // Générer des stats aléatoires et calculer le talent
+  const stats = genererStatsAleatoires();
+  return calculerTalentCultivation(stats);
 }; 

@@ -20,7 +20,9 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  SelectChangeEvent
+  SelectChangeEvent,
+  TextField,
+  InputAdornment
 } from '@mui/material';
 import { 
   Personnage, 
@@ -35,6 +37,7 @@ import {
   peutApprendreTechnique, 
   calculerCoutApprentissage 
 } from '../../models/techniques';
+import SearchIcon from '@mui/icons-material/Search';
 
 interface TechniquesMenuProps {
   personnage: Personnage;
@@ -42,34 +45,16 @@ interface TechniquesMenuProps {
 }
 
 const TechniquesMenu: React.FC<TechniquesMenuProps> = ({ personnage, onUpdatePersonnage }) => {
-  const [techniquesDisponibles, setTechniquesDisponibles] = useState<TechniqueCultivation[]>([]);
   const [techniquesApprises, setTechniquesApprises] = useState<TechniqueCultivation[]>([]);
   const [selectedTechnique, setSelectedTechnique] = useState<TechniqueCultivation | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filtreRang, setFiltreRang] = useState<string>("tous");
   const [filtreElement, setFiltreElement] = useState<string>("tous");
+  const [filtreUtilite, setFiltreUtilite] = useState<string>("");
 
   useEffect(() => {
-    // Charger les techniques disponibles en fonction de l'appartenance à une secte
     try {
-      const secteId = personnage.appartenanceSecte?.secteId;
-      let techniques: TechniqueCultivation[] = [];
-      
-      if (secteId) {
-        techniques = getTechniquesSecte(secteId);
-      } else {
-        // Si le personnage n'appartient à aucune secte, montrer uniquement les techniques génériques
-        techniques = getTechniquesSecte('');
-      }
-      
-      // Filtrer les techniques déjà apprises
-      const techniquesNonApprises = techniques.filter(
-        technique => !personnage.techniquesApprises.some(t => t.id === technique.id)
-      );
-      
-      setTechniquesDisponibles(techniquesNonApprises);
       setTechniquesApprises(personnage.techniquesApprises);
       setLoading(false);
     } catch (err) {
@@ -89,34 +74,6 @@ const TechniquesMenu: React.FC<TechniquesMenuProps> = ({ personnage, onUpdatePer
     setSelectedTechnique(null);
   };
 
-  const handleApprendreTechnique = () => {
-    if (!selectedTechnique) return;
-    
-    const resultat = peutApprendreTechnique(personnage, selectedTechnique);
-    
-    if (resultat.peut) {
-      // Calculer le coût réel en tenant compte des bonus
-      const coutReel = calculerCoutApprentissage(
-        personnage, 
-        selectedTechnique, 
-        personnage.appartenanceSecte?.secteId
-      );
-      
-      // Mettre à jour le personnage
-      const personnageUpdated = {
-        ...personnage,
-        pierresSpirituelles: personnage.pierresSpirituelles - coutReel,
-        techniquesApprises: [...personnage.techniquesApprises, selectedTechnique]
-      };
-      
-      onUpdatePersonnage(personnageUpdated);
-      setDialogOpen(false);
-      setSelectedTechnique(null);
-    } else {
-      setError(resultat.raison || "Vous ne pouvez pas apprendre cette technique.");
-    }
-  };
-
   const getElementColor = (element: ElementCultivation): string => {
     switch (element) {
       case ElementCultivation.FEU:
@@ -132,11 +89,11 @@ const TechniquesMenu: React.FC<TechniquesMenuProps> = ({ personnage, onUpdatePer
       case ElementCultivation.FOUDRE:
         return '#ffeb3b'; // Jaune
       case ElementCultivation.LUMIERE:
-        return '#ffeb3b'; // Jaune clair
+        return '#ffc107'; // Ambre
       case ElementCultivation.OBSCURITE:
         return '#673ab7'; // Violet
       default:
-        return '#9e9e9e'; // Gris par défaut
+        return '#000000'; // Noir
     }
   };
 
@@ -161,39 +118,40 @@ const TechniquesMenu: React.FC<TechniquesMenuProps> = ({ personnage, onUpdatePer
     }
   };
 
-  const handleFiltreRangChange = (event: SelectChangeEvent) => {
-    setFiltreRang(event.target.value);
-  };
-
   const handleFiltreElementChange = (event: SelectChangeEvent) => {
     setFiltreElement(event.target.value);
   };
 
-  // Filtrer les techniques disponibles en fonction des filtres
+  const handleFiltreUtiliteChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFiltreUtilite(event.target.value);
+  };
+
   const filtrerTechniques = (techniques: TechniqueCultivation[]): TechniqueCultivation[] => {
     return techniques.filter(technique => {
-      // Filtre par rang
-      if (filtreRang !== "tous" && technique.rangRequis) {
-        if (filtreRang === "accessibles") {
-          // Montrer seulement les techniques accessibles avec le rang actuel
-          if (!personnage.appartenanceSecte || technique.rangRequis > personnage.appartenanceSecte.rang) {
-            return false;
-          }
-        } else if (filtreRang !== technique.rangRequis) {
-          return false;
-        }
-      }
-      
       // Filtre par élément
       if (filtreElement !== "tous" && technique.element !== filtreElement) {
         return false;
+      }
+      
+      // Filtre par utilité
+      if (filtreUtilite.trim() !== "") {
+        const termeRecherche = filtreUtilite.toLowerCase();
+        const utiliteMatch = technique.utilite.some(util => 
+          util.toLowerCase().includes(termeRecherche)
+        );
+        const nomMatch = technique.nom.toLowerCase().includes(termeRecherche);
+        const descriptionMatch = technique.description.toLowerCase().includes(termeRecherche);
+        
+        if (!utiliteMatch && !nomMatch && !descriptionMatch) {
+          return false;
+        }
       }
       
       return true;
     });
   };
 
-  const techniquesFiltrees = filtrerTechniques(techniquesDisponibles);
+  const techniquesFiltrees = filtrerTechniques(techniquesApprises);
 
   if (loading) {
     return (
@@ -215,11 +173,53 @@ const TechniquesMenu: React.FC<TechniquesMenuProps> = ({ personnage, onUpdatePer
         </Alert>
       )}
       
+      
+      <Paper sx={{ p: 2, mb: 3 }}>
+        <Typography variant="h6" gutterBottom>
+          Filtres
+        </Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <InputLabel id="filtre-element-label">Élément</InputLabel>
+              <Select
+                labelId="filtre-element-label"
+                value={filtreElement}
+                label="Élément"
+                onChange={handleFiltreElementChange}
+              >
+                <MenuItem value="tous">Tous les éléments</MenuItem>
+                {Object.values(ElementCultivation).map(element => (
+                  <MenuItem key={element} value={element}>{element}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              label="Rechercher par utilité"
+              variant="outlined"
+              value={filtreUtilite}
+              onChange={handleFiltreUtiliteChange}
+              placeholder="Ex: guérison, combat, méditation..."
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Grid>
+        </Grid>
+      </Paper>
+      
       <Typography variant="h5" gutterBottom>
-        Techniques Apprises ({techniquesApprises.length})
+        Techniques Apprises ({techniquesFiltrees.length})
       </Typography>
       
-      {techniquesApprises.length === 0 ? (
+      {techniquesFiltrees.length === 0 ? (
         <Paper sx={{ p: 2, mb: 3, bgcolor: 'background.paper' }}>
           <Typography variant="body1">
             Vous n'avez pas encore appris de techniques de cultivation.
@@ -227,7 +227,7 @@ const TechniquesMenu: React.FC<TechniquesMenuProps> = ({ personnage, onUpdatePer
         </Paper>
       ) : (
         <Grid container spacing={2} sx={{ mb: 3 }}>
-          {techniquesApprises.map((technique) => (
+          {techniquesFiltrees.map((technique) => (
             <Grid item xs={12} sm={6} md={4} key={technique.id}>
               <Card 
                 sx={{ 
@@ -235,39 +235,95 @@ const TechniquesMenu: React.FC<TechniquesMenuProps> = ({ personnage, onUpdatePer
                   display: 'flex', 
                   flexDirection: 'column',
                   borderLeft: `4px solid ${getElementColor(technique.element)}`,
-                  boxShadow: 3
+                  boxShadow: 3,
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                  '&:hover': {
+                    transform: 'translateY(-5px)',
+                    boxShadow: 6,
+                    cursor: 'pointer'
+                  }
                 }}
                 onClick={() => handleTechniqueClick(technique)}
               >
-                <CardContent>
-                  <Typography variant="h6" component="div" gutterBottom>
-                    {technique.nom}
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <Box sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'flex-start',
+                    mb: 1
+                  }}>
+                    <Typography variant="h6" component="div" gutterBottom>
+                      {technique.nom}
+                    </Typography>
+                    <Chip 
+                      label={technique.rarete} 
+                      size="small"
+                      sx={{ 
+                        bgcolor: getRareteColor(technique.rarete),
+                        color: 'white',
+                        fontWeight: 'bold'
+                      }} 
+                    />
+                  </Box>
+                  
+                  <Typography 
+                    variant="body2" 
+                    color="text.secondary"
+                    sx={{ 
+                      mb: 2,
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
+                    }}
+                  >
+                    {technique.description}
                   </Typography>
                   
-                  <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
+                  <Box sx={{ mb: 1 }}>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Utilisations principales:
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
+                      {technique.utilite.slice(0, 2).map((util, index) => (
+                        <Chip 
+                          key={index}
+                          label={util.length > 20 ? util.substring(0, 20) + '...' : util} 
+                          size="small"
+                          variant="outlined"
+                          sx={{ fontSize: '0.7rem' }}
+                        />
+                      ))}
+                      {technique.utilite.length > 2 && (
+                        <Chip 
+                          label={`+${technique.utilite.length - 2}`} 
+                          size="small"
+                          variant="outlined"
+                          sx={{ fontSize: '0.7rem' }}
+                        />
+                      )}
+                    </Box>
+                  </Box>
+                  
+                  <Box sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between',
+                    mt: 'auto',
+                    pt: 1
+                  }}>
                     <Chip 
                       label={technique.element} 
-                      size="small" 
+                      size="small"
                       sx={{ 
                         bgcolor: getElementColor(technique.element),
                         color: 'white'
                       }} 
                     />
-                    <Chip 
-                      label={technique.rarete} 
-                      size="small" 
-                      sx={{ 
-                        bgcolor: getRareteColor(technique.rarete),
-                        color: 'white'
-                      }} 
-                    />
+                    <Typography variant="body2" color="text.secondary">
+                      {technique.niveauRequis}
+                    </Typography>
                   </Box>
-                  
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                    {technique.description.length > 100 
-                      ? `${technique.description.substring(0, 100)}...` 
-                      : technique.description}
-                  </Typography>
                 </CardContent>
               </Card>
             </Grid>
@@ -275,296 +331,125 @@ const TechniquesMenu: React.FC<TechniquesMenuProps> = ({ personnage, onUpdatePer
         </Grid>
       )}
       
-      <Divider sx={{ my: 3 }} />
-      
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h5">
-          Techniques Disponibles ({techniquesFiltrees.length})
-        </Typography>
-        
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <FormControl size="small" sx={{ minWidth: 150 }}>
-            <InputLabel id="filtre-rang-label">Rang requis</InputLabel>
-            <Select
-              labelId="filtre-rang-label"
-              value={filtreRang}
-              label="Rang requis"
-              onChange={handleFiltreRangChange}
-            >
-              <MenuItem value="tous">Tous les rangs</MenuItem>
-              <MenuItem value="accessibles">Accessibles</MenuItem>
-              <MenuItem value={RangSecte.DISCIPLE_EXTERNE}>Disciple Externe</MenuItem>
-              <MenuItem value={RangSecte.DISCIPLE_INTERNE}>Disciple Interne</MenuItem>
-              <MenuItem value={RangSecte.DISCIPLE_PRINCIPAL}>Disciple Principal</MenuItem>
-              <MenuItem value={RangSecte.DOYEN}>Doyen</MenuItem>
-              <MenuItem value={RangSecte.ANCIEN}>Ancien</MenuItem>
-              <MenuItem value={RangSecte.GRAND_ANCIEN}>Grand Ancien</MenuItem>
-              <MenuItem value={RangSecte.PATRIARCHE}>Patriarche</MenuItem>
-            </Select>
-          </FormControl>
-          
-          <FormControl size="small" sx={{ minWidth: 150 }}>
-            <InputLabel id="filtre-element-label">Élément</InputLabel>
-            <Select
-              labelId="filtre-element-label"
-              value={filtreElement}
-              label="Élément"
-              onChange={handleFiltreElementChange}
-            >
-              <MenuItem value="tous">Tous les éléments</MenuItem>
-              <MenuItem value={ElementCultivation.FEU}>Feu</MenuItem>
-              <MenuItem value={ElementCultivation.EAU}>Eau</MenuItem>
-              <MenuItem value={ElementCultivation.BOIS}>Bois</MenuItem>
-              <MenuItem value={ElementCultivation.METAL}>Métal</MenuItem>
-              <MenuItem value={ElementCultivation.TERRE}>Terre</MenuItem>
-              <MenuItem value={ElementCultivation.FOUDRE}>Foudre</MenuItem>
-              <MenuItem value={ElementCultivation.LUMIERE}>Lumière</MenuItem>
-              <MenuItem value={ElementCultivation.OBSCURITE}>Obscurité</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-      </Box>
-      
-      {techniquesFiltrees.length === 0 ? (
-        <Paper sx={{ p: 2, bgcolor: 'background.paper' }}>
-          <Typography variant="body1">
-            Aucune technique ne correspond à vos critères de recherche. Essayez de modifier les filtres ou progressez dans votre cultivation pour débloquer plus de techniques.
-          </Typography>
-        </Paper>
-      ) : (
-        <Grid container spacing={2}>
-          {techniquesFiltrees.map((technique) => {
-            const resultat = peutApprendreTechnique(personnage, technique);
-            const coutReel = calculerCoutApprentissage(
-              personnage, 
-              technique, 
-              personnage.appartenanceSecte?.secteId
-            );
-            
-            return (
-              <Grid item xs={12} sm={6} md={4} key={technique.id}>
-                <Card 
-                  sx={{ 
-                    height: '100%', 
-                    display: 'flex', 
-                    flexDirection: 'column',
-                    borderLeft: `4px solid ${getElementColor(technique.element)}`,
-                    opacity: resultat.peut ? 1 : 0.7,
-                    boxShadow: 3
-                  }}
-                  onClick={() => handleTechniqueClick(technique)}
-                >
-                  <CardContent>
-                    <Typography variant="h6" component="div" gutterBottom>
-                      {technique.nom}
-                    </Typography>
-                    
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 1 }}>
-                      <Chip 
-                        label={technique.element} 
-                        size="small" 
-                        sx={{ 
-                          bgcolor: getElementColor(technique.element),
-                          color: 'white'
-                        }} 
-                      />
-                      <Chip 
-                        label={technique.rarete} 
-                        size="small" 
-                        sx={{ 
-                          bgcolor: getRareteColor(technique.rarete),
-                          color: 'white'
-                        }} 
-                      />
-                      <Chip 
-                        label={`${coutReel} PS`} 
-                        size="small" 
-                        variant="outlined"
-                      />
-                      {technique.rangRequis && (
-                        <Tooltip title="Rang requis dans la secte">
-                          <Chip 
-                            label={technique.rangRequis} 
-                            size="small" 
-                            sx={{ 
-                              bgcolor: getRangColor(technique.rangRequis),
-                              color: 'white'
-                            }} 
-                          />
-                        </Tooltip>
-                      )}
-                    </Box>
-                    
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                      {technique.description.length > 100 
-                        ? `${technique.description.substring(0, 100)}...` 
-                        : technique.description}
-                    </Typography>
-                    
-                    {!resultat.peut && (
-                      <Typography variant="caption" color="error">
-                        {resultat.raison}
-                      </Typography>
-                    )}
-                  </CardContent>
-                </Card>
-              </Grid>
-            );
-          })}
-        </Grid>
-      )}
-      
-      {/* Dialogue de détail de technique */}
+      {/* Dialogue de détail de la technique */}
       <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth="md" fullWidth>
         {selectedTechnique && (
           <>
             <DialogTitle sx={{ 
-              borderBottom: `4px solid ${getElementColor(selectedTechnique.element)}`,
+              bgcolor: getRareteColor(selectedTechnique.rarete),
+              color: 'white',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center'
             }}>
-              <Typography variant="h5">{selectedTechnique.nom}</Typography>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Chip 
-                  label={selectedTechnique.element} 
-                  sx={{ 
-                    bgcolor: getElementColor(selectedTechnique.element),
-                    color: 'white'
-                  }} 
-                />
-                <Chip 
-                  label={selectedTechnique.rarete} 
-                  sx={{ 
-                    bgcolor: getRareteColor(selectedTechnique.rarete),
-                    color: 'white'
-                  }} 
-                />
-                {selectedTechnique.rangRequis && (
-                  <Chip 
-                    label={selectedTechnique.rangRequis} 
-                    sx={{ 
-                      bgcolor: getRangColor(selectedTechnique.rangRequis),
-                      color: 'white'
-                    }} 
-                  />
-                )}
-              </Box>
+              {selectedTechnique.nom}
+              <Chip 
+                label={selectedTechnique.rarete} 
+                sx={{ 
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  color: 'white',
+                  fontWeight: 'bold'
+                }} 
+              />
             </DialogTitle>
-            <DialogContent dividers>
-              <Typography variant="body1" paragraph>
-                {selectedTechnique.description}
-              </Typography>
-              
-              <Typography variant="subtitle1" gutterBottom>
-                Niveau requis: {selectedTechnique.niveauRequis}
-              </Typography>
-              
-              {selectedTechnique.rangRequis && (
-                <Typography variant="subtitle1" gutterBottom>
-                  Rang requis dans la secte: {selectedTechnique.rangRequis}
+            <DialogContent>
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                  {selectedTechnique.description}
                 </Typography>
-              )}
-              
-              <Typography variant="subtitle1" gutterBottom>
-                Coût d'apprentissage: {
-                  personnage.techniquesApprises.some(t => t.id === selectedTechnique.id)
-                    ? "Déjà apprise"
-                    : `${calculerCoutApprentissage(personnage, selectedTechnique, personnage.appartenanceSecte?.secteId)} Pierres Spirituelles`
-                }
-              </Typography>
-              
-              <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                Effets
-              </Typography>
-              
-              <Grid container spacing={2}>
-                {selectedTechnique.effets.multiplicateurQi && (
-                  <Grid item xs={12} sm={6}>
-                    <Paper sx={{ p: 1 }}>
-                      <Typography variant="body2">
-                        <strong>Multiplicateur de Qi:</strong> x{selectedTechnique.effets.multiplicateurQi}
-                      </Typography>
-                    </Paper>
-                  </Grid>
+                
+                <Divider sx={{ my: 2 }} />
+                
+                <Typography variant="h6" sx={{ mb: 1, color: getElementColor(selectedTechnique.element) }}>
+                  Élément: {selectedTechnique.element}
+                </Typography>
+                
+                <Typography variant="h6" sx={{ mb: 1 }}>
+                  Niveau requis: {selectedTechnique.niveauRequis}
+                </Typography>
+                
+                {selectedTechnique.rangRequis && (
+                  <Typography variant="h6" sx={{ mb: 1, color: getRangColor(selectedTechnique.rangRequis) }}>
+                    Rang requis: {selectedTechnique.rangRequis}
+                  </Typography>
                 )}
                 
-                {selectedTechnique.effets.reductionTemps && (
-                  <Grid item xs={12} sm={6}>
-                    <Paper sx={{ p: 1 }}>
-                      <Typography variant="body2">
-                        <strong>Réduction du temps de cultivation:</strong> {selectedTechnique.effets.reductionTemps}%
-                      </Typography>
-                    </Paper>
-                  </Grid>
-                )}
+                <Divider sx={{ my: 2 }} />
                 
-                {selectedTechnique.effets.bonusLongevite && (
-                  <Grid item xs={12} sm={6}>
-                    <Paper sx={{ p: 1 }}>
-                      <Typography variant="body2">
-                        <strong>Bonus de longévité:</strong> +{selectedTechnique.effets.bonusLongevite}%
-                      </Typography>
-                    </Paper>
-                  </Grid>
-                )}
+                <Typography variant="h6" sx={{ mb: 1 }}>
+                  Utilisations pratiques:
+                </Typography>
+                <Box component="ul" sx={{ pl: 2 }}>
+                  {selectedTechnique.utilite.map((util, index) => (
+                    <Typography component="li" key={index} variant="body1" sx={{ mb: 0.5 }}>
+                      {util}
+                    </Typography>
+                  ))}
+                </Box>
                 
-                {selectedTechnique.effets.bonusStats && (
-                  <Grid item xs={12}>
-                    <Paper sx={{ p: 1 }}>
-                      <Typography variant="body2">
-                        <strong>Bonus de statistiques:</strong>
+                <Divider sx={{ my: 2 }} />
+                
+                <Typography variant="h6" sx={{ mb: 1 }}>
+                  Effets:
+                </Typography>
+                <Box sx={{ pl: 2 }}>
+                  {selectedTechnique.effets.multiplicateurQi && (
+                    <Typography variant="body1" sx={{ mb: 0.5 }}>
+                      Multiplicateur de Qi: <strong>×{selectedTechnique.effets.multiplicateurQi.toFixed(2)}</strong>
+                    </Typography>
+                  )}
+                  
+                  {selectedTechnique.effets.reductionTemps && (
+                    <Typography variant="body1" sx={{ mb: 0.5 }}>
+                      Réduction du temps de cultivation: <strong>{selectedTechnique.effets.reductionTemps}%</strong>
+                    </Typography>
+                  )}
+                  
+                  {selectedTechnique.effets.bonusLongevite && (
+                    <Typography variant="body1" sx={{ mb: 0.5 }}>
+                      Bonus de longévité: <strong>+{selectedTechnique.effets.bonusLongevite}%</strong>
+                    </Typography>
+                  )}
+                  
+                  {selectedTechnique.effets.bonusStats && (
+                    <Box sx={{ mb: 0.5 }}>
+                      <Typography variant="body1">
+                        Bonus aux statistiques:
                       </Typography>
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
+                      <Box component="ul" sx={{ pl: 2, mt: 0.5 }}>
                         {Object.entries(selectedTechnique.effets.bonusStats).map(([stat, value]) => (
-                          <Chip 
-                            key={stat} 
-                            label={`${stat}: +${value}`} 
-                            size="small" 
-                            variant="outlined" 
-                          />
+                          <Typography component="li" key={stat} variant="body2">
+                            {stat.charAt(0).toUpperCase() + stat.slice(1)}: <strong>+{value}</strong>
+                          </Typography>
                         ))}
                       </Box>
-                    </Paper>
-                  </Grid>
-                )}
-                
-                {selectedTechnique.effets.resistanceElement && (
-                  <Grid item xs={12}>
-                    <Paper sx={{ p: 1 }}>
-                      <Typography variant="body2">
-                        <strong>Résistance aux éléments:</strong>
+                    </Box>
+                  )}
+                  
+                  {selectedTechnique.effets.resistanceElement && selectedTechnique.effets.resistanceElement.length > 0 && (
+                    <Box sx={{ mb: 0.5 }}>
+                      <Typography variant="body1">
+                        Résistance aux éléments:
                       </Typography>
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
-                        {selectedTechnique.effets.resistanceElement.map((element) => (
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 0.5 }}>
+                        {selectedTechnique.effets.resistanceElement.map(element => (
                           <Chip 
-                            key={element} 
+                            key={element}
                             label={element} 
-                            size="small" 
-                            sx={{ 
-                              bgcolor: getElementColor(element),
-                              color: 'white'
-                            }} 
+                            size="small"
+                            sx={{ bgcolor: getElementColor(element), color: 'white' }}
                           />
                         ))}
                       </Box>
-                    </Paper>
-                  </Grid>
-                )}
-              </Grid>
+                    </Box>
+                  )}
+                </Box>
+              </Box>
             </DialogContent>
             <DialogActions>
-              <Button onClick={handleCloseDialog}>Fermer</Button>
-              {!personnage.techniquesApprises.some(t => t.id === selectedTechnique.id) && (
-                <Button 
-                  onClick={handleApprendreTechnique}
-                  variant="contained" 
-                  color="primary"
-                  disabled={!peutApprendreTechnique(personnage, selectedTechnique).peut}
-                >
-                  Apprendre ({calculerCoutApprentissage(personnage, selectedTechnique, personnage.appartenanceSecte?.secteId)} PS)
-                </Button>
-              )}
+              <Button onClick={handleCloseDialog} color="primary">
+                Fermer
+              </Button>
             </DialogActions>
           </>
         )}

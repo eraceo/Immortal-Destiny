@@ -6,7 +6,7 @@ import {
   Grid, 
   LinearProgress
 } from '@mui/material';
-import { Personnage } from '../../models/types';
+import { Personnage, STAT_MAX_CREATION, STAT_MAX_JEU } from '../../models/types';
 
 interface StatsMenuProps {
   personnage: Personnage;
@@ -14,23 +14,31 @@ interface StatsMenuProps {
 
 // Fonction pour obtenir la couleur en fonction de la valeur de la statistique
 const getStatColor = (value: number): string => {
-  if (value <= 3) return '#e74c3c'; // Faible - rouge
-  if (value <= 6) return '#f1c40f'; // Moyen - jaune
-  if (value <= 8) return '#2ecc71'; // Bon - vert
+  // Normaliser la valeur par rapport à STAT_MAX_JEU
+  const normalizedValue = value / STAT_MAX_JEU * 10;
+  
+  if (normalizedValue <= 3) return '#e74c3c'; // Faible - rouge
+  if (normalizedValue <= 6) return '#f1c40f'; // Moyen - jaune
+  if (normalizedValue <= 8) return '#2ecc71'; // Bon - vert
   return '#9b59b6'; // Excellent - violet
 };
 
 // Composant pour afficher une statistique avec une barre de progression
 const StatDisplay = ({ nom, valeur, description }: { nom: string, valeur: number, description: string }) => {
+  // Calculer le pourcentage pour la barre de progression (0-100%)
+  const progressValue = (valeur / STAT_MAX_JEU) * 100;
+  
   return (
     <Box sx={{ mb: 2 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
         <Typography variant="body1">{nom}</Typography>
-        <Typography variant="body1" fontWeight="bold">{valeur}</Typography>
+        <Typography variant="body1" fontWeight="bold">
+          {valeur} {valeur >= STAT_MAX_CREATION && `/ ${STAT_MAX_JEU}`}
+        </Typography>
       </Box>
       <LinearProgress 
         variant="determinate" 
-        value={valeur * 10} 
+        value={progressValue} 
         sx={{ 
           height: 8, 
           borderRadius: 4,
@@ -48,9 +56,25 @@ const StatDisplay = ({ nom, valeur, description }: { nom: string, valeur: number
 };
 
 const StatsMenu: React.FC<StatsMenuProps> = ({ personnage }) => {
-  // Calcul du total des statistiques
-  const totalStats = Object.values(personnage.stats).reduce((a, b) => a + b, 0);
-  const moyenneStats = totalStats / 8;
+  // Calcul du total des statistiques de base uniquement (sans les stats dérivées)
+  const statsDeBase = [
+    personnage.stats.force,
+    personnage.stats.agilite,
+    personnage.stats.constitution,
+    personnage.stats.intelligence,
+    personnage.stats.perception,
+    personnage.stats.charisme,
+    personnage.stats.chance,
+    personnage.stats.qi
+  ];
+  
+  const totalStats = statsDeBase.reduce((a, b) => a + b, 0);
+  const moyenneStats = totalStats / statsDeBase.length;
+
+  // Déterminer la couleur de la moyenne en fonction de sa valeur par rapport à STAT_MAX_CREATION
+  // pour la création du personnage, ou STAT_MAX_JEU pour les personnages avancés
+  const maxStatReference = Math.max(...statsDeBase) > STAT_MAX_CREATION ? STAT_MAX_JEU : STAT_MAX_CREATION;
+  const moyenneColor = getStatColor(moyenneStats);
 
   return (
     <Box>
@@ -65,7 +89,7 @@ const StatsMenu: React.FC<StatsMenuProps> = ({ personnage }) => {
             px: 1.5, 
             py: 0.5, 
             borderRadius: 1, 
-            backgroundColor: getStatColor(moyenneStats),
+            backgroundColor: moyenneColor,
             color: 'white',
             fontWeight: 'bold'
           }}>
