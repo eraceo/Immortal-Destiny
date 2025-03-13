@@ -400,7 +400,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
                           />
                         ))}
                         <Chip 
-                          label={`Percée -${bonusSecte.reductionTempsPercee.toFixed(1)}%`} 
+                          label={`Percée -${bonusSecte.reductionCoutPercee.toFixed(1)}%`} 
                           size="small" 
                           sx={{ backgroundColor: '#1e1e1e' }} 
                         />

@@ -199,53 +199,53 @@ export const DESCRIPTIONS_ROYAUMES: Record<RoyaumeCultivation, string> = {
 export const QI_REQUIS_PERCEE: Record<RoyaumeCultivation, Record<NiveauPercee, number>> = {
   [RoyaumeCultivation.MORTEL]: {
     [NiveauPercee.PREMIER]: 0,
-    [NiveauPercee.INTERMEDIAIRE]: 200,
-    [NiveauPercee.AVANCE]: 600
+    [NiveauPercee.INTERMEDIAIRE]: 300,
+    [NiveauPercee.AVANCE]: 900
   },
   [RoyaumeCultivation.INITIATION]: {
-    [NiveauPercee.PREMIER]: 1200,
-    [NiveauPercee.INTERMEDIAIRE]: 2000,
-    [NiveauPercee.AVANCE]: 3000
+    [NiveauPercee.PREMIER]: 1800,
+    [NiveauPercee.INTERMEDIAIRE]: 3000,
+    [NiveauPercee.AVANCE]: 4500
   },
   [RoyaumeCultivation.QI_CONDENSE]: {
-    [NiveauPercee.PREMIER]: 4200,
-    [NiveauPercee.INTERMEDIAIRE]: 5600,
-    [NiveauPercee.AVANCE]: 7200
+    [NiveauPercee.PREMIER]: 6300,
+    [NiveauPercee.INTERMEDIAIRE]: 8400,
+    [NiveauPercee.AVANCE]: 10800
   },
   [RoyaumeCultivation.FONDATION]: {
-    [NiveauPercee.PREMIER]: 9000,
-    [NiveauPercee.INTERMEDIAIRE]: 11000,
-    [NiveauPercee.AVANCE]: 13200
+    [NiveauPercee.PREMIER]: 13500,
+    [NiveauPercee.INTERMEDIAIRE]: 16500,
+    [NiveauPercee.AVANCE]: 19800
   },
   [RoyaumeCultivation.CORE_OR]: {
-    [NiveauPercee.PREMIER]: 16000,
-    [NiveauPercee.INTERMEDIAIRE]: 20000,
-    [NiveauPercee.AVANCE]: 25000
+    [NiveauPercee.PREMIER]: 24000,
+    [NiveauPercee.INTERMEDIAIRE]: 30000,
+    [NiveauPercee.AVANCE]: 37500
   },
   [RoyaumeCultivation.NASCENT_SOUL]: {
-    [NiveauPercee.PREMIER]: 30000,
-    [NiveauPercee.INTERMEDIAIRE]: 36000,
-    [NiveauPercee.AVANCE]: 44000
+    [NiveauPercee.PREMIER]: 45000,
+    [NiveauPercee.INTERMEDIAIRE]: 54000,
+    [NiveauPercee.AVANCE]: 66000
   },
   [RoyaumeCultivation.TRANSCENDANCE]: {
-    [NiveauPercee.PREMIER]: 52000,
-    [NiveauPercee.INTERMEDIAIRE]: 62000,
-    [NiveauPercee.AVANCE]: 74000
+    [NiveauPercee.PREMIER]: 78000,
+    [NiveauPercee.INTERMEDIAIRE]: 93000,
+    [NiveauPercee.AVANCE]: 111000
   },
   [RoyaumeCultivation.SAINT_MARTIAL]: {
-    [NiveauPercee.PREMIER]: 88000,
-    [NiveauPercee.INTERMEDIAIRE]: 104000,
-    [NiveauPercee.AVANCE]: 122000
+    [NiveauPercee.PREMIER]: 132000,
+    [NiveauPercee.INTERMEDIAIRE]: 156000,
+    [NiveauPercee.AVANCE]: 183000
   },
   [RoyaumeCultivation.DEMI_DIEU]: {
-    [NiveauPercee.PREMIER]: 144000,
-    [NiveauPercee.INTERMEDIAIRE]: 170000,
-    [NiveauPercee.AVANCE]: 200000
+    [NiveauPercee.PREMIER]: 216000,
+    [NiveauPercee.INTERMEDIAIRE]: 255000,
+    [NiveauPercee.AVANCE]: 300000
   },
   [RoyaumeCultivation.DIVIN_SUPREME]: {
-    [NiveauPercee.PREMIER]: 120000,
-    [NiveauPercee.INTERMEDIAIRE]: 150000,
-    [NiveauPercee.AVANCE]: 200000
+    [NiveauPercee.PREMIER]: 360000,
+    [NiveauPercee.INTERMEDIAIRE]: 450000,
+    [NiveauPercee.AVANCE]: 600000
   }
 };
 
@@ -340,7 +340,7 @@ export interface Secte {
   avantages: {
     multiplicateurQi: number;        // Multiplicateur pour le gain de Qi
     bonusStats: Partial<Stats>;      // Bonus aux statistiques
-    reductionTempsPercee: number;    // Réduction du temps pour les percées (en %)
+    reductionCoutPercee: number;    // Réduction du coût pour les percées (en %)
     bonusLongevite: number;          // Bonus à l'espérance de vie (en %)
   };
   conditionsAdmission: {
@@ -1096,7 +1096,7 @@ export const SECTES: Secte[] = [
     avantages: {
       multiplicateurQi: 1.2,
       bonusStats: { force: 1, agilite: 1 },
-      reductionTempsPercee: 10,
+      reductionCoutPercee: 10,
       bonusLongevite: 5
     },
     conditionsAdmission: {
@@ -1119,7 +1119,7 @@ export const SECTES: Secte[] = [
     avantages: {
       multiplicateurQi: 1.3,
       bonusStats: { intelligence: 1, perception: 1 },
-      reductionTempsPercee: 5,
+      reductionCoutPercee: 5,
       bonusLongevite: 15
     },
     conditionsAdmission: {
@@ -1142,7 +1142,7 @@ export const SECTES: Secte[] = [
     avantages: {
       multiplicateurQi: 1.15,
       bonusStats: { force: 1, constitution: 1 },
-      reductionTempsPercee: 8,
+      reductionCoutPercee: 8,
       bonusLongevite: 10
     },
     conditionsAdmission: {
@@ -1165,7 +1165,7 @@ export const SECTES: Secte[] = [
     avantages: {
       multiplicateurQi: 1.1,
       bonusStats: { constitution: 1, intelligence: 1 },
-      reductionTempsPercee: 5,
+      reductionCoutPercee: 5,
       bonusLongevite: 15
     },
     conditionsAdmission: {
@@ -1188,7 +1188,7 @@ export const SECTES: Secte[] = [
     avantages: {
       multiplicateurQi: 1.6,
       bonusStats: { intelligence: 2, perception: 2 },
-      reductionTempsPercee: 25,
+      reductionCoutPercee: 25,
       bonusLongevite: 30
     },
     conditionsAdmission: {
@@ -1284,14 +1284,14 @@ export const getSecteById = (secteId: string): Secte | undefined => {
 export const calculerBonusSecte = (personnage: Personnage): { 
   multiplicateurQi: number, 
   bonusStats: Partial<Stats>,
-  reductionTempsPercee: number,
+  reductionCoutPercee: number,
   bonusLongevite: number
 } => {
   // Valeurs par défaut si le personnage n'appartient à aucune secte
   const bonusDefaut = {
     multiplicateurQi: 1,
     bonusStats: {},
-    reductionTempsPercee: 0,
+    reductionCoutPercee: 0,
     bonusLongevite: 0
   };
   
@@ -1335,7 +1335,7 @@ export const calculerBonusSecte = (personnage: Personnage): {
       acc[stat as keyof Stats] = valeur * multiplicateurRang;
       return acc;
     }, {} as Partial<Stats>),
-    reductionTempsPercee: secte.avantages.reductionTempsPercee * multiplicateurRang,
+    reductionCoutPercee: secte.avantages.reductionCoutPercee * multiplicateurRang,
     bonusLongevite: secte.avantages.bonusLongevite * multiplicateurRang
   };
 };

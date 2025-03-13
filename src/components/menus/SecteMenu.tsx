@@ -33,7 +33,8 @@ import {
   TechniqueCultivation,
   MissionSecte,
   RessourceSecte,
-  ElementCultivation
+  ElementCultivation,
+  RoyaumeCultivation
 } from '../../models/types';
 import { getTechniquesSecte, peutApprendreTechnique, calculerCoutApprentissage } from '../../models/techniques';
 import GroupIcon from '@mui/icons-material/Group';
@@ -318,7 +319,7 @@ const SecteMenu: React.FC<SecteMenuProps> = ({ personnage, onUpdatePersonnage })
                   Multiplicateur de Qi : <strong>+{((secte.avantages.multiplicateurQi - 1) * 100).toFixed(0)}%</strong>
                 </Typography>
                 <Typography variant="body2">
-                  Réduction du temps de percée : <strong>{secte.avantages.reductionTempsPercee}%</strong>
+                  Réduction du coût de percée : <strong>{secte.avantages.reductionCoutPercee}%</strong>
                 </Typography>
                 <Typography variant="body2">
                   Bonus de longévité : <strong>{secte.avantages.bonusLongevite > 0 ? '+' : ''}{secte.avantages.bonusLongevite}%</strong>
@@ -387,12 +388,14 @@ const SecteMenu: React.FC<SecteMenuProps> = ({ personnage, onUpdatePersonnage })
                   personnage.appartenanceSecte?.secteId
                 );
                 
-                // Vérifier si la technique est verrouillée en raison du rang
+                // Vérifier si la technique est verrouillée en raison du rang (rétrocompatible)
                 const rangInsuffisant = technique.rangRequis && personnage.appartenanceSecte && 
-                                       technique.rangRequis > personnage.appartenanceSecte.rang;
+                                       Object.values(RangSecte).indexOf(personnage.appartenanceSecte.rang) < 
+                                       Object.values(RangSecte).indexOf(technique.rangRequis);
                 
-                // Vérifier si le niveau de cultivation est insuffisant
-                const niveauInsuffisant = personnage.royaumeCultivation < technique.niveauRequis;
+                // Vérifier si le niveau de cultivation est insuffisant (rétrocompatible)
+                const niveauInsuffisant = Object.values(RoyaumeCultivation).indexOf(personnage.royaumeCultivation) < 
+                                         Object.values(RoyaumeCultivation).indexOf(technique.niveauRequis);
                 
                 // Technique verrouillée si rang ou niveau insuffisant
                 const techniqueVerrouillee = rangInsuffisant || niveauInsuffisant;
@@ -847,8 +850,10 @@ const SecteMenu: React.FC<SecteMenuProps> = ({ personnage, onUpdatePersonnage })
                 
                 // Double vérification des conditions
                 const rangInsuffisant = selectedTechnique.rangRequis && personnage.appartenanceSecte && 
-                                       selectedTechnique.rangRequis > personnage.appartenanceSecte.rang;
-                const niveauInsuffisant = personnage.royaumeCultivation < selectedTechnique.niveauRequis;
+                                       Object.values(RangSecte).indexOf(personnage.appartenanceSecte.rang) < 
+                                       Object.values(RangSecte).indexOf(selectedTechnique.rangRequis);
+                const niveauInsuffisant = Object.values(RoyaumeCultivation).indexOf(personnage.royaumeCultivation) < 
+                                         Object.values(RoyaumeCultivation).indexOf(selectedTechnique.niveauRequis);
                 const peutApprendre = !estApprise && resultat.peut && !rangInsuffisant && !niveauInsuffisant;
                 
                 if (peutApprendre) {

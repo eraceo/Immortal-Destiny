@@ -892,8 +892,12 @@ export const peutApprendreTechnique = (
     return { peut: false, raison: "Vous avez déjà appris cette technique." };
   }
   
-  // Vérifier le niveau de cultivation requis
-  if (personnage.royaumeCultivation < technique.niveauRequis) {
+  // Vérifier le niveau de cultivation requis (maintenant rétrocompatible)
+  // On vérifie si le royaume du personnage est inférieur au royaume requis
+  const royaumeIndex = Object.values(RoyaumeCultivation).indexOf(personnage.royaumeCultivation);
+  const royaumeRequisIndex = Object.values(RoyaumeCultivation).indexOf(technique.niveauRequis);
+  
+  if (royaumeIndex < royaumeRequisIndex) {
     return { 
       peut: false, 
       raison: `Votre niveau de cultivation est insuffisant. Niveau requis: ${technique.niveauRequis}.` 
@@ -908,10 +912,12 @@ export const peutApprendreTechnique = (
     };
   }
   
-  // Vérifier le rang requis dans la secte
+  // Vérifier le rang requis dans la secte (maintenant rétrocompatible)
   if (technique.rangRequis && personnage.appartenanceSecte) {
-    const rangPersonnage = personnage.appartenanceSecte.rang;
-    if (rangPersonnage < technique.rangRequis) {
+    const rangPersonnageIndex = Object.values(RangSecte).indexOf(personnage.appartenanceSecte.rang);
+    const rangRequisIndex = Object.values(RangSecte).indexOf(technique.rangRequis);
+    
+    if (rangPersonnageIndex < rangRequisIndex) {
       return {
         peut: false,
         raison: `Votre rang dans la secte est insuffisant. Rang requis: ${technique.rangRequis}.`

@@ -609,22 +609,25 @@ const GameScreen: React.FC = () => {
       pointsQi: pointsQiExcedentaires > 0 ? pointsQiExcedentaires : 0
     };
     
-    // Appliquer les bonus de secte pour la réduction du temps de percée
+    // Appliquer les bonus de secte pour la réduction du coût de percée
     if (personnage.appartenanceSecte) {
       const bonusSecte = calculerBonusSecte(personnage);
       
       // Ajouter un message pour informer le joueur des bonus appliqués
-      const messageBonus = `Grâce à votre appartenance à la secte, vous bénéficiez d'une réduction de ${bonusSecte.reductionTempsPercee.toFixed(1)}% du temps de percée.`;
+      const messageBonus = `Grâce à votre appartenance à la secte, vous bénéficiez d'une réduction de ${bonusSecte.reductionCoutPercee.toFixed(1)}% du coût de percée.`;
       setSnackbarMessage(messageBonus);
       setSnackbarOpen(true);
       
-      // On pourrait ajouter ici une logique pour réduire le temps nécessaire pour la prochaine percée
-      // Par exemple, réduire qiRequis en fonction du bonus de secte
-      nouveauPersonnage.qiRequis = Math.floor(nouveauPersonnage.qiRequis * (1 - bonusSecte.reductionTempsPercee / 100));
+      // Réduire le Qi requis pour la prochaine percée en fonction du bonus de secte
+      nouveauPersonnage.qiRequis = Math.floor(nouveauPersonnage.qiRequis * (1 - bonusSecte.reductionCoutPercee / 100));
     }
     
     // Mettre à jour l'état du personnage
     setPersonnage(nouveauPersonnage);
+    
+    // Mettre à jour l'espérance de vie
+    const nouvelleEsperanceVie = calculerEsperanceVie(nouveauPersonnage.race, nouveauPersonnage.royaumeCultivation);
+    setEsperanceVie(nouvelleEsperanceVie);
     
     // Fermer la boîte de dialogue
     setOpenPerceeDialog(false);
@@ -876,6 +879,24 @@ const GameScreen: React.FC = () => {
       setGainQiParSeconde(buffs.total);
     }
   }, [personnage, calculerBuffsCultivation]);
+
+  // Mettre à jour l'espérance de vie lorsque le personnage change
+  useEffect(() => {
+    if (personnage) {
+      // Calculer l'espérance de vie de base
+      const esperanceVieBase = calculerEsperanceVie(personnage.race, personnage.royaumeCultivation);
+      
+      // Appliquer les bonus de secte à l'espérance de vie si applicable
+      let esperanceVieFinale = esperanceVieBase;
+      if (personnage.appartenanceSecte) {
+        const bonusSecte = calculerBonusSecte(personnage);
+        esperanceVieFinale += Math.floor(esperanceVieBase * bonusSecte.bonusLongevite / 100);
+      }
+      
+      // Mettre à jour l'état de l'espérance de vie
+      setEsperanceVie(esperanceVieFinale);
+    }
+  }, [personnage]);
 
   // Nettoyer les timers lors du démontage du composant
   useEffect(() => {
