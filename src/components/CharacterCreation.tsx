@@ -421,9 +421,20 @@ const CharacterCreation: React.FC = () => {
     }
   };
 
-  // Calcul du total des statistiques
-  const totalStats = Object.values(personnage.stats).reduce((a, b) => a + b, 0);
-  const moyenneStats = totalStats / 8;
+  // Calcul du total des statistiques de base uniquement (sans les stats dérivées)
+  const statsDeBase = [
+    personnage.stats.force,
+    personnage.stats.agilite,
+    personnage.stats.constitution,
+    personnage.stats.intelligence,
+    personnage.stats.perception,
+    personnage.stats.charisme,
+    personnage.stats.chance,
+    personnage.stats.qi
+  ];
+  
+  const totalStats = statsDeBase.reduce((a, b) => a + b, 0);
+  const moyenneStats = totalStats / statsDeBase.length;
 
   // Obtenir les informations de race et d'origine
   const raceInfo = getRaceInfo(personnage.race);

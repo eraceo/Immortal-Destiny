@@ -282,7 +282,6 @@ export interface TechniqueCultivation {
   effets: {
     multiplicateurQi?: number;       // Multiplicateur pour le gain de Qi
     bonusStats?: Partial<Stats>;     // Bonus aux statistiques
-    reductionTemps?: number;         // Réduction du temps de cultivation (en %)
     bonusLongevite?: number;         // Bonus à l'espérance de vie (en %)
     resistanceElement?: ElementCultivation[]; // Résistance à certains éléments
   };
@@ -344,7 +343,7 @@ export interface Secte {
     bonusLongevite: number;          // Bonus à l'espérance de vie (en %)
   };
   conditionsAdmission: {
-    royaumeMinimum: RoyaumeCultivation;
+    royaumeMinimum?: RoyaumeCultivation;
     statsMinimales: Partial<Stats>;
     raceCompatible?: Race[];
   };
@@ -1100,7 +1099,7 @@ export const SECTES: Secte[] = [
       bonusLongevite: 5
     },
     conditionsAdmission: {
-      royaumeMinimum: RoyaumeCultivation.INITIATION,
+      royaumeMinimum: RoyaumeCultivation.MORTEL,
       statsMinimales: { force: 4, agilite: 4 }
     },
     relationSectes: {}
@@ -1123,7 +1122,7 @@ export const SECTES: Secte[] = [
       bonusLongevite: 15
     },
     conditionsAdmission: {
-      royaumeMinimum: RoyaumeCultivation.INITIATION,
+      royaumeMinimum: RoyaumeCultivation.MORTEL,
       statsMinimales: { intelligence: 5, perception: 3 }
     },
     relationSectes: {}
@@ -1146,7 +1145,7 @@ export const SECTES: Secte[] = [
       bonusLongevite: 10
     },
     conditionsAdmission: {
-      royaumeMinimum: RoyaumeCultivation.INITIATION,
+      royaumeMinimum: RoyaumeCultivation.MORTEL,
       statsMinimales: { force: 3, constitution: 5 }
     },
     relationSectes: {}
@@ -1192,8 +1191,8 @@ export const SECTES: Secte[] = [
       bonusLongevite: 30
     },
     conditionsAdmission: {
-      royaumeMinimum: RoyaumeCultivation.CORE_OR,
-      statsMinimales: { intelligence: 7, perception: 7, chance: 6 }
+      royaumeMinimum: RoyaumeCultivation.MORTEL,
+      statsMinimales: { intelligence: 5, perception: 5, chance: 4 } // Réduction des statistiques requises
     },
     relationSectes: {}
   }
@@ -1208,11 +1207,8 @@ export const getSecteDisponibles = (personnage: Personnage): Secte[] => {
                      (personnage.stats.resistance * 0.3) + 
                      (personnage.stats.degat * 0.2);
   
-  // Filtrer les sectes en fonction du royaume de cultivation et des stats minimales
+  // Filtrer les sectes en fonction des stats minimales (sans la condition de royaume)
   return SECTES.filter(secte => {
-    // Vérifier si le personnage répond aux conditions d'admission de base
-    const royaumeOk = personnage.royaumeCultivation >= secte.conditionsAdmission.royaumeMinimum;
-    
     // Vérifier si les stats du personnage sont suffisantes
     let statsOk = true;
     Object.entries(secte.conditionsAdmission.statsMinimales).forEach(([stat, valeurMin]) => {
@@ -1229,25 +1225,27 @@ export const getSecteDisponibles = (personnage: Personnage): Secte[] => {
     }
     
     // Vérifier l'affinité élémentaire avec l'élément principal de la secte
+    // Réduction des exigences d'affinité pour les sectes légendaires
     let affiniteOk = true;
     const affiniteRequise = secte.rarete === Rarete.COMMUN ? 30 :
                            secte.rarete === Rarete.RARE ? 50 :
                            secte.rarete === Rarete.EPIQUE ? 65 :
-                           secte.rarete === Rarete.LEGENDAIRE ? 80 :
-                           secte.rarete === Rarete.MYTHIQUE ? 90 : 0;
+                           secte.rarete === Rarete.LEGENDAIRE ? 60 : // Réduit de 80 à 60
+                           secte.rarete === Rarete.MYTHIQUE ? 70 : 0; // Réduit de 90 à 70
     
     if (personnage.affiniteElements[secte.elementPrincipal] < affiniteRequise) {
       affiniteOk = false;
     }
     
     // Vérifier le score de talent pour les sectes rares
+    // Réduction des exigences de talent pour les sectes légendaires
     let talentOk = true;
     if (secte.rarete === Rarete.RARE && scoreTalent < 50) talentOk = false;
     if (secte.rarete === Rarete.EPIQUE && scoreTalent < 70) talentOk = false;
-    if (secte.rarete === Rarete.LEGENDAIRE && scoreTalent < 90) talentOk = false;
-    if (secte.rarete === Rarete.MYTHIQUE && scoreTalent < 95) talentOk = false;
+    if (secte.rarete === Rarete.LEGENDAIRE && scoreTalent < 70) talentOk = false; // Réduit de 90 à 70
+    if (secte.rarete === Rarete.MYTHIQUE && scoreTalent < 80) talentOk = false; // Réduit de 95 à 80
     
-    return royaumeOk && statsOk && raceOk && affiniteOk && talentOk;
+    return statsOk && raceOk && affiniteOk && talentOk;
   });
 };
 

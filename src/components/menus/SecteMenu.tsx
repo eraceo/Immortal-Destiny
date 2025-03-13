@@ -787,12 +787,6 @@ const SecteMenu: React.FC<SecteMenuProps> = ({ personnage, onUpdatePersonnage })
                     </Typography>
                   )}
                   
-                  {selectedTechnique.effets.reductionTemps && (
-                    <Typography variant="body1" sx={{ mb: 0.5 }}>
-                      Réduction du temps de cultivation: <strong>{selectedTechnique.effets.reductionTemps}%</strong>
-                    </Typography>
-                  )}
-                  
                   {selectedTechnique.effets.bonusLongevite && (
                     <Typography variant="body1" sx={{ mb: 0.5 }}>
                       Bonus de longévité: <strong>+{selectedTechnique.effets.bonusLongevite}%</strong>

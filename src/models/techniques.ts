@@ -17,7 +17,6 @@ export const TECHNIQUES_LOTUS_POURPRE: TechniqueCultivation[] = [
     ],
     effets: {
       multiplicateurQi: 1.2,
-      reductionTemps: 5,
       bonusLongevite: 3
     },
     coutApprentissage: 100
@@ -364,8 +363,7 @@ export const TECHNIQUES_MONTAGNE_VERTE: TechniqueCultivation[] = [
     ],
     effets: {
       multiplicateurQi: 1.1,
-      bonusLongevite: 2,
-      reductionTemps: 3
+      bonusLongevite: 2
     },
     coutApprentissage: 50
   },
@@ -385,8 +383,7 @@ export const TECHNIQUES_MONTAGNE_VERTE: TechniqueCultivation[] = [
       "Communication avec les plantes pour obtenir des informations"
     ],
     effets: {
-      bonusStats: { intelligence: 1, perception: 1 },
-      reductionTemps: 7
+      bonusStats: { intelligence: 1, perception: 1 }
     },
     coutApprentissage: 300
   },
@@ -470,7 +467,6 @@ export const TECHNIQUES_MONTAGNE_VERTE: TechniqueCultivation[] = [
     ],
     effets: {
       bonusStats: { intelligence: 2, charisme: 1 },
-      reductionTemps: 10,
       bonusLongevite: 5
     },
     coutApprentissage: 800
@@ -540,10 +536,9 @@ export const TECHNIQUES_VOILE_OBSCUR: TechniqueCultivation[] = [
       "Repérage d'adversaires cachés"
     ],
     effets: {
-      bonusStats: { perception: 2 },
-      resistanceElement: [ElementCultivation.LUMIERE]
+      bonusStats: { perception: 2 }
     },
-    coutApprentissage: 2000
+    coutApprentissage: 200
   },
   {
     id: "technique-pas-ombre",
@@ -648,8 +643,7 @@ export const TECHNIQUES_VOILE_OBSCUR: TechniqueCultivation[] = [
     ],
     effets: {
       bonusStats: { intelligence: 1, perception: 1 },
-      multiplicateurQi: 1.15,
-      reductionTemps: 5
+      multiplicateurQi: 1.15
     },
     coutApprentissage: 200
   },
@@ -716,8 +710,7 @@ export const TECHNIQUES_GENERIQUES: TechniqueCultivation[] = [
       "Récupération d'énergie spirituelle"
     ],
     effets: {
-      multiplicateurQi: 1.05,
-      reductionTemps: 2
+      multiplicateurQi: 1.05
     },
     coutApprentissage: 10
   },
@@ -757,8 +750,7 @@ export const TECHNIQUES_GENERIQUES: TechniqueCultivation[] = [
       "Analyse des flux de Qi dans les artefacts et talismans"
     ],
     effets: {
-      bonusStats: { perception: 2 },
-      reductionTemps: 5
+      bonusStats: { perception: 2 }
     },
     coutApprentissage: 200
   },
