@@ -526,7 +526,27 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange, onReset
         <DialogContent dividers>
           <Box sx={{ mb: 4 }}>
             <Typography variant="h6" gutterBottom sx={{ color: (theme) => theme.palette.primary.main, fontWeight: 'bold' }}>
-              Version 1.1.0 (Actuelle)
+              Version 1.2.0 (Actuelle)
+            </Typography>
+            <Typography variant="subtitle2" gutterBottom sx={{ color: 'text.secondary' }}>
+              Date: 15 Mars 2025
+            </Typography>
+            <Box component="ul" sx={{ pl: 2 }}>
+              <Typography component="li" variant="body1" sx={{ mb: 1 }}>
+                <strong>Changement conceptuel:</strong> Modification du système de percée pour passer d'une "réduction du temps de percée" à une "réduction du coût de percée", reflétant plus précisément le mécanisme réel (réduction du Qi requis).
+              </Typography>
+              <Typography component="li" variant="body1" sx={{ mb: 1 }}>
+                <strong>Interface:</strong> Mise à jour des textes dans les menus Profil, Secte et GameScreen pour refléter ce changement conceptuel.
+              </Typography>
+              <Typography component="li" variant="body1" sx={{ mb: 1 }}>
+                <strong>Correction:</strong> Résolution de problèmes de cohérence dans l'affichage des bonus de secte.
+              </Typography>
+            </Box>
+          </Box>
+          
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h6" gutterBottom sx={{ color: (theme) => theme.palette.primary.main, fontWeight: 'bold' }}>
+              Version 1.1.0
             </Typography>
             <Typography variant="subtitle2" gutterBottom sx={{ color: 'text.secondary' }}>
               Date: 11 Mars 2025
