@@ -34,7 +34,10 @@ import {
   MissionSecte,
   RessourceSecte,
   ElementCultivation,
-  RoyaumeCultivation
+  RoyaumeCultivation,
+  Stats,
+  STAT_MAX_JEU,
+  calculerTalentCultivation
 } from '../../models/types';
 import { getTechniquesSecte, peutApprendreTechnique, calculerCoutApprentissage } from '../../models/techniques';
 import GroupIcon from '@mui/icons-material/Group';
@@ -148,12 +151,38 @@ const SecteMenu: React.FC<SecteMenuProps> = ({ personnage, onUpdatePersonnage })
       return; // Ne pas continuer si les conditions ne sont plus remplies
     }
     
-    // Mettre à jour le personnage
+    // Créer une copie des statistiques du personnage
+    const statsUpdated = { ...personnage.stats };
+    
+    // Appliquer les bonus de statistiques de la technique si présents
+    if (selectedTechnique.effets.bonusStats) {
+      Object.entries(selectedTechnique.effets.bonusStats).forEach(([stat, valeur]) => {
+        if (stat in statsUpdated) {
+          // Limiter les statistiques entre 1 et STAT_MAX_JEU (100)
+          statsUpdated[stat as keyof Stats] = Math.min(
+            STAT_MAX_JEU, 
+            Math.max(1, statsUpdated[stat as keyof Stats] + (valeur as number))
+          );
+        }
+      });
+      
+      // Recalculer les statistiques dérivées
+      statsUpdated.hp = statsUpdated.constitution * 10 + statsUpdated.force * 5;
+      statsUpdated.degat = statsUpdated.force * 2 + statsUpdated.qi;
+      statsUpdated.esquive = statsUpdated.agilite * 1.5 + statsUpdated.perception * 0.5;
+      statsUpdated.resistance = statsUpdated.constitution * 1.5 + statsUpdated.force * 0.5;
+    }
+    
+    // Mettre à jour le personnage avec les nouvelles statistiques et la technique apprise
     const personnageUpdated = {
       ...personnage,
+      stats: statsUpdated,
       techniquesApprises: [...personnage.techniquesApprises, selectedTechnique],
       pierresSpirituelles: personnage.pierresSpirituelles - coutReel
     };
+    
+    // Recalculer le talent de cultivation avec les nouvelles statistiques
+    personnageUpdated.talentCultivation = calculerTalentCultivation(statsUpdated);
     
     onUpdatePersonnage(personnageUpdated);
     handleCloseConfirmation();

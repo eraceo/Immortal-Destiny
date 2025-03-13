@@ -398,6 +398,7 @@ export interface Personnage {
   dateNaissance: number; // Timestamp de création du personnage
   dernierTempsJeu: number; // Timestamp de la dernière fois que le joueur a joué
   tempsJeuTotal: number; // Temps total de jeu en secondes
+  tempsEcoule: number; // Temps écoulé pendant la méditation en années
   // Système monétaire
   pierresSpirituelles: number; // Monnaie du jeu
   // Système de sectes
@@ -429,8 +430,7 @@ export const genererAgeInitial = (): number => {
 
 // Fonction pour calculer l'âge actuel du personnage
 export const calculerAgeActuel = (personnage: Personnage): number => {
-  // L'âge est maintenant simplement l'âge initial plus les années gagnées pendant la méditation
-  // Ces années sont stockées directement dans personnage.age
+  // L'âge est maintenant simplement l'âge stocké dans le personnage
   return personnage.age;
 };
 

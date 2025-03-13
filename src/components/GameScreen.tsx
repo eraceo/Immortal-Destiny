@@ -68,7 +68,6 @@ const GameScreen: React.FC = () => {
   const [openPerceeDialog, setOpenPerceeDialog] = useState<boolean>(false);
   const [tempsTotalMeditation, setTempsTotalMeditation] = useState<number>(0);
   const [tempsMeditationCumule, setTempsMeditationCumule] = useState<number>(0);
-  const [ageActuel, setAgeActuel] = useState<number>(0);
   const [esperanceVie, setEsperanceVie] = useState<number>(0);
   const [tempsJeuFormate, setTempsJeuFormate] = useState<string>("00:00:00");
   const [openMortDialog, setOpenMortDialog] = useState<boolean>(false);
@@ -225,18 +224,31 @@ const GameScreen: React.FC = () => {
       const derniereAnneeEvenementSauvegarde = sauvegarde.derniereAnneeEvenement || 0;
       const historiqueEvenementsSauvegarde = sauvegarde.historiqueEvenements || [];
       
+      // Initialiser tempsEcoule s'il n'existe pas
+      if (personnageData.tempsEcoule === undefined) {
+        personnageData.tempsEcoule = 0;
+      }
+      
       // Mettre à jour le dernier temps de jeu
       personnageData.dernierTempsJeu = Date.now();
       
+      // S'assurer que l'âge est correctement initialisé
+      // Si l'âge n'est pas défini, l'initialiser à partir du temps de méditation
+      if (personnageData.age === undefined) {
+        const anneesMeditation = Math.floor(tempsMeditationCumuleSauvegarde / 60);
+        personnageData.age = (personnageData.age || 0) + anneesMeditation;
+      }
+      
+      // Réinitialiser le temps de méditation cumulé pour éviter de compter deux fois les années
+      const nouveauTempsMeditationCumule = tempsMeditationCumuleSauvegarde % 60;
+      
       setPersonnage(personnageData);
-      setTempsMeditationCumule(tempsMeditationCumuleSauvegarde);
+      setTempsMeditationCumule(nouveauTempsMeditationCumule);
       setDerniereAnneeEvenement(derniereAnneeEvenementSauvegarde);
       setHistoriqueEvenements(historiqueEvenementsSauvegarde);
       
-      // Calculer l'âge actuel en fonction du temps de méditation cumulé
-      const anneesMeditation = Math.floor(tempsMeditationCumuleSauvegarde / 60);
-      const ageCalcule = personnageData.age + anneesMeditation;
-      setAgeActuel(ageCalcule);
+      // Définir l'âge actuel pour l'affichage
+      // setAgeActuel(personnageData.age);
       
       const esperanceVieCalculee = calculerEsperanceVie(personnageData.race, personnageData.royaumeCultivation);
       setEsperanceVie(esperanceVieCalculee);
@@ -259,25 +271,15 @@ const GameScreen: React.FC = () => {
   // Sauvegarder le personnage dans le localStorage
   const sauvegarderPersonnage = useCallback((personnageToSave?: Personnage | null) => {
     try {
-      // Utiliser le personnage passé en paramètre ou celui du state
-      const personnageActuel = personnageToSave || personnage;
+      const personnageASauvegarder = personnageToSave || personnage;
+      if (!personnageASauvegarder) return false;
       
-      if (!personnageActuel) return false;
-      
-      // Mettre à jour le dernier temps de jeu et l'âge actuel
-      const personnageAJour = {
-        ...personnageActuel,
-        dernierTempsJeu: Date.now(),
-        age: personnage ? personnage.age : ageActuel, // Conserver l'âge initial du personnage
-        tempsJeuTotal: personnageActuel.tempsJeuTotal + 10 // Ajouter 10 secondes (intervalle de sauvegarde)
-      };
-      
-      // Créer un objet de sauvegarde contenant toutes les données
+      // Créer l'objet de sauvegarde
       const sauvegarde = {
-        personnage: personnageAJour,
-        tempsMeditationCumule: tempsMeditationCumule,
-        derniereAnneeEvenement: derniereAnneeEvenement,
-        historiqueEvenements: historiqueEvenements
+        personnage: personnageASauvegarder,
+        tempsMeditationCumule,
+        derniereAnneeEvenement,
+        historiqueEvenements
       };
       
       // Convertir en JSON puis en base64
@@ -287,18 +289,24 @@ const GameScreen: React.FC = () => {
       // Sauvegarder dans le localStorage
       localStorage.setItem('wuxiaWorldSauvegarde', sauvegardeBase64);
       
+      // Afficher un message de succès si c'est une sauvegarde manuelle
+      if (!personnageToSave) {
+        setSnackbarMessage("Personnage sauvegardé avec succès !");
+        setSnackbarOpen(true);
+      }
+      
       return true;
     } catch (err) {
       console.error("Erreur lors de la sauvegarde:", err);
+      setSnackbarMessage("Erreur lors de la sauvegarde !");
+      setSnackbarOpen(true);
       return false;
     }
-  }, [personnage, ageActuel, tempsMeditationCumule, derniereAnneeEvenement, historiqueEvenements]);
+  }, [personnage, tempsMeditationCumule, derniereAnneeEvenement, historiqueEvenements]);
 
   // Fonction pour sauvegarder manuellement
   const sauvegarderManuellement = () => {
     sauvegarderPersonnage(personnage);
-    setSnackbarMessage("Personnage sauvegardé avec succès !");
-    setSnackbarOpen(true);
   };
 
   // Mettre en place la sauvegarde automatique toutes les 5 secondes
@@ -345,7 +353,7 @@ const GameScreen: React.FC = () => {
     
     // Mettre à jour l'espérance de vie si nécessaire
     if (evenementActuel.effets.esperanceVie) {
-      const nouvelleEsperanceVie = Math.max(ageActuel + 1, esperanceVie + evenementActuel.effets.esperanceVie);
+      const nouvelleEsperanceVie = Math.max(personnage.age + 1, esperanceVie + evenementActuel.effets.esperanceVie);
       setEsperanceVie(nouvelleEsperanceVie);
     }
     
@@ -359,7 +367,7 @@ const GameScreen: React.FC = () => {
     // Afficher un message de confirmation
     setSnackbarMessage(`Les effets de l'événement "${evenementActuel.titre}" ont été appliqués !`);
     setSnackbarOpen(true);
-  }, [personnage, evenementActuel, ageActuel, esperanceVie]);
+  }, [personnage, evenementActuel, esperanceVie]);
 
   // Gérer le vieillissement du personnage
   useEffect(() => {
@@ -371,8 +379,6 @@ const GameScreen: React.FC = () => {
         // Un an par minute (60 secondes)
         const anneesMeditation = Math.floor(tempsMeditationCumule / 60);
         const nouvelAge = personnage.age + anneesMeditation;
-        
-        setAgeActuel(nouvelAge);
         
         // Vérifier si une année s'est écoulée depuis le dernier événement
         const anneeActuelle = Math.floor(tempsMeditationCumule / 60);
@@ -517,76 +523,81 @@ const GameScreen: React.FC = () => {
         
         // Incrémenter le temps total de méditation (fraction d'une seconde)
         setTempsTotalMeditation(prev => prev + (1/12));
-      }, 5000); // Mise à jour toutes les 5 secondes (1 minute / 12)
-      
-      // Démarrer le timer pour l'âge (1 an par minute)
-      ageTimerRef.current = setInterval(() => {
+        
+        // Incrémenter le temps écoulé
         setPersonnage(prevPersonnage => {
           if (!prevPersonnage) return null;
           
-          // Incrémenter l'âge (1 an par minute réelle)
-          const nouvelAge = prevPersonnage.age + 1;
+          // Ajouter 1/12 d'année au temps écoulé (1 mois)
+          const nouveauTempsEcoule = (prevPersonnage.tempsEcoule || 0) + (1/12);
           
-          // Vérifier si le personnage a dépassé son espérance de vie
-          const esperanceVieActuelle = calculerEsperanceVie(prevPersonnage.race, prevPersonnage.royaumeCultivation);
+          // Vérifier si une année complète s'est écoulée
+          const anneesPrecedentes = Math.floor(prevPersonnage.tempsEcoule || 0);
+          const anneesActuelles = Math.floor(nouveauTempsEcoule);
           
-          // Appliquer les bonus de secte à l'espérance de vie
-          let esperanceVieFinale = esperanceVieActuelle;
-          if (prevPersonnage.appartenanceSecte) {
-            const bonusSecte = calculerBonusSecte(prevPersonnage);
-            esperanceVieFinale += (esperanceVieActuelle * bonusSecte.bonusLongevite / 100);
-          }
-          
-          if (nouvelAge >= esperanceVieFinale) {
-            // Le personnage est mort de vieillesse
-            setMeditationActive(false);
-            if (ageTimerRef.current) {
-              clearInterval(ageTimerRef.current);
-              ageTimerRef.current = null;
-            }
-            if (qiTimerRef.current) {
-              clearInterval(qiTimerRef.current);
-              qiTimerRef.current = null;
-            }
-            if (moisTimerRef.current) {
-              clearInterval(moisTimerRef.current);
-              moisTimerRef.current = null;
-            }
-            setOpenMortDialog(true);
-            return prevPersonnage;
-          }
-          
-          // Mettre à jour le temps de méditation cumulé
-          setTempsMeditationCumule(prev => prev + 60);
-          
-          // Vérifier si un événement aléatoire doit se produire (tous les 10 ans de jeu)
-          const anneeActuelle = Math.floor(nouvelAge);
-          if (anneeActuelle > derniereAnneeEvenement && anneeActuelle % 10 === 0) {
-            setDerniereAnneeEvenement(anneeActuelle);
+          // Si une nouvelle année complète s'est écoulée, incrémenter l'âge
+          if (anneesActuelles > anneesPrecedentes) {
+            const nouvelAge = prevPersonnage.age + 1;
+            // setAgeActuel(nouvelAge);
             
-            // Tenter de générer un événement aléatoire
-            const evenement = obtenirEvenementAleatoire(prevPersonnage.royaumeCultivation);
-            if (evenement) {
-              setEvenementActuel(evenement);
-              setOpenEvenementDialog(true);
-              
-              // Ajouter l'événement à l'historique
-              setHistoriqueEvenements(prev => [...prev, evenement]);
+            // Vérifier si le personnage a dépassé son espérance de vie
+            const esperanceVieActuelle = calculerEsperanceVie(prevPersonnage.race, prevPersonnage.royaumeCultivation);
+            
+            // Appliquer les bonus de secte à l'espérance de vie
+            let esperanceVieFinale = esperanceVieActuelle;
+            if (prevPersonnage.appartenanceSecte) {
+              const bonusSecte = calculerBonusSecte(prevPersonnage);
+              esperanceVieFinale += (esperanceVieActuelle * bonusSecte.bonusLongevite / 100);
             }
+            
+            if (nouvelAge >= esperanceVieFinale) {
+              // Le personnage est mort de vieillesse
+              setMeditationActive(false);
+              if (ageTimerRef.current) {
+                clearInterval(ageTimerRef.current);
+                ageTimerRef.current = null;
+              }
+              if (qiTimerRef.current) {
+                clearInterval(qiTimerRef.current);
+                qiTimerRef.current = null;
+              }
+              if (moisTimerRef.current) {
+                clearInterval(moisTimerRef.current);
+                moisTimerRef.current = null;
+              }
+              setOpenMortDialog(true);
+              return prevPersonnage;
+            }
+            
+            // Vérifier si un événement aléatoire doit se produire (tous les 10 ans de jeu)
+            if (nouvelAge > derniereAnneeEvenement && nouvelAge % 10 === 0) {
+              setDerniereAnneeEvenement(nouvelAge);
+              
+              // Tenter de générer un événement aléatoire
+              const evenement = obtenirEvenementAleatoire(prevPersonnage.royaumeCultivation);
+              if (evenement) {
+                setEvenementActuel(evenement);
+                setOpenEvenementDialog(true);
+                
+                // Ajouter l'événement à l'historique
+                setHistoriqueEvenements(prev => [...prev, evenement]);
+              }
+            }
+            
+            return {
+              ...prevPersonnage,
+              age: nouvelAge,
+              tempsEcoule: nouveauTempsEcoule
+            };
           }
           
+          // Si aucune année complète ne s'est écoulée, mettre à jour uniquement le temps écoulé
           return {
             ...prevPersonnage,
-            age: nouvelAge
+            tempsEcoule: nouveauTempsEcoule
           };
         });
-        
-        // Mettre à jour l'âge actuel
-        setAgeActuel(prevAge => prevAge + 1);
-        
-        // Réinitialiser le mois actuel à 0 (début d'une nouvelle année)
-        setMoisActuel(0);
-      }, 60000); // Mise à jour chaque minute (60 secondes)
+      }, 5000); // Mise à jour toutes les 5 secondes (1 minute / 12)
     }
   };
 
@@ -606,7 +617,9 @@ const GameScreen: React.FC = () => {
       royaumeCultivation: prochainNiveau.royaume,
       niveauPercee: prochainNiveau.niveau,
       qiRequis: prochainNiveau.qiRequis,
-      pointsQi: pointsQiExcedentaires > 0 ? pointsQiExcedentaires : 0
+      pointsQi: pointsQiExcedentaires > 0 ? pointsQiExcedentaires : 0,
+      // Assurons-nous que l'âge est correctement conservé
+      age: personnage.age
     };
     
     // Appliquer les bonus de secte pour la réduction du coût de percée
@@ -624,6 +637,9 @@ const GameScreen: React.FC = () => {
     
     // Mettre à jour l'état du personnage
     setPersonnage(nouveauPersonnage);
+    
+    // Mettre à jour l'âge affiché pour s'assurer qu'il est synchronisé
+    // setAgeActuel(nouveauPersonnage.age);
     
     // Mettre à jour l'espérance de vie
     const nouvelleEsperanceVie = calculerEsperanceVie(nouveauPersonnage.race, nouveauPersonnage.royaumeCultivation);
@@ -732,23 +748,25 @@ const GameScreen: React.FC = () => {
     
     switch (activeMenu) {
       case MenuType.PROFILE:
-        return <ProfileMenu 
-          personnage={personnage} 
-          ageActuel={ageActuel} 
-          esperanceVie={esperanceVie} 
-          tempsJeuFormate={tempsJeuFormate}
-          historiqueEvenements={historiqueEvenements}
-        />;
+        return (
+          <ProfileMenu 
+            personnage={personnage} 
+            ageActuel={personnage.age}
+            esperanceVie={esperanceVie}
+            tempsJeuFormate={tempsJeuFormate}
+            historiqueEvenements={historiqueEvenements}
+          />
+        );
       case MenuType.CULTIVATION:
         return (
           <CultivationMenu 
             personnage={personnage} 
-            meditationActive={meditationActive} 
-            gainQiParSeconde={gainQiParSeconde} 
+            meditationActive={meditationActive}
+            gainQiParSeconde={gainQiParSeconde}
             tempsTotalMeditation={tempsTotalMeditation}
             tempsMeditationCumule={tempsMeditationCumule}
             toggleMeditation={toggleMeditation}
-            onPercee={perceeDisponible ? effectuerPercee : undefined}
+            onPercee={effectuerPercee}
             perceeDisponible={perceeDisponible}
             moisActuel={moisActuel}
             buffsCultivation={calculerBuffsCultivation(personnage)}
@@ -773,8 +791,8 @@ const GameScreen: React.FC = () => {
       default:
         return <ProfileMenu 
           personnage={personnage} 
-          ageActuel={ageActuel} 
-          esperanceVie={esperanceVie} 
+          ageActuel={personnage.age}
+          esperanceVie={esperanceVie}
           tempsJeuFormate={tempsJeuFormate}
           historiqueEvenements={historiqueEvenements}
         />;
@@ -1066,7 +1084,7 @@ const GameScreen: React.FC = () => {
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="mort-dialog-description" sx={{ mb: 2 }}>
-            {personnage.nom} a atteint la fin de sa vie à l'âge de {ageActuel} ans. Son voyage sur le chemin de l'immortalité s'achève ici.
+            {personnage.nom} a atteint la fin de sa vie à l'âge de {personnage.age} ans. Son voyage sur le chemin de l'immortalité s'achève ici.
           </DialogContentText>
           
           <Box sx={{ 

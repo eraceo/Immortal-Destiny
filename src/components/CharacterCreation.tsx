@@ -266,6 +266,7 @@ const CharacterCreation: React.FC = () => {
     dateNaissance: Date.now(),
     dernierTempsJeu: Date.now(),
     tempsJeuTotal: 0,
+    tempsEcoule: 0, // Initialisation du temps écoulé à 0
     pierresSpirituelles: 100, // Initialisation avec 100 pierres spirituelles
     // Nouvelles propriétés pour le système de sectes
     appartenanceSecte: null,
@@ -337,10 +338,8 @@ const CharacterCreation: React.FC = () => {
       if (origineInfo.bonusStats) {
         Object.entries(origineInfo.bonusStats).forEach(([stat, bonus]) => {
           statsFinales[stat as keyof Stats] += bonus;
-          // S'assurer que les statistiques ne dépassent pas STAT_MAX_CREATION
-          if (statsFinales[stat as keyof Stats] > STAT_MAX_CREATION) {
-            statsFinales[stat as keyof Stats] = STAT_MAX_CREATION;
-          }
+          // Ne pas limiter les statistiques à STAT_MAX_CREATION
+          // Elles pourront ainsi dépasser 10 et atteindre jusqu'à STAT_MAX_JEU (100)
         });
       }
 
@@ -373,6 +372,7 @@ const CharacterCreation: React.FC = () => {
         dateNaissance: Date.now(),
         dernierTempsJeu: Date.now(),
         tempsJeuTotal: 0,
+        tempsEcoule: 0,
         pierresSpirituelles: pierresInitiales,
         // Nouvelles propriétés pour le système de sectes
         appartenanceSecte: appartenanceSecteFinale,

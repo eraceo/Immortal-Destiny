@@ -198,7 +198,7 @@ const CultivationMenu: React.FC<CultivationMenuProps> = ({
                 py: 0.5,
                 borderRadius: 1
               }}>
-                {Math.floor((tempsTotalMeditation * MOIS_PAR_MINUTE) / 12)} ans {Math.floor((tempsTotalMeditation * MOIS_PAR_MINUTE) % 12)} mois
+                {Math.floor(personnage.tempsEcoule)} ans {Math.floor((personnage.tempsEcoule % 1) * 12)} mois
               </Box>
             </Typography>
           )}

@@ -13,10 +13,14 @@ import {
   List,
   ListItem,
   ListItemText,
-  ListItemIcon
+  ListItemIcon,
+  Tooltip
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import EventIcon from '@mui/icons-material/Event';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import FaceIcon from '@mui/icons-material/Face';
+import CakeIcon from '@mui/icons-material/Cake';
 import { 
   Personnage, 
   getRaceInfo, 
@@ -147,8 +151,17 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
                 Genre: <strong>{personnage.genre}</strong>
               </Typography>
               
-              <Typography variant="body2" color="text.secondary" gutterBottom>
-                Âge: <strong>{ageActuel} ans</strong> (Espérance de vie: {esperanceVie} ans)
+              <Typography variant="body2" color="text.secondary" gutterBottom sx={{ 
+                display: 'flex', 
+                alignItems: 'center',
+                '& svg': { mr: 1, color: pourcentageAge > 90 ? 'error.main' : 'primary.main' }
+              }}>
+                Âge: <strong style={{ marginLeft: '4px' }}>{ageActuel.toLocaleString()} ans</strong> 
+                <Tooltip title="Espérance de vie basée sur votre race et votre niveau de cultivation" arrow>
+                  <span style={{ marginLeft: '8px', opacity: 0.8 }}>
+                    (Espérance de vie: {esperanceVie.toLocaleString()} ans)
+                  </span>
+                </Tooltip>
               </Typography>
               
               <Typography variant="body2" color="text.secondary" gutterBottom>
@@ -174,11 +187,6 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
                   }} 
                 />
               </Box>
-            </Box>
-            
-            <Box>
-              <Typography variant="body2" color="text.secondary">Temps de jeu</Typography>
-              <Typography variant="body1">{tempsJeuFormate}</Typography>
             </Box>
           </Paper>
           
