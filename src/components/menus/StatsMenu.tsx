@@ -8,7 +8,7 @@ import {
   Tooltip,
   Divider
 } from '@mui/material';
-import { Personnage, STAT_MAX_CREATION, STAT_MAX_JEU, calculerBonusSecte } from '../../models/types';
+import { Personnage, STAT_MAX_CREATION, STAT_MAX_JEU, calculerBonusSecte, MULTIPLICATEUR_COMBAT_ROYAUME, getRoyaumeColor, RoyaumeCultivation } from '../../models/types';
 
 interface StatsMenuProps {
   personnage: Personnage;
@@ -287,7 +287,10 @@ const StatsMenu: React.FC<StatsMenuProps> = ({ personnage }) => {
                       Détail du calcul
                     </Typography>
                     <Typography variant="body2">
-                      Constitution × 10 + Force × 5 = {personnage.stats.constitution} × 10 + {personnage.stats.force} × 5 = {personnage.stats.hp}
+                      (Constitution × 10 + Force × 5) × Multiplicateur du Royaume
+                    </Typography>
+                    <Typography variant="body2">
+                      ({personnage.stats.constitution} × 10 + {personnage.stats.force} × 5) × {MULTIPLICATEUR_COMBAT_ROYAUME[personnage.royaumeCultivation]} = {personnage.stats.hp}
                     </Typography>
                   </Box>
                 }
@@ -295,11 +298,13 @@ const StatsMenu: React.FC<StatsMenuProps> = ({ personnage }) => {
                 placement="top"
               >
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, cursor: 'help' }}>
-                  Calculé à partir de Constitution (×10) et Force (×5)
+                  Calculé à partir de Constitution (×10) et Force (×5) avec un multiplicateur de {MULTIPLICATEUR_COMBAT_ROYAUME[personnage.royaumeCultivation]} pour le {personnage.royaumeCultivation}
                 </Typography>
               </Tooltip>
             </Box>
-            
+          </Grid>
+          
+          <Grid item xs={12} md={6}>
             <Box sx={{ mb: 2 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                 <Typography variant="body1">Dégâts</Typography>
@@ -315,7 +320,7 @@ const StatsMenu: React.FC<StatsMenuProps> = ({ personnage }) => {
                   borderRadius: 4,
                   backgroundColor: 'rgba(255, 255, 255, 0.1)',
                   '& .MuiLinearProgress-bar': {
-                    backgroundColor: '#f39c12', // Orange pour Dégâts
+                    backgroundColor: '#e67e22', // Orange pour Dégâts
                   }
                 }} 
               />
@@ -326,7 +331,10 @@ const StatsMenu: React.FC<StatsMenuProps> = ({ personnage }) => {
                       Détail du calcul
                     </Typography>
                     <Typography variant="body2">
-                      Force × 2 + Qi = {personnage.stats.force} × 2 + {personnage.stats.qi} = {personnage.stats.degat}
+                      (Force × 2 + Qi) × Multiplicateur du Royaume
+                    </Typography>
+                    <Typography variant="body2">
+                      ({personnage.stats.force} × 2 + {personnage.stats.qi}) × {MULTIPLICATEUR_COMBAT_ROYAUME[personnage.royaumeCultivation]} = {personnage.stats.degat}
                     </Typography>
                   </Box>
                 }
@@ -334,7 +342,7 @@ const StatsMenu: React.FC<StatsMenuProps> = ({ personnage }) => {
                 placement="top"
               >
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, cursor: 'help' }}>
-                  Calculé à partir de Force (×2) et Qi
+                  Calculé à partir de Force (×2) et Qi avec un multiplicateur de {MULTIPLICATEUR_COMBAT_ROYAUME[personnage.royaumeCultivation]} pour le {personnage.royaumeCultivation}
                 </Typography>
               </Tooltip>
             </Box>
@@ -367,7 +375,10 @@ const StatsMenu: React.FC<StatsMenuProps> = ({ personnage }) => {
                       Détail du calcul
                     </Typography>
                     <Typography variant="body2">
-                      Agilité × 1.5 + Perception × 0.5 = {personnage.stats.agilite} × 1.5 + {personnage.stats.perception} × 0.5 = {personnage.stats.esquive}
+                      (Agilité × 1.5 + Perception × 0.5) × Multiplicateur du Royaume
+                    </Typography>
+                    <Typography variant="body2">
+                      ({personnage.stats.agilite} × 1.5 + {personnage.stats.perception} × 0.5) × {MULTIPLICATEUR_COMBAT_ROYAUME[personnage.royaumeCultivation]} = {personnage.stats.esquive}
                     </Typography>
                   </Box>
                 }
@@ -375,11 +386,13 @@ const StatsMenu: React.FC<StatsMenuProps> = ({ personnage }) => {
                 placement="top"
               >
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, cursor: 'help' }}>
-                  Calculé à partir d'Agilité (×1.5) et Perception (×0.5)
+                  Calculé à partir d'Agilité (×1.5) et Perception (×0.5) avec un multiplicateur de {MULTIPLICATEUR_COMBAT_ROYAUME[personnage.royaumeCultivation]} pour le {personnage.royaumeCultivation}
                 </Typography>
               </Tooltip>
             </Box>
-            
+          </Grid>
+          
+          <Grid item xs={12} md={6}>
             <Box sx={{ mb: 2 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                 <Typography variant="body1">Résistance</Typography>
@@ -395,7 +408,7 @@ const StatsMenu: React.FC<StatsMenuProps> = ({ personnage }) => {
                   borderRadius: 4,
                   backgroundColor: 'rgba(255, 255, 255, 0.1)',
                   '& .MuiLinearProgress-bar': {
-                    backgroundColor: '#27ae60', // Vert pour Résistance
+                    backgroundColor: '#2ecc71', // Vert pour Résistance
                   }
                 }} 
               />
@@ -406,7 +419,10 @@ const StatsMenu: React.FC<StatsMenuProps> = ({ personnage }) => {
                       Détail du calcul
                     </Typography>
                     <Typography variant="body2">
-                      Constitution × 1.5 + Force × 0.5 = {personnage.stats.constitution} × 1.5 + {personnage.stats.force} × 0.5 = {personnage.stats.resistance}
+                      (Constitution × 1.5 + Force × 0.5) × Multiplicateur du Royaume
+                    </Typography>
+                    <Typography variant="body2">
+                      ({personnage.stats.constitution} × 1.5 + {personnage.stats.force} × 0.5) × {MULTIPLICATEUR_COMBAT_ROYAUME[personnage.royaumeCultivation]} = {personnage.stats.resistance}
                     </Typography>
                   </Box>
                 }
@@ -414,7 +430,7 @@ const StatsMenu: React.FC<StatsMenuProps> = ({ personnage }) => {
                 placement="top"
               >
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, cursor: 'help' }}>
-                  Calculé à partir de Constitution (×1.5) et Force (×0.5)
+                  Calculé à partir de Constitution (×1.5) et Force (×0.5) avec un multiplicateur de {MULTIPLICATEUR_COMBAT_ROYAUME[personnage.royaumeCultivation]} pour le {personnage.royaumeCultivation}
                 </Typography>
               </Tooltip>
             </Box>
@@ -429,8 +445,38 @@ const StatsMenu: React.FC<StatsMenuProps> = ({ personnage }) => {
           border: '1px solid #e74c3c'
         }}>
           <Typography variant="body2" gutterBottom>
-            <strong>Note:</strong> Les statistiques de combat sont dérivées de vos statistiques de base. Améliorer vos statistiques de base augmentera automatiquement vos capacités de combat.
+            <strong>Note:</strong> Les statistiques de combat sont dérivées de vos statistiques de base et sont multipliées par un facteur dépendant de votre royaume de cultivation actuel ({MULTIPLICATEUR_COMBAT_ROYAUME[personnage.royaumeCultivation]}x pour {personnage.royaumeCultivation}).
           </Typography>
+        </Box>
+        
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="subtitle1" gutterBottom>
+            Multiplicateurs de Combat par Royaume:
+          </Typography>
+          <Grid container spacing={1}>
+            {Object.entries(MULTIPLICATEUR_COMBAT_ROYAUME).map(([royaume, multiplicateur]) => (
+              <Grid item xs={6} sm={4} md={3} key={royaume}>
+                <Box 
+                  sx={{ 
+                    p: 1, 
+                    borderRadius: 1, 
+                    backgroundColor: royaume === personnage.royaumeCultivation ? 'rgba(255,255,255,0.1)' : 'transparent',
+                    border: royaume === personnage.royaumeCultivation ? `1px solid ${getRoyaumeColor(royaume as RoyaumeCultivation)}` : 'none'
+                  }}
+                >
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      color: getRoyaumeColor(royaume as RoyaumeCultivation),
+                      fontWeight: royaume === personnage.royaumeCultivation ? 'bold' : 'normal'
+                    }}
+                  >
+                    {royaume}: ×{multiplicateur}
+                  </Typography>
+                </Box>
+              </Grid>
+            ))}
+          </Grid>
         </Box>
       </Paper>
       
@@ -454,16 +500,16 @@ const StatsMenu: React.FC<StatsMenuProps> = ({ personnage }) => {
           
           <Box sx={{ pl: 2, mb: 2 }}>
             <Typography variant="body2" gutterBottom>
-              <strong>Points de Vie (HP):</strong> Constitution × 10 + Force × 5
+              <strong>Points de Vie (HP):</strong> (Constitution × 10 + Force × 5) × Multiplicateur du Royaume
             </Typography>
             <Typography variant="body2" gutterBottom>
-              <strong>Dégâts:</strong> Force × 2 + Qi
+              <strong>Dégâts:</strong> (Force × 2 + Qi) × Multiplicateur du Royaume
             </Typography>
             <Typography variant="body2" gutterBottom>
-              <strong>Esquive:</strong> Agilité × 1.5 + Perception × 0.5
+              <strong>Esquive:</strong> (Agilité × 1.5 + Perception × 0.5) × Multiplicateur du Royaume
             </Typography>
             <Typography variant="body2" gutterBottom>
-              <strong>Résistance:</strong> Constitution × 1.5 + Force × 0.5
+              <strong>Résistance:</strong> (Constitution × 1.5 + Force × 0.5) × Multiplicateur du Royaume
             </Typography>
           </Box>
           

@@ -533,22 +533,13 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange, onReset
             </Typography>
             <Box component="ul" sx={{ pl: 2 }}>
               <Typography component="li" variant="body1" sx={{ mb: 1 }}>
-                <strong>Correction majeure:</strong> Résolution du bug où les statistiques ne pouvaient pas dépasser 10 après la création du personnage. Les statistiques peuvent maintenant atteindre jusqu'à 100 pendant le jeu.
+                <strong>Nouvelle fonctionnalité majeure:</strong> Ajout d'un multiplicateur sur les statistiques de combat selon le royaume de cultivation, rendant les cultivateurs des royaumes supérieurs significativement plus puissants.
               </Typography>
               <Typography component="li" variant="body1" sx={{ mb: 1 }}>
-                <strong>Correction:</strong> Résolution du problème où la valeur de base d'une statistique diminuait de 1 après l'achat d'une technique. Les bonus des techniques sont maintenant correctement appliqués.
+                <strong>Interface:</strong> Affichage détaillé des multiplicateurs de combat par royaume dans le menu des statistiques.
               </Typography>
               <Typography component="li" variant="body1" sx={{ mb: 1 }}>
-                <strong>Amélioration:</strong> Ajout d'une section "Statistiques de Combat" dans le menu des statistiques, montrant clairement les points de vie, dégâts, esquive et résistance avec leurs formules de calcul détaillées.
-              </Typography>
-              <Typography component="li" variant="body1" sx={{ mb: 1 }}>
-                <strong>Amélioration:</strong> Refonte de la section "Effets des Statistiques" pour inclure des informations détaillées sur l'influence de chaque statistique de base sur les statistiques dérivées.
-              </Typography>
-              <Typography component="li" variant="body1" sx={{ mb: 1 }}>
-                <strong>Correction majeure:</strong> Résolution du bug où le personnage ne vieillissait pas correctement lorsqu'un an de cultivation était complété.
-              </Typography>
-              <Typography component="li" variant="body1" sx={{ mb: 1 }}>
-                <strong>Amélioration:</strong> Ajout d'une variable de temps écoulé qui augmente pendant la méditation et incrémente l'âge du personnage lorsqu'une année complète est écoulée.
+                <strong>Amélioration:</strong> Recalcul automatique des statistiques de combat lors des percées entre royaumes avec notification des changements.
               </Typography>
               <Typography component="li" variant="body1" sx={{ mb: 1 }}>
                 <strong>Changement conceptuel:</strong> Modification du système de percée pour passer d'une "réduction du temps de percée" à une "réduction du coût de percée", reflétant plus précisément le mécanisme réel (réduction du Qi requis).

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Box, 
   Typography, 
@@ -19,7 +20,16 @@ import {
   IconButton,
   Alert,
   Snackbar,
-  CircularProgress
+  CircularProgress,
+  Slider,
+  Switch,
+  FormControlLabel,
+  TextField,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  SelectChangeEvent
 } from '@mui/material';
 import { 
   Personnage, 
@@ -44,7 +54,19 @@ import {
   RangSecte,
   TypeSecte,
   RoyaumeCultivation,
-  NiveauPercee
+  NiveauPercee,
+  Genre,
+  Race,
+  Origine,
+  Stats,
+  Secte,
+  rejoindreSecte,
+  getSecteDisponibles,
+  appliquerBonusSecte,
+  QI_REQUIS_PERCEE,
+  STAT_MAX_JEU,
+  calculerStatsCombat,
+  MULTIPLICATEUR_COMBAT_ROYAUME
 } from '../models/types';
 import Layout, { MenuType } from './Layout';
 import { 
@@ -635,6 +657,28 @@ const GameScreen: React.FC = () => {
       nouveauPersonnage.qiRequis = Math.floor(nouveauPersonnage.qiRequis * (1 - bonusSecte.reductionCoutPercee / 100));
     }
     
+    // Recalculer les statistiques de combat avec le multiplicateur du nouveau royaume
+    // Seulement si le royaume a changé
+    if (nouveauPersonnage.royaumeCultivation !== personnage.royaumeCultivation) {
+      // Calculer les nouvelles statistiques de combat
+      const statsCombat = calculerStatsCombat(nouveauPersonnage.stats, nouveauPersonnage.royaumeCultivation);
+      nouveauPersonnage.stats.hp = statsCombat.hp;
+      nouveauPersonnage.stats.degat = statsCombat.degat;
+      nouveauPersonnage.stats.esquive = statsCombat.esquive;
+      nouveauPersonnage.stats.resistance = statsCombat.resistance;
+      
+      // Ajouter un message pour informer le joueur de l'augmentation des statistiques de combat
+      const ancienMultiplicateur = MULTIPLICATEUR_COMBAT_ROYAUME[personnage.royaumeCultivation];
+      const nouveauMultiplicateur = MULTIPLICATEUR_COMBAT_ROYAUME[nouveauPersonnage.royaumeCultivation];
+      const messageStatsCombat = `Vos statistiques de combat ont été multipliées par ${(nouveauMultiplicateur / ancienMultiplicateur).toFixed(1)} grâce à votre progression dans le royaume ${nouveauPersonnage.royaumeCultivation}.`;
+      
+      // Afficher le message après un court délai pour ne pas écraser le message précédent
+      setTimeout(() => {
+        setSnackbarMessage(messageStatsCombat);
+        setSnackbarOpen(true);
+      }, 3000);
+    }
+    
     // Mettre à jour l'état du personnage
     setPersonnage(nouveauPersonnage);
     
@@ -647,17 +691,6 @@ const GameScreen: React.FC = () => {
     
     // Fermer la boîte de dialogue
     setOpenPerceeDialog(false);
-    
-    // Réinitialiser l'état perceeDisponible
-    setPerceeDisponible(false);
-    
-    // Afficher un message de félicitations
-    const message = `Félicitations ! Vous avez atteint ${getNomCompletCultivation(prochainNiveau.royaume, prochainNiveau.niveau)} !`;
-    setSnackbarMessage(message);
-    setSnackbarOpen(true);
-    
-    // Sauvegarder le personnage
-    sauvegarderPersonnage(nouveauPersonnage);
   };
 
   // Fonction pour retourner à la création de personnage

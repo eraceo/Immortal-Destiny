@@ -638,10 +638,12 @@ export const genererStatsAleatoires = (): Stats => {
   const qi = Math.floor(Math.random() * 10) + 1;
   
   // Calculer les statistiques dérivées
-  const hp = constitution * 10 + force * 5;
-  const degat = force * 2 + qi;
-  const esquive = agilite * 1.5 + perception * 0.5;
-  const resistance = constitution * 1.5 + force * 0.5;
+  // Note: Nous utilisons le multiplicateur du royaume MORTEL par défaut (1)
+  const multiplicateur = MULTIPLICATEUR_COMBAT_ROYAUME[RoyaumeCultivation.MORTEL];
+  const hp = Math.round((constitution * 10 + force * 5) * multiplicateur);
+  const degat = Math.round((force * 2 + qi) * multiplicateur);
+  const esquive = Math.round((agilite * 1.5 + perception * 0.5) * multiplicateur);
+  const resistance = Math.round((constitution * 1.5 + force * 0.5) * multiplicateur);
   
   return {
     force,
@@ -1056,11 +1058,12 @@ export const appliquerEffetsEvenement = (personnage: Personnage, evenement: Even
       }
     });
     
-    // Recalculer les statistiques dérivées
-    personnageModifie.stats.hp = personnageModifie.stats.constitution * 10 + personnageModifie.stats.force * 5;
-    personnageModifie.stats.degat = personnageModifie.stats.force * 2 + personnageModifie.stats.qi;
-    personnageModifie.stats.esquive = personnageModifie.stats.agilite * 1.5 + personnageModifie.stats.perception * 0.5;
-    personnageModifie.stats.resistance = personnageModifie.stats.constitution * 1.5 + personnageModifie.stats.force * 0.5;
+    // Recalculer les statistiques dérivées avec le multiplicateur du royaume
+    const statsCombat = calculerStatsCombat(personnageModifie.stats, personnageModifie.royaumeCultivation);
+    personnageModifie.stats.hp = statsCombat.hp;
+    personnageModifie.stats.degat = statsCombat.degat;
+    personnageModifie.stats.esquive = statsCombat.esquive;
+    personnageModifie.stats.resistance = statsCombat.resistance;
     
     // Recalculer le talent de cultivation
     personnageModifie.talentCultivation = calculerTalentCultivation(personnageModifie.stats);
@@ -1357,11 +1360,12 @@ export const appliquerBonusSecte = (personnage: Personnage): Personnage => {
       }
     });
     
-    // Recalculer les statistiques dérivées
-    personnageModifie.stats.hp = personnageModifie.stats.constitution * 10 + personnageModifie.stats.force * 5;
-    personnageModifie.stats.degat = personnageModifie.stats.force * 2 + personnageModifie.stats.qi;
-    personnageModifie.stats.esquive = personnageModifie.stats.agilite * 1.5 + personnageModifie.stats.perception * 0.5;
-    personnageModifie.stats.resistance = personnageModifie.stats.constitution * 1.5 + personnageModifie.stats.force * 0.5;
+    // Recalculer les statistiques dérivées avec le multiplicateur du royaume
+    const statsCombat = calculerStatsCombat(personnageModifie.stats, personnageModifie.royaumeCultivation);
+    personnageModifie.stats.hp = statsCombat.hp;
+    personnageModifie.stats.degat = statsCombat.degat;
+    personnageModifie.stats.esquive = statsCombat.esquive;
+    personnageModifie.stats.resistance = statsCombat.resistance;
     
     // Recalculer le talent de cultivation
     personnageModifie.talentCultivation = calculerTalentCultivation(personnageModifie.stats);
@@ -1427,4 +1431,35 @@ export const genererTalentCultivation = (): number => {
   // Générer des stats aléatoires et calculer le talent
   const stats = genererStatsAleatoires();
   return calculerTalentCultivation(stats);
+};
+
+// Constantes pour les multiplicateurs de statistiques de combat par royaume
+export const MULTIPLICATEUR_COMBAT_ROYAUME: Record<RoyaumeCultivation, number> = {
+  [RoyaumeCultivation.MORTEL]: 1,
+  [RoyaumeCultivation.INITIATION]: 1.2,
+  [RoyaumeCultivation.QI_CONDENSE]: 1.5,
+  [RoyaumeCultivation.FONDATION]: 2,
+  [RoyaumeCultivation.CORE_OR]: 3,
+  [RoyaumeCultivation.NASCENT_SOUL]: 5,
+  [RoyaumeCultivation.TRANSCENDANCE]: 8,
+  [RoyaumeCultivation.SAINT_MARTIAL]: 12,
+  [RoyaumeCultivation.DEMI_DIEU]: 20,
+  [RoyaumeCultivation.DIVIN_SUPREME]: 30
+};
+
+// Fonction pour calculer les statistiques de combat avec le multiplicateur du royaume
+export const calculerStatsCombat = (stats: Stats, royaume: RoyaumeCultivation): {
+  hp: number,
+  degat: number,
+  esquive: number,
+  resistance: number
+} => {
+  const multiplicateur = MULTIPLICATEUR_COMBAT_ROYAUME[royaume];
+  
+  return {
+    hp: Math.round((stats.constitution * 10 + stats.force * 5) * multiplicateur),
+    degat: Math.round((stats.force * 2 + stats.qi) * multiplicateur),
+    esquive: Math.round((stats.agilite * 1.5 + stats.perception * 0.5) * multiplicateur),
+    resistance: Math.round((stats.constitution * 1.5 + stats.force * 0.5) * multiplicateur)
+  };
 }; 

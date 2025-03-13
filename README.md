@@ -42,7 +42,7 @@ Avec une esthétique moderne et sombre, ce jeu vous permet de progresser même l
 - **TypeScript** - Typage statique pour un code robuste
 - **Material UI** - Composants d'interface utilisateur élégants
 - **React Router** - Navigation fluide entre les différentes sections
-- **CSS personnalisé** - Styles uniques adaptés à l'univers wuxia
+- **CSS personnalisé** - Styles uniques adaptés à l'univers wuxia=
 
 ## 🚀 Démarrage rapide
 
