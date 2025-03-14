@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Box,
   Typography,
@@ -61,8 +61,10 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange, onReset
   const [localSettings, setLocalSettings] = useState<GameSettings>(settings);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error' | 'info' | 'warning'>('success');
   const [openResetDialog, setOpenResetDialog] = useState(false);
   const [patchNotesOpen, setPatchNotesOpen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fonction pour mettre à jour un paramètre
   const updateSetting = <K extends keyof GameSettings>(key: K, value: GameSettings[K]) => {
@@ -85,6 +87,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange, onReset
     onSettingsChange(defaultSettings);
     onReset();
     setSnackbarMessage('Paramètres réinitialisés avec succès !');
+    setSnackbarSeverity('success');
     setSnackbarOpen(true);
     
     // Émettre un événement personnalisé pour le changement de thème
@@ -104,6 +107,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange, onReset
     localStorage.removeItem('wuxiaWorldSauvegarde');
     setOpenResetDialog(false);
     setSnackbarMessage('Sauvegarde réinitialisée avec succès ! La page va se recharger...');
+    setSnackbarSeverity('success');
     setSnackbarOpen(true);
     
     // Rediriger vers la page d'accueil après un court délai
@@ -120,6 +124,109 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange, onReset
   // Fonction pour fermer la boîte de dialogue des patch notes
   const handleClosePatchNotes = () => {
     setPatchNotesOpen(false);
+  };
+
+  // Fonction pour exporter la sauvegarde
+  const exporterSauvegarde = () => {
+    try {
+      // Récupérer les données de sauvegarde du localStorage
+      const sauvegarde = localStorage.getItem('wuxiaWorldSauvegarde');
+      
+      if (!sauvegarde) {
+        setSnackbarMessage('Aucune sauvegarde trouvée à exporter.');
+        setSnackbarSeverity('warning');
+        setSnackbarOpen(true);
+        return;
+      }
+      
+      // Créer un objet Blob avec les données
+      const blob = new Blob([sauvegarde], { type: 'application/octet-stream' });
+      
+      // Créer un URL pour le Blob
+      const url = URL.createObjectURL(blob);
+      
+      // Créer un élément <a> pour télécharger le fichier
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `immortal-destiny-sauvegarde-${new Date().toISOString().slice(0, 10)}.b64`;
+      
+      // Ajouter l'élément au DOM, cliquer dessus, puis le supprimer
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      
+      // Libérer l'URL
+      URL.revokeObjectURL(url);
+      
+      setSnackbarMessage('Sauvegarde exportée avec succès !');
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error('Erreur lors de l\'exportation de la sauvegarde:', error);
+      setSnackbarMessage('Erreur lors de l\'exportation de la sauvegarde.');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    }
+  };
+  
+  // Fonction pour déclencher le dialogue de sélection de fichier
+  const declencherImportation = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+  
+  // Fonction pour importer la sauvegarde
+  const importerSauvegarde = (event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      const fichier = event.target.files?.[0];
+      if (!fichier) {
+        return;
+      }
+      
+      const lecteur = new FileReader();
+      
+      lecteur.onload = (e) => {
+        try {
+          const contenu = e.target?.result as string;
+          
+          // Remplacer directement le contenu dans le localStorage
+          localStorage.setItem('wuxiaWorldSauvegarde', contenu);
+          
+          setSnackbarMessage('Sauvegarde importée avec succès ! La page va se recharger...');
+          setSnackbarSeverity('success');
+          setSnackbarOpen(true);
+          
+          // Rediriger vers la page d'accueil après un court délai
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        } catch (error) {
+          console.error('Erreur lors de l\'importation de la sauvegarde:', error);
+          setSnackbarMessage('Erreur lors de l\'importation de la sauvegarde.');
+          setSnackbarSeverity('error');
+          setSnackbarOpen(true);
+        }
+      };
+      
+      lecteur.onerror = () => {
+        setSnackbarMessage('Erreur lors de la lecture du fichier.');
+        setSnackbarSeverity('error');
+        setSnackbarOpen(true);
+      };
+      
+      lecteur.readAsText(fichier);
+      
+      // Réinitialiser l'input file pour permettre de sélectionner le même fichier plusieurs fois
+      if (event.target) {
+        event.target.value = '';
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'importation de la sauvegarde:', error);
+      setSnackbarMessage('Erreur lors de l\'importation de la sauvegarde.');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    }
   };
 
   return (
@@ -348,6 +455,47 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange, onReset
             />
           </Grid>
 
+          <Grid item xs={12} sm={6}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+              <Button 
+                variant="outlined" 
+                color="primary" 
+                onClick={exporterSauvegarde}
+                sx={{ 
+                  borderWidth: 2,
+                  '&:hover': {
+                    borderWidth: 2,
+                    backgroundColor: (theme) => theme.palette.mode === 'light' ? 'rgba(25, 118, 210, 0.04)' : 'rgba(33, 150, 243, 0.08)'
+                  }
+                }}
+              >
+                Exporter la sauvegarde
+              </Button>
+              
+              <Button 
+                variant="outlined" 
+                color="primary" 
+                onClick={declencherImportation}
+                sx={{ 
+                  borderWidth: 2,
+                  '&:hover': {
+                    borderWidth: 2,
+                    backgroundColor: (theme) => theme.palette.mode === 'light' ? 'rgba(25, 118, 210, 0.04)' : 'rgba(33, 150, 243, 0.08)'
+                  }
+                }}
+              >
+                Importer une sauvegarde
+              </Button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                style={{ display: 'none' }}
+                accept=".b64,.json"
+                onChange={importerSauvegarde}
+              />
+            </Box>
+          </Grid>
+
           <Grid item xs={12}>
             <Button 
               variant="outlined" 
@@ -439,7 +587,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange, onReset
         autoHideDuration={3000}
         onClose={() => setSnackbarOpen(false)}
       >
-        <Alert severity="success" sx={{ width: '100%' }}>
+        <Alert severity={snackbarSeverity} sx={{ width: '100%' }}>
           {snackbarMessage}
         </Alert>
       </Snackbar>
