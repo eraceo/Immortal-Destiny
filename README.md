@@ -19,31 +19,6 @@
 
 Avec une esthétique moderne et sombre, ce jeu vous permet de progresser même lorsque vous êtes absent, tout en offrant une expérience immersive dans l'univers fascinant de la cultivation.
 
-## ✨ Fonctionnalités principales
-
-### 🧙‍♂️ Création de personnage
-- **Statistiques aléatoires** influençant votre parcours et vos aptitudes
-- **Races diverses** avec des avantages et inconvénients uniques
-- **Origines variées** déterminant votre histoire et vos affinités
-
-### 🔄 Système de progression
-- **Cultivation automatique** même en votre absence
-- **Percées de niveau** débloquant de nouvelles capacités
-- **Attributs évolutifs** façonnant votre style de jeu
-
-### 🏯 Monde riche et immersif
-- **Interface élégante** inspirée de l'esthétique wuxia/xianxia
-- **Système de quêtes** pour enrichir votre expérience
-- **Factions et sects** à découvrir et rejoindre
-
-## 🛠️ Technologies utilisées
-
-- **React 18** - Bibliothèque front-end
-- **TypeScript** - Typage statique pour un code robuste
-- **Material UI** - Composants d'interface utilisateur élégants
-- **React Router** - Navigation fluide entre les différentes sections
-- **CSS personnalisé** - Styles uniques adaptés à l'univers wuxia=
-
 ## 🚀 Démarrage rapide
 
 ### Prérequis
@@ -83,28 +58,6 @@ yarn build
 
 Les fichiers optimisés seront générés dans le dossier `build`.
 
-## 🗺️ Roadmap
-
-### Phase 1 - Fondations
-- ✅ Système de création de personnage
-- ✅ Interface utilisateur de base
-- ✅ Mécaniques de cultivation idle
-
-### Phase 2 - Expansion
-- 🔄 Système de combat approfondi
-- 🔄 Techniques et arts martiaux à débloquer
-- 🔄 Quêtes et missions dynamiques
-
-### Phase 3 - Enrichissement
-- 📝 Secteurs et factions à rejoindre
-- 📝 Système d'équipement et d'artefacts
-- 📝 Système d'alchimie et de création d'élixirs
-
-## 📸 Captures d'écran
-
-<div align="center">
-  <p><em>Captures d'écran à venir</em></p>
-</div>
 
 ## 🤝 Contribution
 
