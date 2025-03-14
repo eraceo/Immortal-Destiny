@@ -269,18 +269,6 @@ const StatsMenu: React.FC<StatsMenuProps> = ({ personnage }) => {
                   {statsCombat.hp}
                 </Typography>
               </Box>
-              <LinearProgress 
-                variant="determinate" 
-                value={(statsCombat.hp / (STAT_MAX_JEU * 15)) * 100} 
-                sx={{ 
-                  height: 8, 
-                  borderRadius: 4,
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  '& .MuiLinearProgress-bar': {
-                    backgroundColor: '#e74c3c', // Rouge pour HP
-                  }
-                }} 
-              />
               <Tooltip
                 title={
                   <Box sx={{ p: 1 }}>
@@ -313,18 +301,6 @@ const StatsMenu: React.FC<StatsMenuProps> = ({ personnage }) => {
                   {statsCombat.degat}
                 </Typography>
               </Box>
-              <LinearProgress 
-                variant="determinate" 
-                value={(statsCombat.degat / (STAT_MAX_JEU * 3)) * 100} 
-                sx={{ 
-                  height: 8, 
-                  borderRadius: 4,
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  '& .MuiLinearProgress-bar': {
-                    backgroundColor: '#e67e22', // Orange pour Dégâts
-                  }
-                }} 
-              />
               <Tooltip
                 title={
                   <Box sx={{ p: 1 }}>
@@ -357,18 +333,6 @@ const StatsMenu: React.FC<StatsMenuProps> = ({ personnage }) => {
                   {statsCombat.esquive}
                 </Typography>
               </Box>
-              <LinearProgress 
-                variant="determinate" 
-                value={(statsCombat.esquive / (STAT_MAX_JEU * 2)) * 100} 
-                sx={{ 
-                  height: 8, 
-                  borderRadius: 4,
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  '& .MuiLinearProgress-bar': {
-                    backgroundColor: '#3498db', // Bleu pour Esquive
-                  }
-                }} 
-              />
               <Tooltip
                 title={
                   <Box sx={{ p: 1 }}>
@@ -401,18 +365,6 @@ const StatsMenu: React.FC<StatsMenuProps> = ({ personnage }) => {
                   {statsCombat.resistance}
                 </Typography>
               </Box>
-              <LinearProgress 
-                variant="determinate" 
-                value={(statsCombat.resistance / (STAT_MAX_JEU * 2)) * 100} 
-                sx={{ 
-                  height: 8, 
-                  borderRadius: 4,
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  '& .MuiLinearProgress-bar': {
-                    backgroundColor: '#2ecc71', // Vert pour Résistance
-                  }
-                }} 
-              />
               <Tooltip
                 title={
                   <Box sx={{ p: 1 }}>
