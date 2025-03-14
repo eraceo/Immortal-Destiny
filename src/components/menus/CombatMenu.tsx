@@ -66,6 +66,30 @@ const CombatMenu: React.FC<CombatMenuProps> = ({ personnage, onUpdatePersonnage 
   const [defierRangSuperieur, setDefierRangSuperieur] = useState(false);
   const [promotion, setPromotion] = useState(false);
 
+  // Fonction d'aide pour vérifier si un royaume est supérieur ou égal à un autre
+  const estRoyaumeSuperieureOuEgal = (royaumeJoueur: RoyaumeCultivation, royaumeRequis: RoyaumeCultivation): boolean => {
+    // Ordre des royaumes de cultivation (du plus bas au plus élevé)
+    const ordreRoyaumes = [
+      RoyaumeCultivation.MORTEL,
+      RoyaumeCultivation.INITIATION,
+      RoyaumeCultivation.QI_CONDENSE,
+      RoyaumeCultivation.FONDATION,
+      RoyaumeCultivation.CORE_OR,
+      RoyaumeCultivation.NASCENT_SOUL,
+      RoyaumeCultivation.TRANSCENDANCE,
+      RoyaumeCultivation.SAINT_MARTIAL,
+      RoyaumeCultivation.DEMI_DIEU,
+      RoyaumeCultivation.DIVIN_SUPREME
+    ];
+    
+    // Obtenir les indices des royaumes dans l'ordre
+    const indexJoueur = ordreRoyaumes.indexOf(royaumeJoueur);
+    const indexRequis = ordreRoyaumes.indexOf(royaumeRequis);
+    
+    // Vérifier si le royaume du joueur est supérieur ou égal au royaume requis
+    return indexJoueur >= indexRequis;
+  };
+
   // Vérifier si le personnage appartient à une secte
   const estDansSecte = !!personnage.appartenanceSecte;
   
@@ -609,7 +633,7 @@ const CombatMenu: React.FC<CombatMenuProps> = ({ personnage, onUpdatePersonnage 
                               <>
                                 <Box component="li">
                                   <Typography variant="caption">
-                                    Royaume de cultivation: Qi Condensé {personnage.royaumeCultivation >= RoyaumeCultivation.QI_CONDENSE ? '✅' : '❌'}
+                                    Royaume de cultivation: Qi Condensé {estRoyaumeSuperieureOuEgal(personnage.royaumeCultivation, RoyaumeCultivation.QI_CONDENSE) ? '✅' : '❌'}
                                   </Typography>
                                 </Box>
                                 <Box component="li">
@@ -623,7 +647,7 @@ const CombatMenu: React.FC<CombatMenuProps> = ({ personnage, onUpdatePersonnage 
                               <>
                                 <Box component="li">
                                   <Typography variant="caption">
-                                    Royaume de cultivation: Fondation {personnage.royaumeCultivation >= RoyaumeCultivation.FONDATION ? '✅' : '❌'}
+                                    Royaume de cultivation: Fondation {estRoyaumeSuperieureOuEgal(personnage.royaumeCultivation, RoyaumeCultivation.FONDATION) ? '✅' : '❌'}
                                   </Typography>
                                 </Box>
                                 <Box component="li">
@@ -637,7 +661,7 @@ const CombatMenu: React.FC<CombatMenuProps> = ({ personnage, onUpdatePersonnage 
                               <>
                                 <Box component="li">
                                   <Typography variant="caption">
-                                    Royaume de cultivation: Core d'Or {personnage.royaumeCultivation >= RoyaumeCultivation.CORE_OR ? '✅' : '❌'}
+                                    Royaume de cultivation: Core d'Or {estRoyaumeSuperieureOuEgal(personnage.royaumeCultivation, RoyaumeCultivation.CORE_OR) ? '✅' : '❌'}
                                   </Typography>
                                 </Box>
                                 <Box component="li">
@@ -651,7 +675,7 @@ const CombatMenu: React.FC<CombatMenuProps> = ({ personnage, onUpdatePersonnage 
                               <>
                                 <Box component="li">
                                   <Typography variant="caption">
-                                    Royaume de cultivation: Âme Naissante {personnage.royaumeCultivation >= RoyaumeCultivation.NASCENT_SOUL ? '✅' : '❌'}
+                                    Royaume de cultivation: Âme Naissante {estRoyaumeSuperieureOuEgal(personnage.royaumeCultivation, RoyaumeCultivation.NASCENT_SOUL) ? '✅' : '❌'}
                                   </Typography>
                                 </Box>
                                 <Box component="li">
@@ -665,7 +689,7 @@ const CombatMenu: React.FC<CombatMenuProps> = ({ personnage, onUpdatePersonnage 
                               <>
                                 <Box component="li">
                                   <Typography variant="caption">
-                                    Royaume de cultivation: Transcendance {personnage.royaumeCultivation >= RoyaumeCultivation.TRANSCENDANCE ? '✅' : '❌'}
+                                    Royaume de cultivation: Transcendance {estRoyaumeSuperieureOuEgal(personnage.royaumeCultivation, RoyaumeCultivation.TRANSCENDANCE) ? '✅' : '❌'}
                                   </Typography>
                                 </Box>
                                 <Box component="li">
@@ -679,7 +703,7 @@ const CombatMenu: React.FC<CombatMenuProps> = ({ personnage, onUpdatePersonnage 
                               <>
                                 <Box component="li">
                                   <Typography variant="caption">
-                                    Royaume de cultivation: Saint Martial {personnage.royaumeCultivation >= RoyaumeCultivation.SAINT_MARTIAL ? '✅' : '❌'}
+                                    Royaume de cultivation: Saint Martial {estRoyaumeSuperieureOuEgal(personnage.royaumeCultivation, RoyaumeCultivation.SAINT_MARTIAL) ? '✅' : '❌'}
                                   </Typography>
                                 </Box>
                                 <Box component="li">

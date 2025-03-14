@@ -63,7 +63,7 @@ const Layout: React.FC<LayoutProps> = ({
   onMenuChange, 
   onSave, 
   onReset, 
-  title = 'Wuxia Idle' 
+  title = 'Immortal Destiny' 
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -107,7 +107,7 @@ const Layout: React.FC<LayoutProps> = ({
     <div>
       <Toolbar>
         <Typography variant="h6" noWrap component="div" sx={{ fontFamily: "'Cinzel', serif" }}>
-          <span className="text-primary">Wuxia</span> <span className="text-accent">Idle</span>
+          <span className="text-primary">Immortal</span> <span className="text-accent">Destiny</span>
         </Typography>
       </Toolbar>
       <Divider />

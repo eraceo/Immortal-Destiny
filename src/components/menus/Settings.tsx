@@ -544,6 +544,9 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange, onReset
               <Typography component="li" variant="body1" sx={{ mb: 1 }}>
                 <strong>Expérience utilisateur:</strong> Meilleure transparence sur la progression dans la secte, permettant aux joueurs de planifier leur stratégie de cultivation.
               </Typography>
+              <Typography component="li" variant="body1" sx={{ mb: 1 }}>
+                <strong>Amélioration:</strong> Système de vérification des royaumes de cultivation rétro-fonctionnel - les royaumes supérieurs à celui requis sont automatiquement considérés comme valides pour les défis de rang.
+              </Typography>
             </Box>
           </Box>
           

@@ -330,6 +330,30 @@ export const appliquerRecompensesCombat = (personnage: Personnage, recompenses: 
   return personnageModifie;
 };
 
+// Fonction d'aide pour vérifier si un royaume est supérieur ou égal à un autre
+const estRoyaumeSuperieureOuEgal = (royaumeJoueur: RoyaumeCultivation, royaumeRequis: RoyaumeCultivation): boolean => {
+  // Ordre des royaumes de cultivation (du plus bas au plus élevé)
+  const ordreRoyaumes = [
+    RoyaumeCultivation.MORTEL,
+    RoyaumeCultivation.INITIATION,
+    RoyaumeCultivation.QI_CONDENSE,
+    RoyaumeCultivation.FONDATION,
+    RoyaumeCultivation.CORE_OR,
+    RoyaumeCultivation.NASCENT_SOUL,
+    RoyaumeCultivation.TRANSCENDANCE,
+    RoyaumeCultivation.SAINT_MARTIAL,
+    RoyaumeCultivation.DEMI_DIEU,
+    RoyaumeCultivation.DIVIN_SUPREME
+  ];
+  
+  // Obtenir les indices des royaumes dans l'ordre
+  const indexJoueur = ordreRoyaumes.indexOf(royaumeJoueur);
+  const indexRequis = ordreRoyaumes.indexOf(royaumeRequis);
+  
+  // Vérifier si le royaume du joueur est supérieur ou égal au royaume requis
+  return indexJoueur >= indexRequis;
+};
+
 // Fonction pour vérifier si le personnage peut défier un rang supérieur
 export const peutDefierRangSuperieur = (personnage: Personnage): boolean => {
   if (!personnage.appartenanceSecte) return false;
@@ -342,27 +366,27 @@ export const peutDefierRangSuperieur = (personnage: Personnage): boolean => {
   // Vérifier les conditions spécifiques pour chaque rang
   switch (rangActuel) {
     case RangSecte.DISCIPLE_EXTERNE:
-      return personnage.royaumeCultivation >= RoyaumeCultivation.QI_CONDENSE && 
+      return estRoyaumeSuperieureOuEgal(personnage.royaumeCultivation, RoyaumeCultivation.QI_CONDENSE) && 
              personnage.appartenanceSecte.pointsContribution >= 100;
     
     case RangSecte.DISCIPLE_INTERNE:
-      return personnage.royaumeCultivation >= RoyaumeCultivation.FONDATION && 
+      return estRoyaumeSuperieureOuEgal(personnage.royaumeCultivation, RoyaumeCultivation.FONDATION) && 
              personnage.appartenanceSecte.pointsContribution >= 300;
     
     case RangSecte.DISCIPLE_PRINCIPAL:
-      return personnage.royaumeCultivation >= RoyaumeCultivation.CORE_OR && 
+      return estRoyaumeSuperieureOuEgal(personnage.royaumeCultivation, RoyaumeCultivation.CORE_OR) && 
              personnage.appartenanceSecte.pointsContribution >= 1000;
     
     case RangSecte.DOYEN:
-      return personnage.royaumeCultivation >= RoyaumeCultivation.NASCENT_SOUL && 
+      return estRoyaumeSuperieureOuEgal(personnage.royaumeCultivation, RoyaumeCultivation.NASCENT_SOUL) && 
              personnage.appartenanceSecte.pointsContribution >= 3000;
     
     case RangSecte.ANCIEN:
-      return personnage.royaumeCultivation >= RoyaumeCultivation.TRANSCENDANCE && 
+      return estRoyaumeSuperieureOuEgal(personnage.royaumeCultivation, RoyaumeCultivation.TRANSCENDANCE) && 
              personnage.appartenanceSecte.pointsContribution >= 10000;
     
     case RangSecte.GRAND_ANCIEN:
-      return personnage.royaumeCultivation >= RoyaumeCultivation.SAINT_MARTIAL && 
+      return estRoyaumeSuperieureOuEgal(personnage.royaumeCultivation, RoyaumeCultivation.SAINT_MARTIAL) && 
              personnage.appartenanceSecte.pointsContribution >= 30000;
     
     default:
