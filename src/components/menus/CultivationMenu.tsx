@@ -6,14 +6,16 @@ import {
   Button, 
   Chip,
   LinearProgress,
-  Divider
+  Divider,
+  Alert
 } from '@mui/material';
 import { 
   Personnage, 
   getDescriptionRoyaume, 
   getRoyaumeColor, 
   getNomCompletCultivation,
-  MOIS_PAR_MINUTE
+  MOIS_PAR_MINUTE,
+  estNiveauMaximumAtteint
 } from '../../models/types';
 
 interface CultivationMenuProps {
@@ -53,6 +55,7 @@ const CultivationMenu: React.FC<CultivationMenuProps> = ({
   const descriptionRoyaume = getDescriptionRoyaume(personnage.royaumeCultivation);
   const nomCultivation = getNomCompletCultivation(personnage.royaumeCultivation, personnage.niveauPercee);
   const pourcentageProgression = (personnage.pointsQi / personnage.qiRequis) * 100;
+  const niveauMaximumAtteint = estNiveauMaximumAtteint(personnage.royaumeCultivation, personnage.niveauPercee);
 
   // Fonction pour obtenir le nom du mois
   const getNomMois = (mois: number): string => {
@@ -157,11 +160,18 @@ const CultivationMenu: React.FC<CultivationMenuProps> = ({
             </Box>
           )}
           
+          {niveauMaximumAtteint && !meditationActive && (
+            <Alert severity="info" sx={{ mb: 2, width: '100%' }}>
+              Vous avez atteint le niveau maximum de cultivation. Aucune progression supplémentaire n'est possible.
+            </Alert>
+          )}
+          
           <Button 
             variant="contained" 
             color={meditationActive ? "secondary" : "primary"}
             size="large"
             onClick={toggleMeditation}
+            disabled={!meditationActive && niveauMaximumAtteint}
             sx={{ 
               minWidth: 200,
               py: 1.5,
@@ -176,7 +186,7 @@ const CultivationMenu: React.FC<CultivationMenuProps> = ({
               animation: meditationActive ? 'pulse 2s infinite' : 'none'
             }}
           >
-            {meditationActive ? "Arrêter la Méditation" : "Commencer à Méditer"}
+            {meditationActive ? "Arrêter la Méditation" : niveauMaximumAtteint ? "Niveau Maximum Atteint" : "Commencer à Méditer"}
             {meditationActive && (
               <Box component="span" sx={{ ml: 1, display: 'flex', alignItems: 'center', fontSize: '0.85em' }}>
                 <span style={{ color: '#4caf50' }}>+{buffsCultivation ? buffsCultivation.total.toFixed(2) : gainQiParSeconde.toFixed(2)}</span>

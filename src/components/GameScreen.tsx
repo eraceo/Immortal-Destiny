@@ -66,7 +66,8 @@ import {
   QI_REQUIS_PERCEE,
   STAT_MAX_JEU,
   calculerStatsCombat,
-  MULTIPLICATEUR_COMBAT_ROYAUME
+  MULTIPLICATEUR_COMBAT_ROYAUME,
+  estNiveauMaximumAtteint
 } from '../models/types';
 import Layout, { MenuType } from './Layout';
 import { 
@@ -77,7 +78,8 @@ import {
   StatsMenu,
   SecteMenu,
   TechniquesMenu,
-  Settings
+  Settings,
+  CombatMenu
 } from './menus';
 import { GameSettings, defaultSettings } from './menus/Settings';
 
@@ -120,7 +122,7 @@ const GameScreen: React.FC = () => {
     JSON.parse(localStorage.getItem('gameSettings') || JSON.stringify(defaultSettings))
   );
 
-  // Fonction pour calculer tous les buffs appliqués sur la vitesse de cultivation
+  // Fonction pour calculer les buffs de cultivation
   const calculerBuffsCultivation = useCallback((personnageData: Personnage): {
     baseQi: number,
     bonusIntelligence: number,
@@ -481,6 +483,14 @@ const GameScreen: React.FC = () => {
         moisTimerRef.current = null;
       }
     } else {
+      // Vérifier si le personnage a atteint le niveau maximum de cultivation
+      if (personnage && estNiveauMaximumAtteint(personnage.royaumeCultivation, personnage.niveauPercee)) {
+        // Afficher un message indiquant que le niveau maximum est atteint
+        setSnackbarMessage("Vous avez atteint le niveau maximum de cultivation. Aucune progression supplémentaire n'est possible.");
+        setSnackbarOpen(true);
+        return;
+      }
+      
       // Démarrer la méditation
       setMeditationActive(true);
       
@@ -529,7 +539,7 @@ const GameScreen: React.FC = () => {
             pointsQiTotal: nouveauxPointsQiTotal
           };
         });
-      }, 1000); // Mise à jour chaque seconde
+      }, 1000);
       
       // Timer pour mettre à jour les mois plus fréquemment (environ 5 secondes = 1 mois)
       moisTimerRef.current = setInterval(() => {
@@ -679,6 +689,15 @@ const GameScreen: React.FC = () => {
       }, 3000);
     }
     
+    // Vérifier si le personnage a atteint le niveau maximum de cultivation
+    if (estNiveauMaximumAtteint(nouveauPersonnage.royaumeCultivation, nouveauPersonnage.niveauPercee)) {
+      // Afficher un message indiquant que le niveau maximum est atteint
+      setTimeout(() => {
+        setSnackbarMessage("Félicitations ! Vous avez atteint le niveau maximum de cultivation. Vous êtes maintenant au sommet du monde !");
+        setSnackbarOpen(true);
+      }, 6000);
+    }
+    
     // Mettre à jour l'état du personnage
     setPersonnage(nouveauPersonnage);
     
@@ -704,6 +723,11 @@ const GameScreen: React.FC = () => {
     setOpenMortDialog(false);
     localStorage.removeItem('wuxiaWorldSauvegarde');
     window.location.href = "/";
+  };
+
+  // Fonction pour mettre à jour le personnage
+  const handleUpdatePersonnage = (personnageModifie: Personnage) => {
+    setPersonnage(personnageModifie);
   };
 
   // Changer de menu
@@ -750,6 +774,8 @@ const GameScreen: React.FC = () => {
         return "Secte";
       case MenuType.TECHNIQUES:
         return "Techniques";
+      case MenuType.COMBAT:
+        return "Combat";
       case MenuType.SETTINGS:
         return "Paramètres";
       default:
@@ -781,30 +807,26 @@ const GameScreen: React.FC = () => {
     
     switch (activeMenu) {
       case MenuType.PROFILE:
-        return (
-          <ProfileMenu 
-            personnage={personnage} 
-            ageActuel={personnage.age}
-            esperanceVie={esperanceVie}
-            tempsJeuFormate={tempsJeuFormate}
-            historiqueEvenements={historiqueEvenements}
-          />
-        );
+        return <ProfileMenu 
+          personnage={personnage} 
+          ageActuel={personnage.age}
+          esperanceVie={esperanceVie}
+          tempsJeuFormate={tempsJeuFormate}
+          historiqueEvenements={historiqueEvenements}
+        />;
       case MenuType.CULTIVATION:
-        return (
-          <CultivationMenu 
-            personnage={personnage} 
-            meditationActive={meditationActive}
-            gainQiParSeconde={gainQiParSeconde}
-            tempsTotalMeditation={tempsTotalMeditation}
-            tempsMeditationCumule={tempsMeditationCumule}
-            toggleMeditation={toggleMeditation}
-            onPercee={effectuerPercee}
-            perceeDisponible={perceeDisponible}
-            moisActuel={moisActuel}
-            buffsCultivation={calculerBuffsCultivation(personnage)}
-          />
-        );
+        return <CultivationMenu 
+          personnage={personnage} 
+          meditationActive={meditationActive}
+          gainQiParSeconde={gainQiParSeconde}
+          tempsTotalMeditation={tempsTotalMeditation}
+          tempsMeditationCumule={tempsMeditationCumule}
+          toggleMeditation={toggleMeditation}
+          onPercee={effectuerPercee}
+          perceeDisponible={perceeDisponible}
+          moisActuel={moisActuel}
+          buffsCultivation={calculerBuffsCultivation(personnage)}
+        />;
       case MenuType.INVENTORY:
         return <InventoryMenu personnage={personnage} />;
       case MenuType.QUESTS:
@@ -812,9 +834,11 @@ const GameScreen: React.FC = () => {
       case MenuType.STATS:
         return <StatsMenu personnage={personnage} />;
       case MenuType.SECTE:
-        return <SecteMenu personnage={personnage} onUpdatePersonnage={setPersonnage} />;
+        return <SecteMenu personnage={personnage} onUpdatePersonnage={handleUpdatePersonnage} />;
       case MenuType.TECHNIQUES:
-        return <TechniquesMenu personnage={personnage} onUpdatePersonnage={setPersonnage} />;
+        return <TechniquesMenu personnage={personnage} onUpdatePersonnage={handleUpdatePersonnage} />;
+      case MenuType.COMBAT:
+        return <CombatMenu personnage={personnage} onUpdatePersonnage={handleUpdatePersonnage} />;
       case MenuType.SETTINGS:
         return <Settings 
           settings={gameSettings} 

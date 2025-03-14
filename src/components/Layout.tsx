@@ -28,6 +28,7 @@ import ResetIcon from '@mui/icons-material/RestartAlt';
 import GroupIcon from '@mui/icons-material/Group';
 import SchoolIcon from '@mui/icons-material/School';
 import SettingsIcon from '@mui/icons-material/Settings';
+import SportsKabaddiIcon from '@mui/icons-material/SportsKabaddi';
 import { useNavigate } from 'react-router-dom';
 
 // Définition des menus disponibles
@@ -39,6 +40,7 @@ export enum MenuType {
   STATS = 'stats',
   SECTE = 'secte',
   TECHNIQUES = 'techniques',
+  COMBAT = 'combat',
   SETTINGS = 'settings'
 }
 
@@ -96,6 +98,7 @@ const Layout: React.FC<LayoutProps> = ({
     { type: MenuType.STATS, text: 'Statistiques', icon: <StatsIcon /> },
     { type: MenuType.SECTE, text: 'Secte', icon: <GroupIcon /> },
     { type: MenuType.TECHNIQUES, text: 'Techniques', icon: <SchoolIcon /> },
+    { type: MenuType.COMBAT, text: 'Combat', icon: <SportsKabaddiIcon /> },
     { type: MenuType.SETTINGS, text: 'Paramètres', icon: <SettingsIcon /> }
   ];
 
@@ -135,7 +138,7 @@ const Layout: React.FC<LayoutProps> = ({
           variant="contained" 
           color="primary" 
           startIcon={<SaveIcon />}
-          onClick={onSave}
+          onClick={handleSave}
         >
           Sauvegarder
         </Button>

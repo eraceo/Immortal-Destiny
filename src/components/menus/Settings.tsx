@@ -526,7 +526,53 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange, onReset
         <DialogContent dividers>
           <Box sx={{ mb: 4 }}>
             <Typography variant="h6" gutterBottom sx={{ color: (theme) => theme.palette.primary.main, fontWeight: 'bold' }}>
-              Version 1.0.1 (Actuelle)
+              Version 1.1.0 (Actuelle)
+            </Typography>
+            <Typography variant="subtitle2" gutterBottom sx={{ color: 'text.secondary' }}>
+              Date: 15 Mars 2025
+            </Typography>
+            <Box component="ul" sx={{ pl: 2 }}>
+              <Typography component="li" variant="body1" sx={{ mb: 1 }}>
+                <strong>Nouvelle fonctionnalité:</strong> Affichage des conditions de passage de rang dans l'interface de combat de secte.
+              </Typography>
+              <Typography component="li" variant="body1" sx={{ mb: 1 }}>
+                <strong>Interface:</strong> Ajout d'un panneau détaillé montrant les prérequis exacts pour défier le rang supérieur (royaume de cultivation requis et points de contribution nécessaires).
+              </Typography>
+              <Typography component="li" variant="body1" sx={{ mb: 1 }}>
+                <strong>Amélioration visuelle:</strong> Indicateurs visuels (✅/❌) pour montrer clairement quelles conditions sont déjà remplies.
+              </Typography>
+              <Typography component="li" variant="body1" sx={{ mb: 1 }}>
+                <strong>Expérience utilisateur:</strong> Meilleure transparence sur la progression dans la secte, permettant aux joueurs de planifier leur stratégie de cultivation.
+              </Typography>
+            </Box>
+          </Box>
+          
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h6" gutterBottom sx={{ color: (theme) => theme.palette.primary.main, fontWeight: 'bold' }}>
+              Version 1.0.2
+            </Typography>
+            <Typography variant="subtitle2" gutterBottom sx={{ color: 'text.secondary' }}>
+              Date: 14 Mars 2025
+            </Typography>
+            <Box component="ul" sx={{ pl: 2 }}>
+              <Typography component="li" variant="body1" sx={{ mb: 1 }}>
+                <strong>Amélioration majeure:</strong> Ajout d'une limite au système de cultivation - il n'est plus possible de méditer lorsque le niveau maximum est atteint (Royaume du Divin Suprême - Niveau Avancé).
+              </Typography>
+              <Typography component="li" variant="body1" sx={{ mb: 1 }}>
+                <strong>Interface:</strong> Le bouton de méditation est désactivé et affiche "Niveau Maximum Atteint" lorsque le cultivateur a atteint le sommet.
+              </Typography>
+              <Typography component="li" variant="body1" sx={{ mb: 1 }}>
+                <strong>Notification:</strong> Ajout d'une alerte informative dans le menu de cultivation pour indiquer que le niveau maximum a été atteint.
+              </Typography>
+              <Typography component="li" variant="body1" sx={{ mb: 1 }}>
+                <strong>Feedback:</strong> Message de félicitations spécial lorsqu'un joueur atteint le niveau maximum de cultivation.
+              </Typography>
+            </Box>
+          </Box>
+          
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h6" gutterBottom sx={{ color: (theme) => theme.palette.primary.main, fontWeight: 'bold' }}>
+              Version 1.0.1
             </Typography>
             <Typography variant="subtitle2" gutterBottom sx={{ color: 'text.secondary' }}>
               Date: 13 Mars 2025

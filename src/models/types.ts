@@ -199,53 +199,53 @@ export const DESCRIPTIONS_ROYAUMES: Record<RoyaumeCultivation, string> = {
 export const QI_REQUIS_PERCEE: Record<RoyaumeCultivation, Record<NiveauPercee, number>> = {
   [RoyaumeCultivation.MORTEL]: {
     [NiveauPercee.PREMIER]: 0,
-    [NiveauPercee.INTERMEDIAIRE]: 300,
-    [NiveauPercee.AVANCE]: 900
+    [NiveauPercee.INTERMEDIAIRE]: 450, // 300 * 1.5
+    [NiveauPercee.AVANCE]: 1350 // 900 * 1.5
   },
   [RoyaumeCultivation.INITIATION]: {
-    [NiveauPercee.PREMIER]: 1800,
-    [NiveauPercee.INTERMEDIAIRE]: 3000,
-    [NiveauPercee.AVANCE]: 4500
+    [NiveauPercee.PREMIER]: 2700, // 1800 * 1.5
+    [NiveauPercee.INTERMEDIAIRE]: 4500, // 3000 * 1.5
+    [NiveauPercee.AVANCE]: 6750 // 4500 * 1.5
   },
   [RoyaumeCultivation.QI_CONDENSE]: {
-    [NiveauPercee.PREMIER]: 6300,
-    [NiveauPercee.INTERMEDIAIRE]: 8400,
-    [NiveauPercee.AVANCE]: 10800
+    [NiveauPercee.PREMIER]: 9450, // 6300 * 1.5
+    [NiveauPercee.INTERMEDIAIRE]: 12600, // 8400 * 1.5
+    [NiveauPercee.AVANCE]: 16200 // 10800 * 1.5
   },
   [RoyaumeCultivation.FONDATION]: {
-    [NiveauPercee.PREMIER]: 13500,
-    [NiveauPercee.INTERMEDIAIRE]: 16500,
-    [NiveauPercee.AVANCE]: 19800
+    [NiveauPercee.PREMIER]: 20250, // 13500 * 1.5
+    [NiveauPercee.INTERMEDIAIRE]: 24750, // 16500 * 1.5
+    [NiveauPercee.AVANCE]: 29700 // 19800 * 1.5
   },
   [RoyaumeCultivation.CORE_OR]: {
-    [NiveauPercee.PREMIER]: 24000,
-    [NiveauPercee.INTERMEDIAIRE]: 30000,
-    [NiveauPercee.AVANCE]: 37500
+    [NiveauPercee.PREMIER]: 36000, // 24000 * 1.5
+    [NiveauPercee.INTERMEDIAIRE]: 45000, // 30000 * 1.5
+    [NiveauPercee.AVANCE]: 56250 // 37500 * 1.5
   },
   [RoyaumeCultivation.NASCENT_SOUL]: {
-    [NiveauPercee.PREMIER]: 45000,
-    [NiveauPercee.INTERMEDIAIRE]: 54000,
-    [NiveauPercee.AVANCE]: 66000
+    [NiveauPercee.PREMIER]: 67500, // 45000 * 1.5
+    [NiveauPercee.INTERMEDIAIRE]: 81000, // 54000 * 1.5
+    [NiveauPercee.AVANCE]: 99000 // 66000 * 1.5
   },
   [RoyaumeCultivation.TRANSCENDANCE]: {
-    [NiveauPercee.PREMIER]: 78000,
-    [NiveauPercee.INTERMEDIAIRE]: 93000,
-    [NiveauPercee.AVANCE]: 111000
+    [NiveauPercee.PREMIER]: 117000, // 78000 * 1.5
+    [NiveauPercee.INTERMEDIAIRE]: 139500, // 93000 * 1.5
+    [NiveauPercee.AVANCE]: 166500 // 111000 * 1.5
   },
   [RoyaumeCultivation.SAINT_MARTIAL]: {
-    [NiveauPercee.PREMIER]: 132000,
-    [NiveauPercee.INTERMEDIAIRE]: 156000,
-    [NiveauPercee.AVANCE]: 183000
+    [NiveauPercee.PREMIER]: 198000, // 132000 * 1.5
+    [NiveauPercee.INTERMEDIAIRE]: 234000, // 156000 * 1.5
+    [NiveauPercee.AVANCE]: 274500 // 183000 * 1.5
   },
   [RoyaumeCultivation.DEMI_DIEU]: {
-    [NiveauPercee.PREMIER]: 216000,
-    [NiveauPercee.INTERMEDIAIRE]: 255000,
-    [NiveauPercee.AVANCE]: 300000
+    [NiveauPercee.PREMIER]: 324000, // 216000 * 1.5
+    [NiveauPercee.INTERMEDIAIRE]: 382500, // 255000 * 1.5
+    [NiveauPercee.AVANCE]: 450000 // 300000 * 1.5
   },
   [RoyaumeCultivation.DIVIN_SUPREME]: {
-    [NiveauPercee.PREMIER]: 360000,
-    [NiveauPercee.INTERMEDIAIRE]: 450000,
-    [NiveauPercee.AVANCE]: 600000
+    [NiveauPercee.PREMIER]: 540000, // 360000 * 1.5
+    [NiveauPercee.INTERMEDIAIRE]: 675000, // 450000 * 1.5
+    [NiveauPercee.AVANCE]: 900000 // 600000 * 1.5
   }
 };
 
@@ -481,6 +481,13 @@ export const getProchainNiveau = (royaume: RoyaumeCultivation, niveau: NiveauPer
       qiRequis: QI_REQUIS_PERCEE[royaume][prochainNiveau]
     };
   }
+};
+
+// Fonction pour vérifier si le personnage a atteint le niveau maximum de cultivation
+export const estNiveauMaximumAtteint = (royaume: RoyaumeCultivation, niveau: NiveauPercee): boolean => {
+  // Vérifier si le personnage est au dernier royaume et au niveau avancé
+  const dernierRoyaume = Object.values(RoyaumeCultivation)[Object.values(RoyaumeCultivation).length - 1];
+  return royaume === dernierRoyaume && niveau === NiveauPercee.AVANCE;
 };
 
 // Données des races avec leurs raretés et descriptions
