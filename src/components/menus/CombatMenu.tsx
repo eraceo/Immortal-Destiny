@@ -49,6 +49,7 @@ import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import ShieldIcon from '@mui/icons-material/Shield';
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 interface CombatMenuProps {
   personnage: Personnage;
@@ -457,6 +458,16 @@ const CombatMenu: React.FC<CombatMenuProps> = ({ personnage, onUpdatePersonnage 
                         </Box>
                       </Tooltip>
                     </Grid>
+                    <Grid item xs={6}>
+                      <Tooltip title="Précision">
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <VisibilityIcon fontSize="small" color="primary" />
+                          <Typography variant="body2" sx={{ ml: 0.5 }}>
+                            {personnage.stats.precision}
+                          </Typography>
+                        </Box>
+                      </Tooltip>
+                    </Grid>
                   </Grid>
                 </Box>
               </CardContent>
@@ -531,6 +542,16 @@ const CombatMenu: React.FC<CombatMenuProps> = ({ personnage, onUpdatePersonnage 
                           <ShieldIcon fontSize="small" color="warning" />
                           <Typography variant="body2" sx={{ ml: 0.5 }}>
                             {ennemi.stats.resistance}
+                          </Typography>
+                        </Box>
+                      </Tooltip>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Tooltip title="Précision">
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <VisibilityIcon fontSize="small" color="primary" />
+                          <Typography variant="body2" sx={{ ml: 0.5 }}>
+                            {ennemi.stats.precision}
                           </Typography>
                         </Box>
                       </Tooltip>

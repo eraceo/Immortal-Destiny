@@ -121,7 +121,8 @@ export const genererEnnemi = (rangCible: RangSecte, secteId: string): Ennemi => 
     hp: 0,
     degat: 0,
     esquive: 0,
-    resistance: 0
+    resistance: 0,
+    precision: 0
   };
   
   // Calculer les stats de combat
@@ -133,6 +134,7 @@ export const genererEnnemi = (rangCible: RangSecte, secteId: string): Ennemi => 
   baseStats.degat = statsCombat.degat;
   baseStats.esquive = statsCombat.esquive;
   baseStats.resistance = statsCombat.resistance;
+  baseStats.precision = statsCombat.precision;
   
   // Générer les récompenses en fonction du rang
   const recompenses = {
@@ -260,8 +262,10 @@ const genererActionCombat = (
     // Attaque normale
     const degats = attaquant.stats.degat;
     
-    // Vérifier si le défenseur esquive (basé sur l'esquive)
-    const chanceEsquive = defenseur.stats.esquive / (defenseur.stats.esquive + attaquant.stats.agilite * 2);
+    // Vérifier si le défenseur esquive (basé sur l'esquive et la précision)
+    // Plus la précision de l'attaquant est élevée, moins le défenseur a de chances d'esquiver
+    const ratioEsquivePrecision = defenseur.stats.esquive / (defenseur.stats.esquive + attaquant.stats.precision);
+    const chanceEsquive = ratioEsquivePrecision * 0.8; // Facteur d'ajustement pour que l'esquive ne soit pas trop fréquente
     const esquive = Math.random() < chanceEsquive;
     
     if (esquive) {
@@ -278,13 +282,28 @@ const genererActionCombat = (
       type: 'attaque',
       source,
       nom: 'Attaque',
-      description: `${attaquant.nom} attaque ${defenseur.nom}!`,
+      description: `${attaquant.nom} attaque ${defenseur.nom} avec précision!`,
       degats
     };
   } else if (rand < probAttaque + probTechnique) {
     // Utilisation d'une technique (à améliorer avec de vraies techniques)
     const multiplicateur = 1.5; // Les techniques font plus de dégâts
     const degats = Math.round(attaquant.stats.degat * multiplicateur);
+    
+    // Les techniques sont également affectées par la précision, mais moins que les attaques normales
+    const ratioEsquivePrecision = defenseur.stats.esquive / (defenseur.stats.esquive + attaquant.stats.precision * 1.2);
+    const chanceEsquive = ratioEsquivePrecision * 0.6; // Facteur d'ajustement pour les techniques
+    const esquive = Math.random() < chanceEsquive;
+    
+    if (esquive) {
+      return {
+        type: 'esquive',
+        source,
+        nom: 'Esquive Technique',
+        description: `${defenseur.nom} esquive habilement la technique de ${attaquant.nom}!`,
+        degats: 0
+      };
+    }
     
     return {
       type: 'technique',
@@ -326,6 +345,14 @@ export const appliquerRecompensesCombat = (personnage: Personnage, recompenses: 
   // Ajouter de l'expérience sous forme de points de Qi
   personnageModifie.pointsQi += recompenses.experience;
   personnageModifie.pointsQiTotal += recompenses.experience;
+  
+  // Recalculer les statistiques dérivées avec le multiplicateur du royaume
+  const statsCombat = calculerStatsCombat(personnageModifie.stats, personnageModifie.royaumeCultivation);
+  personnageModifie.stats.hp = statsCombat.hp;
+  personnageModifie.stats.degat = statsCombat.degat;
+  personnageModifie.stats.esquive = statsCombat.esquive;
+  personnageModifie.stats.resistance = statsCombat.resistance;
+  personnageModifie.stats.precision = statsCombat.precision;
   
   return personnageModifie;
 };

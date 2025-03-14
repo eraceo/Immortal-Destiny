@@ -377,6 +377,7 @@ export interface Stats {
   degat: number;        // Dégâts infligés
   esquive: number;      // Capacité d'esquive
   resistance: number;   // Résistance aux dégâts
+  precision: number;    // Précision des attaques (basée sur la perception)
 }
 
 // Interface pour le personnage
@@ -651,6 +652,7 @@ export const genererStatsAleatoires = (): Stats => {
   const degat = Math.round((force * 2 + qi) * multiplicateur);
   const esquive = Math.round((agilite * 1.5 + perception * 0.5) * multiplicateur);
   const resistance = Math.round((constitution * 1.5 + force * 0.5) * multiplicateur);
+  const precision = Math.round((perception * 2 + agilite * 0.5) * multiplicateur);
   
   return {
     force,
@@ -664,7 +666,8 @@ export const genererStatsAleatoires = (): Stats => {
     hp,
     degat,
     esquive,
-    resistance
+    resistance,
+    precision
   };
 };
 
@@ -1071,6 +1074,7 @@ export const appliquerEffetsEvenement = (personnage: Personnage, evenement: Even
     personnageModifie.stats.degat = statsCombat.degat;
     personnageModifie.stats.esquive = statsCombat.esquive;
     personnageModifie.stats.resistance = statsCombat.resistance;
+    personnageModifie.stats.precision = statsCombat.precision;
     
     // Recalculer le talent de cultivation
     personnageModifie.talentCultivation = calculerTalentCultivation(personnageModifie.stats);
@@ -1373,6 +1377,7 @@ export const appliquerBonusSecte = (personnage: Personnage): Personnage => {
     personnageModifie.stats.degat = statsCombat.degat;
     personnageModifie.stats.esquive = statsCombat.esquive;
     personnageModifie.stats.resistance = statsCombat.resistance;
+    personnageModifie.stats.precision = statsCombat.precision;
     
     // Recalculer le talent de cultivation
     personnageModifie.talentCultivation = calculerTalentCultivation(personnageModifie.stats);
@@ -1459,7 +1464,8 @@ export const calculerStatsCombat = (stats: Stats, royaume: RoyaumeCultivation): 
   hp: number,
   degat: number,
   esquive: number,
-  resistance: number
+  resistance: number,
+  precision: number
 } => {
   const multiplicateur = MULTIPLICATEUR_COMBAT_ROYAUME[royaume];
   
@@ -1467,6 +1473,7 @@ export const calculerStatsCombat = (stats: Stats, royaume: RoyaumeCultivation): 
     hp: Math.round((stats.constitution * 10 + stats.force * 5) * multiplicateur),
     degat: Math.round((stats.force * 2 + stats.qi) * multiplicateur),
     esquive: Math.round((stats.agilite * 1.5 + stats.perception * 0.5) * multiplicateur),
-    resistance: Math.round((stats.constitution * 1.5 + stats.force * 0.5) * multiplicateur)
+    resistance: Math.round((stats.constitution * 1.5 + stats.force * 0.5) * multiplicateur),
+    precision: Math.round((stats.perception * 2 + stats.agilite * 0.5) * multiplicateur)
   };
 }; 

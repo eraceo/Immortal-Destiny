@@ -348,6 +348,7 @@ const CharacterCreation: React.FC = () => {
       statsFinales.degat = statsFinales.force * 2 + statsFinales.qi;
       statsFinales.esquive = statsFinales.agilite * 1.5 + statsFinales.perception * 0.5;
       statsFinales.resistance = statsFinales.constitution * 1.5 + statsFinales.force * 0.5;
+      statsFinales.precision = statsFinales.perception * 2 + statsFinales.agilite * 0.5;
 
       // Recalculer le talent de cultivation avec les statistiques finales
       const talentFinal = calculerTalentCultivation(statsFinales);
@@ -825,6 +826,7 @@ const CharacterCreation: React.FC = () => {
                 <Grid item xs={6}>
                   <CombatStatDisplay nom="Esquive" valeur={personnage.stats.esquive} />
                   <CombatStatDisplay nom="Résistance" valeur={personnage.stats.resistance} />
+                  <CombatStatDisplay nom="Précision" valeur={personnage.stats.precision} />
                 </Grid>
               </Grid>
             </Box>
