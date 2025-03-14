@@ -1453,10 +1453,10 @@ export const MULTIPLICATEUR_COMBAT_ROYAUME: Record<RoyaumeCultivation, number> =
   [RoyaumeCultivation.FONDATION]: 2,
   [RoyaumeCultivation.CORE_OR]: 3,
   [RoyaumeCultivation.NASCENT_SOUL]: 5,
-  [RoyaumeCultivation.TRANSCENDANCE]: 8,
-  [RoyaumeCultivation.SAINT_MARTIAL]: 12,
-  [RoyaumeCultivation.DEMI_DIEU]: 20,
-  [RoyaumeCultivation.DIVIN_SUPREME]: 30
+  [RoyaumeCultivation.TRANSCENDANCE]: 12,
+  [RoyaumeCultivation.SAINT_MARTIAL]: 20,
+  [RoyaumeCultivation.DEMI_DIEU]: 30,
+  [RoyaumeCultivation.DIVIN_SUPREME]: 50
 };
 
 // Fonction pour calculer les statistiques de combat avec le multiplicateur du royaume
