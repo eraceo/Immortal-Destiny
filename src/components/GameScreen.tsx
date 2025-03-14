@@ -828,7 +828,7 @@ const GameScreen: React.FC = () => {
           buffsCultivation={calculerBuffsCultivation(personnage)}
         />;
       case MenuType.INVENTORY:
-        return <InventoryMenu personnage={personnage} />;
+        return <InventoryMenu personnage={personnage} onUpdatePersonnage={handleUpdatePersonnage} />;
       case MenuType.QUESTS:
         return <QuestsMenu personnage={personnage} />;
       case MenuType.STATS:

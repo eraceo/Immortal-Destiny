@@ -48,6 +48,7 @@ import InventoryIcon from '@mui/icons-material/Inventory';
 import InfoIcon from '@mui/icons-material/Info';
 import StarIcon from '@mui/icons-material/Star';
 import PersonIcon from '@mui/icons-material/Person';
+import PilulesShop from './PilulesShop';
 
 interface SecteMenuProps {
   personnage: Personnage;
@@ -337,6 +338,7 @@ const SecteMenu: React.FC<SecteMenuProps> = ({ personnage, onUpdatePersonnage })
           <Tab label="Techniques" />
           <Tab label="Missions" />
           <Tab label="Ressources" />
+          <Tab label="Pilules" />
         </Tabs>
       </Box>
       
@@ -705,6 +707,10 @@ const SecteMenu: React.FC<SecteMenuProps> = ({ personnage, onUpdatePersonnage })
             Aucune ressource disponible actuellement. Complétez des missions pour obtenir des ressources de la secte.
           </Alert>
         )}
+      </TabPanel>
+      
+      <TabPanel value={tabValue} index={4}>
+        <PilulesShop personnage={personnage} onUpdatePersonnage={onUpdatePersonnage} />
       </TabPanel>
       
       {/* Dialogue de détail de la technique */}

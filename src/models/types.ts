@@ -410,6 +410,16 @@ export interface Personnage {
   bonusQi?: number; // Bonus de gain de Qi (pourcentage)
   bonusApprentissage?: number; // Bonus d'apprentissage des techniques (pourcentage)
   bonusSpecial?: string; // Description d'un bonus spécial unique
+  pilulesAchetees?: Record<string, number>; // ID de pilule -> nombre d'achats
+  inventairePilules?: Record<string, number>; // ID de pilule -> quantité dans l'inventaire
+  bonusTemporaires?: Array<{
+    source: string;
+    bonusStats: Partial<Stats>;
+    dureeRestante: number;
+    dateDebut: number;
+  }>;
+  bonusLongevite?: number; // Bonus de longévité cumulatif
+  bonusPercee?: number; // Bonus de percée cumulatif
 }
 
 // Constantes pour les limites de statistiques
@@ -1476,4 +1486,342 @@ export const calculerStatsCombat = (stats: Stats, royaume: RoyaumeCultivation): 
     resistance: Math.round((stats.constitution * 1.5 + stats.force * 0.5) * multiplicateur),
     precision: Math.round((stats.perception * 2 + stats.agilite * 0.5) * multiplicateur)
   };
-}; 
+};
+
+// Interface pour les pilules de cultivation
+export interface Pilule {
+  id: string;
+  nom: string;
+  description: string;
+  rarete: Rarete;
+  coutContribution: number;
+  effets: {
+    gainQi?: number;                 // Gain immédiat de Qi
+    bonusStats?: Partial<Stats>;     // Bonus aux statistiques
+    bonusPercee?: number;            // Bonus de chance de percée (en %)
+    bonusLongevite?: number;         // Bonus de longévité (en %)
+    estPermanent: boolean;           // Tous les effets sont permanents
+  };
+  limiteAchat?: number;              // Limite d'achat par personnage (si applicable)
+}
+
+// Liste des pilules disponibles
+export const PILULES: Pilule[] = [
+  {
+    id: "pilule-qi-concentre",
+    nom: "Pilule de Qi Concentré",
+    description: "Une pilule de base qui aide à condenser le Qi et accélère légèrement la cultivation.",
+    rarete: Rarete.COMMUN,
+    coutContribution: 100,
+    effets: {
+      gainQi: 500,
+      estPermanent: true
+    }
+  },
+  {
+    id: "pilule-fondation-celeste",
+    nom: "Pilule de Fondation Céleste",
+    description: "Renforce les fondations du cultivateur, augmentant sa constitution.",
+    rarete: Rarete.RARE,
+    coutContribution: 300,
+    effets: {
+      bonusStats: { constitution: 2 },
+      estPermanent: true
+    }
+  },
+  {
+    id: "pilule-purification-esprit",
+    nom: "Pilule de Purification de l'Esprit",
+    description: "Purifie l'esprit et améliore l'intelligence et la perception.",
+    rarete: Rarete.RARE,
+    coutContribution: 350,
+    effets: {
+      bonusStats: { intelligence: 2, perception: 1 },
+      estPermanent: true
+    }
+  },
+  {
+    id: "pilule-force-martiale",
+    nom: "Pilule de Force Martiale",
+    description: "Renforce le corps, augmentant la force et l'agilité.",
+    rarete: Rarete.RARE,
+    coutContribution: 350,
+    effets: {
+      bonusStats: { force: 2, agilite: 1 },
+      estPermanent: true
+    }
+  },
+  {
+    id: "pilule-longevite-immortelle",
+    nom: "Pilule de Longévité Immortelle",
+    description: "Augmente de façon permanente la longévité du cultivateur.",
+    rarete: Rarete.EPIQUE,
+    coutContribution: 1000,
+    effets: {
+      bonusLongevite: 5,
+      estPermanent: true
+    },
+    limiteAchat: 5
+  },
+  {
+    id: "pilule-ascension-mythique",
+    nom: "Pilule d'Ascension Mythique",
+    description: "Une pilule légendaire qui améliore toutes les statistiques du cultivateur.",
+    rarete: Rarete.LEGENDAIRE,
+    coutContribution: 3000,
+    effets: {
+      bonusStats: { force: 1, agilite: 1, constitution: 1, intelligence: 1, perception: 1 },
+      estPermanent: true
+    },
+    limiteAchat: 1
+  },
+];
+
+// Fonction pour acheter et utiliser une pilule
+export const acheterEtUtiliserPilule = (personnage: Personnage, piluleId: string): { 
+  personnageMisAJour: Personnage, 
+  succes: boolean, 
+  message: string 
+} => {
+  // Vérifier si le personnage appartient à une secte
+  if (!personnage.appartenanceSecte) {
+    return { 
+      personnageMisAJour: personnage, 
+      succes: false, 
+      message: "Vous devez appartenir à une secte pour acheter des pilules." 
+    };
+  }
+
+  // Trouver la pilule
+  const pilule = PILULES.find(p => p.id === piluleId);
+  if (!pilule) {
+    return { 
+      personnageMisAJour: personnage, 
+      succes: false, 
+      message: "Pilule introuvable." 
+    };
+  }
+
+  // Vérifier si le personnage a assez de points de contribution
+  if (personnage.appartenanceSecte.pointsContribution < pilule.coutContribution) {
+    return { 
+      personnageMisAJour: personnage, 
+      succes: false, 
+      message: `Vous n'avez pas assez de points de contribution. Nécessaire: ${pilule.coutContribution}` 
+    };
+  }
+
+  // Vérifier la limite d'achat si applicable
+  if (pilule.limiteAchat) {
+    const pilulesAchetees = personnage.pilulesAchetees || {};
+    const nombreAchats = pilulesAchetees[piluleId] || 0;
+    
+    if (nombreAchats >= pilule.limiteAchat) {
+      return { 
+        personnageMisAJour: personnage, 
+        succes: false, 
+        message: `Vous avez atteint la limite d'achat pour cette pilule (${pilule.limiteAchat}).` 
+      };
+    }
+  }
+
+  // Copie profonde du personnage pour éviter les mutations directes
+  const personnageMisAJour = JSON.parse(JSON.stringify(personnage));
+  
+  // Mettre à jour les points de contribution
+  personnageMisAJour.appartenanceSecte.pointsContribution -= pilule.coutContribution;
+  
+  // Mettre à jour le compteur d'achats de pilules
+  if (!personnageMisAJour.pilulesAchetees) {
+    personnageMisAJour.pilulesAchetees = {};
+  }
+  personnageMisAJour.pilulesAchetees[piluleId] = (personnageMisAJour.pilulesAchetees[piluleId] || 0) + 1;
+  
+  // Appliquer les effets de la pilule
+  if (pilule.effets.gainQi) {
+    personnageMisAJour.pointsQi += pilule.effets.gainQi;
+    personnageMisAJour.pointsQiTotal += pilule.effets.gainQi;
+  }
+  
+  if (pilule.effets.bonusStats) {
+    // Appliquer les bonus permanents aux statistiques
+    Object.entries(pilule.effets.bonusStats).forEach(([stat, value]) => {
+      personnageMisAJour.stats[stat as keyof Stats] += value;
+    });
+  }
+  
+  if (pilule.effets.bonusLongevite) {
+    // Stocker le bonus de longévité
+    if (!personnageMisAJour.bonusLongevite) {
+      personnageMisAJour.bonusLongevite = 0;
+    }
+    personnageMisAJour.bonusLongevite += pilule.effets.bonusLongevite;
+  }
+  
+  if (pilule.effets.bonusPercee) {
+    // Stocker le bonus de percée
+    if (!personnageMisAJour.bonusPercee) {
+      personnageMisAJour.bonusPercee = 0;
+    }
+    personnageMisAJour.bonusPercee += pilule.effets.bonusPercee;
+  }
+  
+  // Mettre à jour les statistiques de combat
+  personnageMisAJour.stats = {
+    ...personnageMisAJour.stats,
+    ...calculerStatsCombat(personnageMisAJour.stats, personnageMisAJour.royaumeCultivation)
+  };
+  
+  return { 
+    personnageMisAJour, 
+    succes: true, 
+    message: `Vous avez acheté et utilisé une ${pilule.nom} avec succès!` 
+  };
+};
+
+// Fonction pour acheter une pilule et l'ajouter à l'inventaire
+export const acheterPilule = (personnage: Personnage, piluleId: string): { 
+  personnageMisAJour: Personnage, 
+  succes: boolean, 
+  message: string 
+} => {
+  // Vérifier si le personnage appartient à une secte
+  if (!personnage.appartenanceSecte) {
+    return { 
+      personnageMisAJour: personnage, 
+      succes: false, 
+      message: "Vous devez appartenir à une secte pour acheter des pilules." 
+    };
+  }
+
+  // Trouver la pilule
+  const pilule = PILULES.find(p => p.id === piluleId);
+  if (!pilule) {
+    return { 
+      personnageMisAJour: personnage, 
+      succes: false, 
+      message: "Pilule introuvable." 
+    };
+  }
+
+  // Vérifier si le personnage a assez de points de contribution
+  if (personnage.appartenanceSecte.pointsContribution < pilule.coutContribution) {
+    return { 
+      personnageMisAJour: personnage, 
+      succes: false, 
+      message: `Vous n'avez pas assez de points de contribution. Nécessaire: ${pilule.coutContribution}` 
+    };
+  }
+
+  // Vérifier la limite d'achat si applicable
+  if (pilule.limiteAchat) {
+    const pilulesAchetees = personnage.pilulesAchetees || {};
+    const nombreAchats = pilulesAchetees[piluleId] || 0;
+    
+    if (nombreAchats >= pilule.limiteAchat) {
+      return { 
+        personnageMisAJour: personnage, 
+        succes: false, 
+        message: `Vous avez atteint la limite d'achat pour cette pilule (${pilule.limiteAchat}).` 
+      };
+    }
+  }
+
+  // Copie profonde du personnage pour éviter les mutations directes
+  const personnageMisAJour = JSON.parse(JSON.stringify(personnage));
+  
+  // Mettre à jour les points de contribution
+  personnageMisAJour.appartenanceSecte.pointsContribution -= pilule.coutContribution;
+  
+  // Mettre à jour le compteur d'achats de pilules
+  if (!personnageMisAJour.pilulesAchetees) {
+    personnageMisAJour.pilulesAchetees = {};
+  }
+  personnageMisAJour.pilulesAchetees[piluleId] = (personnageMisAJour.pilulesAchetees[piluleId] || 0) + 1;
+  
+  // Ajouter la pilule à l'inventaire
+  if (!personnageMisAJour.inventairePilules) {
+    personnageMisAJour.inventairePilules = {};
+  }
+  personnageMisAJour.inventairePilules[piluleId] = (personnageMisAJour.inventairePilules[piluleId] || 0) + 1;
+  
+  return { 
+    personnageMisAJour, 
+    succes: true, 
+    message: `Vous avez acheté une ${pilule.nom} avec succès! Elle a été ajoutée à votre inventaire.` 
+  };
+};
+
+// Fonction pour utiliser une pilule depuis l'inventaire
+export const utiliserPilule = (personnage: Personnage, piluleId: string): { 
+  personnageMisAJour: Personnage, 
+  succes: boolean, 
+  message: string 
+} => {
+  // Vérifier si le personnage a la pilule dans son inventaire
+  if (!personnage.inventairePilules || !personnage.inventairePilules[piluleId] || personnage.inventairePilules[piluleId] <= 0) {
+    return { 
+      personnageMisAJour: personnage, 
+      succes: false, 
+      message: "Vous n'avez pas cette pilule dans votre inventaire." 
+    };
+  }
+
+  // Trouver la pilule
+  const pilule = PILULES.find(p => p.id === piluleId);
+  if (!pilule) {
+    return { 
+      personnageMisAJour: personnage, 
+      succes: false, 
+      message: "Pilule introuvable." 
+    };
+  }
+
+  // Copie profonde du personnage pour éviter les mutations directes
+  const personnageMisAJour = JSON.parse(JSON.stringify(personnage));
+  
+  // Retirer la pilule de l'inventaire
+  personnageMisAJour.inventairePilules[piluleId] -= 1;
+  
+  // Appliquer les effets de la pilule
+  if (pilule.effets.gainQi) {
+    personnageMisAJour.pointsQi += pilule.effets.gainQi;
+    personnageMisAJour.pointsQiTotal += pilule.effets.gainQi;
+  }
+  
+  if (pilule.effets.bonusStats) {
+    // Appliquer les bonus aux statistiques
+    Object.entries(pilule.effets.bonusStats).forEach(([stat, value]) => {
+      personnageMisAJour.stats[stat as keyof Stats] += value;
+    });
+  }
+  
+  if (pilule.effets.bonusLongevite) {
+    // Stocker le bonus de longévité
+    if (!personnageMisAJour.bonusLongevite) {
+      personnageMisAJour.bonusLongevite = 0;
+    }
+    personnageMisAJour.bonusLongevite += pilule.effets.bonusLongevite;
+  }
+  
+  if (pilule.effets.bonusPercee) {
+    // Stocker le bonus de percée
+    if (!personnageMisAJour.bonusPercee) {
+      personnageMisAJour.bonusPercee = 0;
+    }
+    personnageMisAJour.bonusPercee += pilule.effets.bonusPercee;
+  }
+  
+  
+  // Mettre à jour les statistiques de combat
+  personnageMisAJour.stats = {
+    ...personnageMisAJour.stats,
+    ...calculerStatsCombat(personnageMisAJour.stats, personnageMisAJour.royaumeCultivation)
+  };
+  
+  return { 
+    personnageMisAJour, 
+    succes: true, 
+    message: `Vous avez utilisé une ${pilule.nom} avec succès!` 
+  };
+};
