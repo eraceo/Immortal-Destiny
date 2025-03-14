@@ -237,81 +237,6 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange, onReset
 
       <Paper sx={{ p: 3, mb: 4, boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)' }}>
         <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', color: (theme) => theme.palette.mode === 'light' ? '#212121' : '#ffffff' }}>
-          Audio
-        </Typography>
-        <Divider sx={{ mb: 2 }} />
-        
-        <Grid container spacing={3}>
-          <Grid item xs={12} sm={6}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={localSettings.soundEnabled}
-                  onChange={(e) => updateSetting('soundEnabled', e.target.checked)}
-                  color="primary"
-                />
-              }
-              label="Effets sonores"
-              sx={{ 
-                '& .MuiFormControlLabel-label': { 
-                  color: (theme) => theme.palette.mode === 'light' ? '#212121' : '#ffffff',
-                  fontWeight: 500
-                } 
-              }}
-            />
-          </Grid>
-          
-          <Grid item xs={12} sm={6}>
-            <Typography gutterBottom sx={{ color: (theme) => theme.palette.mode === 'light' ? '#424242' : '#b0bec5', fontWeight: 500 }}>
-              Volume des effets sonores
-            </Typography>
-            <Slider
-              value={localSettings.soundVolume}
-              onChange={(_, value) => updateSetting('soundVolume', value as number)}
-              disabled={!localSettings.soundEnabled}
-              valueLabelDisplay="auto"
-              min={0}
-              max={100}
-            />
-          </Grid>
-          
-          <Grid item xs={12} sm={6}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={localSettings.musicEnabled}
-                  onChange={(e) => updateSetting('musicEnabled', e.target.checked)}
-                  color="primary"
-                />
-              }
-              label="Musique"
-              sx={{ 
-                '& .MuiFormControlLabel-label': { 
-                  color: (theme) => theme.palette.mode === 'light' ? '#212121' : '#ffffff',
-                  fontWeight: 500
-                } 
-              }}
-            />
-          </Grid>
-          
-          <Grid item xs={12} sm={6}>
-            <Typography gutterBottom sx={{ color: (theme) => theme.palette.mode === 'light' ? '#424242' : '#b0bec5', fontWeight: 500 }}>
-              Volume de la musique
-            </Typography>
-            <Slider
-              value={localSettings.musicVolume}
-              onChange={(_, value) => updateSetting('musicVolume', value as number)}
-              disabled={!localSettings.musicEnabled}
-              valueLabelDisplay="auto"
-              min={0}
-              max={100}
-            />
-          </Grid>
-        </Grid>
-      </Paper>
-
-      <Paper sx={{ p: 3, mb: 4, boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)' }}>
-        <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', color: (theme) => theme.palette.mode === 'light' ? '#212121' : '#ffffff' }}>
           Interface
         </Typography>
         <Divider sx={{ mb: 2 }} />
@@ -335,7 +260,6 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange, onReset
               >
                 <MenuItem value="fr">Français</MenuItem>
                 <MenuItem value="en">English</MenuItem>
-                <MenuItem value="zh">中文</MenuItem>
               </Select>
             </FormControl>
           </Grid>
@@ -355,30 +279,6 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange, onReset
                   color: (theme) => theme.palette.mode === 'light' ? '#212121' : '#ffffff',
                   fontWeight: 500
                 } 
-              }}
-            />
-          </Grid>
-          
-          <Grid item xs={12} sm={6}>
-            <Typography gutterBottom sx={{ color: (theme) => theme.palette.mode === 'light' ? '#424242' : '#b0bec5', fontWeight: 500 }}>
-              Taille du texte
-            </Typography>
-            <Slider
-              value={localSettings.textSize}
-              onChange={(_, value) => updateSetting('textSize', value as number)}
-              valueLabelDisplay="auto"
-              min={12}
-              max={24}
-              marks={[
-                { value: 12, label: '12px' },
-                { value: 16, label: '16px' },
-                { value: 20, label: '20px' },
-                { value: 24, label: '24px' },
-              ]}
-              sx={{
-                '& .MuiSlider-markLabel': {
-                  color: (theme) => theme.palette.mode === 'light' ? '#616161' : '#b0bec5',
-                }
               }}
             />
           </Grid>

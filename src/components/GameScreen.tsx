@@ -333,16 +333,19 @@ const GameScreen: React.FC = () => {
     sauvegarderPersonnage(personnage);
   };
 
-  // Mettre en place la sauvegarde automatique toutes les 5 secondes
+  // Mettre en place la sauvegarde automatique selon les paramètres
   useEffect(() => {
-    if (personnage) {
+    if (personnage && gameSettings.autoSaveEnabled) {
+      // Convertir l'intervalle de minutes en millisecondes
+      const intervalleMs = gameSettings.autoSaveInterval * 60 * 1000;
+      
       // Démarrer le timer pour la sauvegarde automatique
       sauvegardeAutoTimerRef.current = setInterval(() => {
         const resultat = sauvegarderPersonnage(personnage);
         if (resultat) {
-          console.log("Sauvegarde automatique effectuée");
+          console.log(`Sauvegarde automatique effectuée (intervalle: ${gameSettings.autoSaveInterval} minutes)`);
         }
-      }, 5000); // Sauvegarde toutes les 5 secondes
+      }, intervalleMs);
     }
     
     return () => {
@@ -352,7 +355,7 @@ const GameScreen: React.FC = () => {
         sauvegardeAutoTimerRef.current = null;
       }
     };
-  }, [personnage, sauvegarderPersonnage]);
+  }, [personnage, sauvegarderPersonnage, gameSettings.autoSaveEnabled, gameSettings.autoSaveInterval]);
 
   // Fonction pour déclencher un événement aléatoire
   const declencherEvenementAleatoire = useCallback(() => {
