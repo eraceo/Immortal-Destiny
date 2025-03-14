@@ -8,7 +8,7 @@ import {
   Tooltip,
   Divider
 } from '@mui/material';
-import { Personnage, STAT_MAX_CREATION, STAT_MAX_JEU, calculerBonusSecte, MULTIPLICATEUR_COMBAT_ROYAUME, getRoyaumeColor, RoyaumeCultivation } from '../../models/types';
+import { Personnage, STAT_MAX_CREATION, STAT_MAX_JEU, calculerBonusSecte, MULTIPLICATEUR_COMBAT_ROYAUME, getRoyaumeColor, RoyaumeCultivation, calculerStatsCombat } from '../../models/types';
 
 interface StatsMenuProps {
   personnage: Personnage;
@@ -148,6 +148,9 @@ const StatDisplay = ({ nom, valeur, description, personnage, statKey }: {
 };
 
 const StatsMenu: React.FC<StatsMenuProps> = ({ personnage }) => {
+  // Calculer les statistiques de combat correctement
+  const statsCombat = calculerStatsCombat(personnage.stats, personnage.royaumeCultivation);
+  
   // Calcul du total des statistiques de base uniquement (sans les stats dérivées)
   const statsDeBase = [
     personnage.stats.force,
@@ -169,9 +172,7 @@ const StatsMenu: React.FC<StatsMenuProps> = ({ personnage }) => {
 
   return (
     <Box>
-      <Typography variant="h5" component="h1" gutterBottom>
-        Statistiques
-      </Typography>
+      <Typography variant="h4" gutterBottom>Statistiques du Personnage</Typography>
       
       <Paper elevation={3} sx={{ p: 3, backgroundColor: 'background.paper', mb: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -265,12 +266,12 @@ const StatsMenu: React.FC<StatsMenuProps> = ({ personnage }) => {
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                 <Typography variant="body1">Points de Vie (HP)</Typography>
                 <Typography variant="body1" fontWeight="bold">
-                  {personnage.stats.hp}
+                  {statsCombat.hp}
                 </Typography>
               </Box>
               <LinearProgress 
                 variant="determinate" 
-                value={(personnage.stats.hp / (STAT_MAX_JEU * 15)) * 100} 
+                value={(statsCombat.hp / (STAT_MAX_JEU * 15)) * 100} 
                 sx={{ 
                   height: 8, 
                   borderRadius: 4,
@@ -290,7 +291,7 @@ const StatsMenu: React.FC<StatsMenuProps> = ({ personnage }) => {
                       (Constitution × 10 + Force × 5) × Multiplicateur du Royaume
                     </Typography>
                     <Typography variant="body2">
-                      ({personnage.stats.constitution} × 10 + {personnage.stats.force} × 5) × {MULTIPLICATEUR_COMBAT_ROYAUME[personnage.royaumeCultivation]} = {personnage.stats.hp}
+                      ({personnage.stats.constitution} × 10 + {personnage.stats.force} × 5) × {MULTIPLICATEUR_COMBAT_ROYAUME[personnage.royaumeCultivation]} = {Math.round((personnage.stats.constitution * 10 + personnage.stats.force * 5) * MULTIPLICATEUR_COMBAT_ROYAUME[personnage.royaumeCultivation])}
                     </Typography>
                   </Box>
                 }
@@ -309,12 +310,12 @@ const StatsMenu: React.FC<StatsMenuProps> = ({ personnage }) => {
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                 <Typography variant="body1">Dégâts</Typography>
                 <Typography variant="body1" fontWeight="bold">
-                  {personnage.stats.degat}
+                  {statsCombat.degat}
                 </Typography>
               </Box>
               <LinearProgress 
                 variant="determinate" 
-                value={(personnage.stats.degat / (STAT_MAX_JEU * 3)) * 100} 
+                value={(statsCombat.degat / (STAT_MAX_JEU * 3)) * 100} 
                 sx={{ 
                   height: 8, 
                   borderRadius: 4,
@@ -334,7 +335,7 @@ const StatsMenu: React.FC<StatsMenuProps> = ({ personnage }) => {
                       (Force × 2 + Qi) × Multiplicateur du Royaume
                     </Typography>
                     <Typography variant="body2">
-                      ({personnage.stats.force} × 2 + {personnage.stats.qi}) × {MULTIPLICATEUR_COMBAT_ROYAUME[personnage.royaumeCultivation]} = {personnage.stats.degat}
+                      ({personnage.stats.force} × 2 + {personnage.stats.qi}) × {MULTIPLICATEUR_COMBAT_ROYAUME[personnage.royaumeCultivation]} = {Math.round((personnage.stats.force * 2 + personnage.stats.qi) * MULTIPLICATEUR_COMBAT_ROYAUME[personnage.royaumeCultivation])}
                     </Typography>
                   </Box>
                 }
@@ -353,12 +354,12 @@ const StatsMenu: React.FC<StatsMenuProps> = ({ personnage }) => {
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                 <Typography variant="body1">Esquive</Typography>
                 <Typography variant="body1" fontWeight="bold">
-                  {personnage.stats.esquive}
+                  {statsCombat.esquive}
                 </Typography>
               </Box>
               <LinearProgress 
                 variant="determinate" 
-                value={(personnage.stats.esquive / (STAT_MAX_JEU * 2)) * 100} 
+                value={(statsCombat.esquive / (STAT_MAX_JEU * 2)) * 100} 
                 sx={{ 
                   height: 8, 
                   borderRadius: 4,
@@ -378,7 +379,7 @@ const StatsMenu: React.FC<StatsMenuProps> = ({ personnage }) => {
                       (Agilité × 1.5 + Perception × 0.5) × Multiplicateur du Royaume
                     </Typography>
                     <Typography variant="body2">
-                      ({personnage.stats.agilite} × 1.5 + {personnage.stats.perception} × 0.5) × {MULTIPLICATEUR_COMBAT_ROYAUME[personnage.royaumeCultivation]} = {personnage.stats.esquive}
+                      ({personnage.stats.agilite} × 1.5 + {personnage.stats.perception} × 0.5) × {MULTIPLICATEUR_COMBAT_ROYAUME[personnage.royaumeCultivation]} = {Math.round((personnage.stats.agilite * 1.5 + personnage.stats.perception * 0.5) * MULTIPLICATEUR_COMBAT_ROYAUME[personnage.royaumeCultivation])}
                     </Typography>
                   </Box>
                 }
@@ -397,12 +398,12 @@ const StatsMenu: React.FC<StatsMenuProps> = ({ personnage }) => {
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                 <Typography variant="body1">Résistance</Typography>
                 <Typography variant="body1" fontWeight="bold">
-                  {personnage.stats.resistance}
+                  {statsCombat.resistance}
                 </Typography>
               </Box>
               <LinearProgress 
                 variant="determinate" 
-                value={(personnage.stats.resistance / (STAT_MAX_JEU * 2)) * 100} 
+                value={(statsCombat.resistance / (STAT_MAX_JEU * 2)) * 100} 
                 sx={{ 
                   height: 8, 
                   borderRadius: 4,
@@ -422,7 +423,7 @@ const StatsMenu: React.FC<StatsMenuProps> = ({ personnage }) => {
                       (Constitution × 1.5 + Force × 0.5) × Multiplicateur du Royaume
                     </Typography>
                     <Typography variant="body2">
-                      ({personnage.stats.constitution} × 1.5 + {personnage.stats.force} × 0.5) × {MULTIPLICATEUR_COMBAT_ROYAUME[personnage.royaumeCultivation]} = {personnage.stats.resistance}
+                      ({personnage.stats.constitution} × 1.5 + {personnage.stats.force} × 0.5) × {MULTIPLICATEUR_COMBAT_ROYAUME[personnage.royaumeCultivation]} = {Math.round((personnage.stats.constitution * 1.5 + personnage.stats.force * 0.5) * MULTIPLICATEUR_COMBAT_ROYAUME[personnage.royaumeCultivation])}
                     </Typography>
                   </Box>
                 }

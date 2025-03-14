@@ -37,7 +37,8 @@ import {
   RoyaumeCultivation,
   Stats,
   STAT_MAX_JEU,
-  calculerTalentCultivation
+  calculerTalentCultivation,
+  calculerStatsCombat
 } from '../../models/types';
 import { getTechniquesSecte, peutApprendreTechnique, calculerCoutApprentissage } from '../../models/techniques';
 import GroupIcon from '@mui/icons-material/Group';
@@ -166,11 +167,14 @@ const SecteMenu: React.FC<SecteMenuProps> = ({ personnage, onUpdatePersonnage })
         }
       });
       
-      // Recalculer les statistiques dérivées
-      statsUpdated.hp = statsUpdated.constitution * 10 + statsUpdated.force * 5;
-      statsUpdated.degat = statsUpdated.force * 2 + statsUpdated.qi;
-      statsUpdated.esquive = statsUpdated.agilite * 1.5 + statsUpdated.perception * 0.5;
-      statsUpdated.resistance = statsUpdated.constitution * 1.5 + statsUpdated.force * 0.5;
+      // Utiliser calculerStatsCombat pour appliquer le multiplicateur du royaume
+      const statsCombat = calculerStatsCombat(statsUpdated, personnage.royaumeCultivation);
+      
+      // Mettre à jour les statistiques dérivées avec les valeurs calculées
+      statsUpdated.hp = statsCombat.hp;
+      statsUpdated.degat = statsCombat.degat;
+      statsUpdated.esquive = statsCombat.esquive;
+      statsUpdated.resistance = statsCombat.resistance;
     }
     
     // Mettre à jour le personnage avec les nouvelles statistiques et la technique apprise
