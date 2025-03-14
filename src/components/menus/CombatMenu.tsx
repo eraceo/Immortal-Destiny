@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
   Typography,
@@ -66,6 +66,9 @@ const CombatMenu: React.FC<CombatMenuProps> = ({ personnage, onUpdatePersonnage 
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
   const [defierRangSuperieur, setDefierRangSuperieur] = useState(false);
   const [promotion, setPromotion] = useState(false);
+  
+  // Référence pour la boîte de logs de combat
+  const logsBoxRef = useRef<HTMLDivElement>(null);
 
   // Fonction d'aide pour vérifier si un royaume est supérieur ou égal à un autre
   const estRoyaumeSuperieureOuEgal = (royaumeJoueur: RoyaumeCultivation, royaumeRequis: RoyaumeCultivation): boolean => {
@@ -109,6 +112,13 @@ const CombatMenu: React.FC<CombatMenuProps> = ({ personnage, onUpdatePersonnage 
       }
     };
   }, [intervalId]);
+
+  // Effet pour faire défiler automatiquement vers le bas lorsque de nouveaux logs sont ajoutés
+  useEffect(() => {
+    if (logsBoxRef.current) {
+      logsBoxRef.current.scrollTop = logsBoxRef.current.scrollHeight;
+    }
+  }, [logIndex]);
 
   // Fonction pour commencer un combat normal
   const commencerCombat = () => {
@@ -259,7 +269,29 @@ const CombatMenu: React.FC<CombatMenuProps> = ({ personnage, onUpdatePersonnage 
     const logsAffichables = resultatCombat.logs.slice(0, logIndex + 1);
     
     return (
-      <Box sx={{ mt: 2, maxHeight: 300, overflowY: 'auto', p: 1 }}>
+      <Box 
+        ref={logsBoxRef}
+        sx={{ 
+          mt: 2, 
+          maxHeight: 300, 
+          overflowY: 'auto', 
+          p: 1,
+          '&::-webkit-scrollbar': {
+            width: '8px',
+          },
+          '&::-webkit-scrollbar-track': {
+            backgroundColor: 'rgba(0, 0, 0, 0.1)',
+            borderRadius: '4px',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: 'rgba(255, 82, 82, 0.6)',
+            borderRadius: '4px',
+            '&:hover': {
+              backgroundColor: 'rgba(255, 82, 82, 0.8)',
+            },
+          },
+        }}
+      >
         <List>
           {logsAffichables.map((log, index) => (
             <ListItem 
@@ -267,7 +299,8 @@ const CombatMenu: React.FC<CombatMenuProps> = ({ personnage, onUpdatePersonnage 
               sx={{ 
                 bgcolor: index === logIndex ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
                 borderRadius: 1,
-                mb: 1
+                mb: 1,
+                transition: 'background-color 0.3s ease',
               }}
             >
               <ListItemText
