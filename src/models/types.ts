@@ -199,53 +199,53 @@ export const DESCRIPTIONS_ROYAUMES: Record<RoyaumeCultivation, string> = {
 export const QI_REQUIS_PERCEE: Record<RoyaumeCultivation, Record<NiveauPercee, number>> = {
   [RoyaumeCultivation.MORTEL]: {
     [NiveauPercee.PREMIER]: 0,
-    [NiveauPercee.INTERMEDIAIRE]: 450, // 300 * 1.5
-    [NiveauPercee.AVANCE]: 1350 // 900 * 1.5
+    [NiveauPercee.INTERMEDIAIRE]: 900, // 450 * 2
+    [NiveauPercee.AVANCE]: 2700 // 1350 * 2
   },
   [RoyaumeCultivation.INITIATION]: {
-    [NiveauPercee.PREMIER]: 2700, // 1800 * 1.5
-    [NiveauPercee.INTERMEDIAIRE]: 4500, // 3000 * 1.5
-    [NiveauPercee.AVANCE]: 6750 // 4500 * 1.5
+    [NiveauPercee.PREMIER]: 5400, // 2700 * 2
+    [NiveauPercee.INTERMEDIAIRE]: 9000, // 4500 * 2
+    [NiveauPercee.AVANCE]: 13500 // 6750 * 2
   },
   [RoyaumeCultivation.QI_CONDENSE]: {
-    [NiveauPercee.PREMIER]: 9450, // 6300 * 1.5
-    [NiveauPercee.INTERMEDIAIRE]: 12600, // 8400 * 1.5
-    [NiveauPercee.AVANCE]: 16200 // 10800 * 1.5
+    [NiveauPercee.PREMIER]: 18900, // 9450 * 2
+    [NiveauPercee.INTERMEDIAIRE]: 25200, // 12600 * 2
+    [NiveauPercee.AVANCE]: 32400 // 16200 * 2
   },
   [RoyaumeCultivation.FONDATION]: {
-    [NiveauPercee.PREMIER]: 20250, // 13500 * 1.5
-    [NiveauPercee.INTERMEDIAIRE]: 24750, // 16500 * 1.5
-    [NiveauPercee.AVANCE]: 29700 // 19800 * 1.5
+    [NiveauPercee.PREMIER]: 40500, // 20250 * 2
+    [NiveauPercee.INTERMEDIAIRE]: 49500, // 24750 * 2
+    [NiveauPercee.AVANCE]: 59400 // 29700 * 2
   },
   [RoyaumeCultivation.CORE_OR]: {
-    [NiveauPercee.PREMIER]: 36000, // 24000 * 1.5
-    [NiveauPercee.INTERMEDIAIRE]: 45000, // 30000 * 1.5
-    [NiveauPercee.AVANCE]: 56250 // 37500 * 1.5
+    [NiveauPercee.PREMIER]: 72000, // 36000 * 2
+    [NiveauPercee.INTERMEDIAIRE]: 90000, // 45000 * 2
+    [NiveauPercee.AVANCE]: 112500 // 56250 * 2
   },
   [RoyaumeCultivation.NASCENT_SOUL]: {
-    [NiveauPercee.PREMIER]: 67500, // 45000 * 1.5
-    [NiveauPercee.INTERMEDIAIRE]: 81000, // 54000 * 1.5
-    [NiveauPercee.AVANCE]: 99000 // 66000 * 1.5
+    [NiveauPercee.PREMIER]: 135000, // 67500 * 2
+    [NiveauPercee.INTERMEDIAIRE]: 162000, // 81000 * 2
+    [NiveauPercee.AVANCE]: 198000 // 99000 * 2
   },
   [RoyaumeCultivation.TRANSCENDANCE]: {
-    [NiveauPercee.PREMIER]: 117000, // 78000 * 1.5
-    [NiveauPercee.INTERMEDIAIRE]: 139500, // 93000 * 1.5
-    [NiveauPercee.AVANCE]: 166500 // 111000 * 1.5
+    [NiveauPercee.PREMIER]: 234000, // 117000 * 2
+    [NiveauPercee.INTERMEDIAIRE]: 279000, // 139500 * 2
+    [NiveauPercee.AVANCE]: 333000 // 166500 * 2
   },
   [RoyaumeCultivation.SAINT_MARTIAL]: {
-    [NiveauPercee.PREMIER]: 198000, // 132000 * 1.5
-    [NiveauPercee.INTERMEDIAIRE]: 234000, // 156000 * 1.5
-    [NiveauPercee.AVANCE]: 274500 // 183000 * 1.5
+    [NiveauPercee.PREMIER]: 396000, // 198000 * 2
+    [NiveauPercee.INTERMEDIAIRE]: 468000, // 234000 * 2
+    [NiveauPercee.AVANCE]: 549000 // 274500 * 2
   },
   [RoyaumeCultivation.DEMI_DIEU]: {
-    [NiveauPercee.PREMIER]: 324000, // 216000 * 1.5
-    [NiveauPercee.INTERMEDIAIRE]: 382500, // 255000 * 1.5
-    [NiveauPercee.AVANCE]: 450000 // 300000 * 1.5
+    [NiveauPercee.PREMIER]: 648000, // 324000 * 2
+    [NiveauPercee.INTERMEDIAIRE]: 765000, // 382500 * 2
+    [NiveauPercee.AVANCE]: 900000 // 450000 * 2
   },
   [RoyaumeCultivation.DIVIN_SUPREME]: {
-    [NiveauPercee.PREMIER]: 540000, // 360000 * 1.5
-    [NiveauPercee.INTERMEDIAIRE]: 675000, // 450000 * 1.5
-    [NiveauPercee.AVANCE]: 900000 // 600000 * 1.5
+    [NiveauPercee.PREMIER]: 1080000, // 540000 * 2
+    [NiveauPercee.INTERMEDIAIRE]: 1350000, // 675000 * 2
+    [NiveauPercee.AVANCE]: 1800000 // 900000 * 2
   }
 };
 
