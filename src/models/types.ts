@@ -424,7 +424,7 @@ export interface Personnage {
 
 // Constantes pour les limites de statistiques
 export const STAT_MAX_CREATION = 10; // Maximum lors de la création du personnage
-export const STAT_MAX_JEU = 100;     // Maximum atteignable pendant le jeu
+export const STAT_MAX_JEU = 500;     // Maximum atteignable pendant le jeu
 
 // Fonction pour calculer l'espérance de vie d'un personnage
 export const calculerEsperanceVie = (race: Race, royaumeCultivation: RoyaumeCultivation): number => {
